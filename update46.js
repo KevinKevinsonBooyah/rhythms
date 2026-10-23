@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46='50',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46='51',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ['Count-in loading status and Stop controls that only appear during a run.','Removed Legacy modes and Strange. The browser tab is now simply Rhythms.','Rhythm Maker supports wheel/swipe scrolling, clickable barlines for meter changes, and deleting notes into equal-value rests, including tuplets.','All scores have a visible bottom scrollbar. Endless round labels are centered.','Shop prices are halved, with a gold Shop button and a matching wallet coin.','A dismissible sign-in reminder appears once after device selection.','High-level tempos are checked against note density, with gentler changes between measures.','Rhythm Maker has its own leaderboard; complete a rhythm with at least four notes to rank.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ['Modes stay isolated during runs, Echo rewinds, and rhythm transitions. Stopping Echo cancels its replay and keeps Start available.','All paid shop items are cheaper, with the most expensive item capped at 20,000 gold.','Compose has clear Notes/Rests buttons, common values up front, more values for dots and tuplets, and labeled move/edit and tempo/meter controls.','Faster Impossible tempos, with limits on dense patterns and sudden speed jumps.','Moved the note in the Rhythms title up slightly to align it.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }
