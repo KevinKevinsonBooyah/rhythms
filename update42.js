@@ -120,7 +120,7 @@ const makerDefaults42=[4,2,1,.5,.25,.125];
 function makerPlan42(bar,marks=makerMarks42){let plan={meter:'4/4',bpm:60};for(let b=0;b<=bar;b++){const v=marks[b];if(v?.meter&&/^(?:[1-9]|[12][0-9]|3[0-2])\/(?:2|4|8|16)$/.test(v.meter))plan.meter=v.meter;if(Number.isFinite(v?.bpm))plan.bpm=Math.round(clamp(v.bpm,30,240))}return plan}
 function makerUsed42(bar){return (makerBars[bar]||[]).reduce((n,e)=>n+makerTicks(e),0)}
 function makerLimit42(bar,marks=makerMarks42){return Math.round(meterInfo(makerPlan42(bar,marks).meter).length*Q)}
-function makerClamp42(){makerCursor42.bar=Math.round(clamp(makerCursor42.bar,0,cfg.bars-1));makerCursor42.index=Math.round(clamp(makerCursor42.index,0,makerBars[makerCursor42.bar]?.length||0));makerBar=makerCursor42.bar}
+function makerClamp42(){for(let bar=0;bar<cfg.bars;bar++)if(!Array.isArray(makerBars[bar]))makerBars[bar]=[];makerCursor42.bar=Math.round(clamp(makerCursor42.bar,0,cfg.bars-1));makerCursor42.index=Math.round(clamp(makerCursor42.index,0,makerBars[makerCursor42.bar]?.length||0));makerBar=makerCursor42.bar}
 normalizeMaker=function(){
  makerBars=Array.from({length:cfg.bars},(_,bar)=>{
   const valid=[];let used=0;for(const e of Array.isArray(makerBars[bar])?makerBars[bar]:[]){
