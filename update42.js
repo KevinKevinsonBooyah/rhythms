@@ -169,9 +169,11 @@ generateMaker=function(){
  const first=makerPlan42(0);cfg.meter=first.meter;cfg.bpm=first.bpm;cfg.manualBpm=first.bpm;
  for(let b=0;b<cfg.bars;b++){
   const plan=makerPlan42(b),m=meterInfo(plan.meter),barTicks=Math.round(m.length*Q),start=totalTicks,entries=makerBars[b].map((e,index)=>({...e,makerIndex:index}));let remaining=barTicks-makerUsed42(b);
-  for(const base of makerDefaults42)while(remaining>=Math.round(base*Q)){entries.push({base,dot:0,rest:true,tied:false,placeholder:true});remaining-=Math.round(base*Q)}
-  // A very short residual rest is possible after a partial imported tuplet.
-  if(remaining>0)entries.push({base:.125,dot:0,rest:true,tied:false,placeholder:true,duration:remaining});
+  // Fill unused beats visibly, aligned to the meter's notated beat grid.
+  const beatTicks=Math.round(4/m.d*Q);
+  while(remaining>0){const used=barTicks-remaining,room=Math.min(remaining,beatTicks-used%beatTicks),base=makerDefaults42.find(v=>Math.round(v*Q)<=room),dur=base?Math.round(base*Q):room;
+   entries.push({base:base||.125,dot:0,rest:true,tied:false,placeholder:true,...(!base?{duration:dur}:{})});remaining-=dur;
+  }
   let local=0,lastToken='',group=null;
   for(const e of entries){const dur=e.duration||makerTicks(e),token=e.tuplet?'t'+e.groupId:'b'+Math.floor(local/(m.unit*Q));
    if(!group||token!==lastToken){group={notes:[],tuplet:e.tuplet||0,bar:b,start:start+local,span:0};groups.push(group);lastToken=token}
@@ -194,7 +196,7 @@ editorDecorateScore=function(){
  if(cfg.playMode!=='maker'||!notes.length||!$('maker42Values'))return;
  const svg=$('score');svg.querySelectorAll('.maker-score-grid,[data-maker-edit]').forEach(el=>el.remove());
  const overlay=svgEl('g',{class:'maker-score-grid','aria-hidden':'true','pointer-events':'none'});
- for(const n of notes)if(n.placeholder)$('n'+n.id)?.setAttribute('opacity',running?'1':'0');
+ for(const n of notes)if(n.placeholder)$('n'+n.id)?.setAttribute('opacity',running?'1':'.62');
  if(!running){
   makerClamp42();const {bar,index}=makerCursor42,br=barRanges[bar],ns=notes.filter(n=>n.bar===bar),selected=ns.find(n=>n.makerIndex===index-1);
   if(selected)overlay.append(svgEl('rect',{x:selected.x-15,y:105,width:Math.max(30,selected.w-4),height:83,rx:9,fill:'#a4e6bd13',stroke:'#a4e6bd66'}));

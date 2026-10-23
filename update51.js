@@ -48,7 +48,7 @@ let moreValues51=false;
 function syncComposer51(){
  if(!$('makerNotes51'))return;
  $('makerNotes51').setAttribute('aria-pressed',String(!makerRest));$('maker42Rest').setAttribute('aria-pressed',String(makerRest));$('maker42Rest').textContent='Rests';
- $('maker42Delete').textContent='Note → rest';$('maker42Delete').title='Replace the note before the cursor with a rest of the same value';
+ $('maker42Delete').textContent='Delete';$('maker42Delete').title='Replace the note before the cursor with a rest of the same value';
  $('makerMore51').textContent=moreValues51?'Fewer values':'More values · dots & tuplets';$('makerMore51').setAttribute('aria-expanded',String(moreValues51));
  $('maker42Values').dataset.expanded=String(moreValues51);
  const {bar,index}=makerCursor42,entry=makerBars[bar]?.[index-1];$('maker42Cursor').textContent='Bar '+(bar+1)+' · '+(entry?'after '+(entry.rest?'rest ':'note ')+index:'start');

@@ -1,0 +1,34 @@
+body[data-device=mobile] .score-scroll50{display:none!important}
+body[data-device=mobile] #viewport{scrollbar-width:none}
+body[data-wide53=true]{height:100dvh;min-height:0;padding:0!important;overflow:hidden;background:#192228}
+body[data-wide53=true]>header,body[data-wide53=true]>footer{display:none!important}
+body[data-wide53=true] main{position:fixed;inset:0;display:block!important;max-width:none;margin:0;padding:0!important;overflow:hidden}
+body[data-wide53=true] main>:not(.score-card):not(.practice):not(#resumeCountdown){display:none!important}
+body[data-wide53=true] main>.score-card{display:block!important;position:fixed;inset:0 0 calc(110px + env(safe-area-inset-bottom));margin:0!important;padding:0!important;width:auto!important;height:auto!important;max-width:none;border:0!important;border-radius:0;box-shadow:none!important;overflow:hidden}
+body[data-wide53=true] .score-card>:is(.score-head,.score-foot,.progress,.score-scroll50,#petWorld52){display:none!important}
+body[data-wide53=true] #scoreStage{position:absolute;inset:0;height:100%!important;width:100%}
+body[data-wide53=true] #viewport{position:absolute;inset:0;display:flex;align-items:center;min-height:0;height:100%;padding:0!important;border:0!important;overflow-x:auto;overflow-y:hidden;touch-action:pan-x}
+body[data-wide53=true] #score{display:block;flex:none;max-width:none;overflow:visible}
+body[data-wide53=true] #scoreOverlays{z-index:5}
+body[data-wide53=true] .practice{display:block!important;position:fixed;inset:auto 0 0;height:calc(110px + env(safe-area-inset-bottom));min-height:0!important;margin:0;padding:0;background:#172027;border-top:1px solid #45536050;z-index:10}
+body[data-wide53=true] #tap,body[data-wide53=true][data-modded=true] #tap{position:fixed;left:calc(10px + env(safe-area-inset-left));right:calc(10px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));width:auto!important;max-width:none;height:60px;min-height:60px!important;margin:0;padding:8px 12px!important;border-radius:11px;display:flex;align-items:center;justify-content:center;z-index:15}
+body[data-wide53=true] #tap>span:first-child{font-size:16px!important;line-height:21px!important}
+body[data-wide53=true] #keyboardHint,body[data-wide53=true] #polyKeys{display:none!important}
+body[data-wide53=true] #wideStatus53{position:fixed;bottom:calc(74px + env(safe-area-inset-bottom));left:calc(62px + env(safe-area-inset-left));right:calc(62px + env(safe-area-inset-right));height:30px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+body[data-wide53=true] #wideStatus53 #countInPanel{position:static!important;inset:auto!important;transform:none!important;display:flex!important;flex-direction:row!important;align-items:center;justify-content:center;gap:10px!important;width:auto;max-width:100%;margin:0;padding:0 6px!important;height:auto;min-height:0;border:0;background:transparent;box-shadow:none;border-radius:0}
+body[data-wide53=true] #wideStatus53 #countInPanel[hidden]{display:none!important}
+body[data-wide53=true] #wideStatus53 .count-in-heading{display:none!important}
+body[data-wide53=true] #wideStatus53 #countInDots{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;min-height:0;gap:4px}
+body[data-wide53=true] #wideStatus53 #countInDots .count-dot{width:24px;height:24px;font-size:12px;border-width:2px;box-shadow:none}
+body[data-wide53=true] #countLoading50{font-size:10px;white-space:nowrap}
+body[data-wide53=true] #resumeCountdown{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom));left:70px;right:70px;z-index:16;height:34px;margin:0;padding:0;border:0;box-shadow:none;background:#172027;justify-content:center;gap:12px}
+body[data-wide53=true] #resumeCountdown strong{font-size:24px;min-width:22px}
+body[data-wide53=true] #resumeCountdown span{font-size:10px}
+body[data-wide53=true] #polyPads{position:fixed;left:calc(10px + env(safe-area-inset-left));right:calc(10px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));height:60px!important;gap:8px;z-index:15}
+body[data-wide53=true] #polyPads button{min-height:60px!important;padding:4px!important;gap:0}
+body[data-wide53=true] #polyPads button b{font-size:13px}
+body[data-wide53=true] #polyPads small{font-size:9px}
+body[data-wide53=true] #feedback{font-size:11px!important}
+#wideExit53{position:fixed;top:calc(8px + env(safe-area-inset-top));left:calc(8px + env(safe-area-inset-left));z-index:95;display:grid;place-items:center;width:42px;height:42px;min-height:42px;padding:0;border:1px solid #a3b3be66;border-radius:50%;background:#17232bed;color:#e4edf1;font:400 29px/1 system-ui;box-shadow:0 2px 8px #0002;touch-action:manipulation}
+#wideExit53[hidden],body:not([data-wide53=true]) #wideStatus53{display:none!important}
+body[data-wide53=true]>#loginTip50{display:none!important}
