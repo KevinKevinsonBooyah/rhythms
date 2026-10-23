@@ -1,0 +1,9 @@
+/* Keep the settings panel directly below the performance cards on both layouts. */
+main>.mode-strip{order:0}main>.hints-bar{order:1}main>.stats{order:2}
+body[data-device] main>.toolbar,main>.toolbar{order:3}
+main>.transport,main>#resumeCountdown{order:4}main>#makerWorkbench{order:5}main>.score-card{order:6}
+main>.practice{order:7}main>#leaderboardPanel{order:8}
+body[data-device=mobile] .toolbar #mobileSliders44{grid-column:1/-1;width:100%;margin:0;padding:0;border:0}
+body[data-device=mobile] .title-controls #titleActions{grid-column:1/-1}
+#playerAlias[aria-invalid=true],#playerBio[aria-invalid=true]{border-color:#e6a3ad;box-shadow:0 0 0 2px #e6a3ad20}
+body[data-device=mobile] .toolbar #mobileSliders44>.control{grid-column:auto}

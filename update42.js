@@ -231,7 +231,7 @@ sync=function(){syncBefore42();if(cfg.playMode==='maker'){$('description').textC
 
 // Account-bound restoration. Cloud revisions prevent stale-device overwrites.
 const ownerKey42='rhythms-save-owner-v1',pendingLogin42='rhythms-signin42';
-const defaultConfig42={level:3,bpm:90,bars:8,meter:'4/4',count:1,rests:true,broken:false,ties:false,guide:true,showPlayhead:true,metro:true,loop:false,randomMeter:true,randomTempo:true,playMode:'standard',standardBars:8,showCounts:false,volume:70,noteVol:40,hitVol:80,offset:0};
+const defaultConfig42={modded:true,level:3,bpm:90,bars:8,meter:'4/4',count:1,rests:true,broken:false,ties:false,guide:true,showPlayhead:true,metro:true,loop:false,randomMeter:true,randomTempo:true,playMode:'standard',standardBars:8,showCounts:false,volume:70,noteVol:40,hitVol:80,offset:0};
 function localBackup42(owner){const data={};for(const key of SAVE_KEYS){const raw=localStorage.getItem(key);if(raw!==null)data[key]=raw}try{localStorage.setItem('rhythms-backup42-'+(owner||'guest'),JSON.stringify({format:'beatbounce-save',version:1,data}))}catch(e){}return {format:'beatbounce-save',version:1,data}}
 function validateSave42(payload){
  if(payload?.format!=='beatbounce-save'||payload.version!==1||!payload.data||typeof payload.data!=='object')throw Error('That is not a Rhythms save.');
