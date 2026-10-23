@@ -40,7 +40,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
      if(rankAlias&&rankAlias!=='Player'&&alias===name(user.displayName)&&rankAlias!==alias){alias=name(rankAlias);await setDoc(profile,{alias},{merge:true})}
     }
     const owners=uid?await ownerIds():new Set();
-    return json({user:uid?{signedIn:true,name:alias,alias,picture:user.photoURL||'',isOwner:owners.has(uid)}:null});
+    return json({user:uid?{id:uid,signedIn:true,name:alias,alias,picture:user.photoURL||'',isOwner:owners.has(uid)}:null});
    }
    if(url.pathname==='/api/leaderboard'&&method==='GET'){
     const mode=url.searchParams.get('mode')||'all';if(mode!=='all'&&!MODES.includes(mode))throw Error('Unknown mode');
@@ -88,3 +88,4 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
  return api;
 }
 export {cleanSave,cleanScore,cleanProfile};
+
