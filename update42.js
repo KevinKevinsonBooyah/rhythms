@@ -1,4 +1,33 @@
-/* Rhythms 42. One recoverable audio startup and a small, sequential composer. */
+/* Rhythms 43. Silent Mode playback with the original low-latency audio clock. */
+let silentAudio43=null,silentURL43=null,silentRelease43=0,silentWanted43=false;
+const isIOS43=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+configureAudioSession=function(){
+ try{if(navigator.audioSession){navigator.audioSession.type='playback';return navigator.audioSession.type==='playback'}}catch(e){}
+ return false;
+};
+function unlockSilentAudio43(){
+ clearTimeout(silentRelease43);silentWanted43=true;
+ // Modern Safari can select the media channel directly. Older iOS needs a
+ // silent media element alongside Web Audio. Never route timed notes through it.
+ if(configureAudioSession()||!isIOS43())return;
+ if(!silentAudio43){
+  const samples=8000,bytes=new Uint8Array(44+samples),view=new DataView(bytes.buffer);
+  const tag=(offset,text)=>{for(let i=0;i<text.length;i++)bytes[offset+i]=text.charCodeAt(i)};
+  tag(0,'RIFF');view.setUint32(4,36+samples,true);tag(8,'WAVE');tag(12,'fmt ');view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);view.setUint32(24,8000,true);view.setUint32(28,8000,true);view.setUint16(32,1,true);view.setUint16(34,8,true);tag(36,'data');view.setUint32(40,samples,true);bytes.fill(128,44);
+  silentURL43=URL.createObjectURL(new Blob([bytes],{type:'audio/wav'}));
+  silentAudio43=document.createElement('audio');silentAudio43.src=silentURL43;silentAudio43.loop=true;silentAudio43.preload='auto';silentAudio43.muted=false;silentAudio43.volume=1;silentAudio43.setAttribute('playsinline','');silentAudio43.setAttribute('aria-hidden','true');silentAudio43.hidden=true;document.body.append(silentAudio43);
+ }
+ if(silentAudio43.paused){try{Promise.resolve(silentAudio43.play()).then(()=>{if(!silentWanted43)silentAudio43.pause()}).catch(()=>{/* Retry on the next playback gesture. */})}catch(e){}}
+}
+function releaseSilentAudio43(delay=0){
+ clearTimeout(silentRelease43);
+ const release=()=>{silentWanted43=false;silentAudio43?.pause()};
+ if(delay)silentRelease43=setTimeout(release,delay);else release();
+}
+configureAudioSession();
+document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseSilentAudio43();else if((running||starting||breaking)&&!roundPaused)unlockSilentAudio43()});
+window.addEventListener('pagehide',()=>{releaseSilentAudio43();if(silentURL43){silentAudio43.removeAttribute('src');silentAudio43.load();silentAudio43.remove();silentAudio43=null;URL.revokeObjectURL(silentURL43);silentURL43=null}});
+for(const event of ['pointerdown','keydown'])document.addEventListener(event,()=>{if((running||starting||breaking)&&!roundPaused)unlockSilentAudio43()},{capture:true,passive:true});
 const timeout42=(promise,ms,message)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error(message)),ms);Promise.resolve(promise).then(v=>{clearTimeout(timer);resolve(v)},e=>{clearTimeout(timer);reject(e)})});
 let audioBuild42=null,runClock42={time:0,at:0},lastPaint42=0,cloudLoading42=false,cloudReady42=false,cloudSaveTimer42=0,cloudRetry42=false;
 function fallbackSample42(ctx,index){
@@ -6,10 +35,11 @@ function fallbackSample42(ctx,index){
  for(let i=0;i<d.length;i++){const t=i/ctx.sampleRate;d[i]=(index===0?Math.sin(t*2*Math.PI*1350):Math.random()*2-1)*Math.exp(-t*(index===0?110:65))*.55}return b;
 }
 initAudio=async function(){
- configureAudioSession();
+ unlockSilentAudio43();
  if(!audio||audio.state==='closed'){
   const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio)throw Error('This browser cannot start audio.');
   audio=new Audio({latencyHint:'interactive'});buffers=[];snareNoise=null;audioBuild42=null;
+  audio.addEventListener('statechange',()=>{if(audio?.state==='running')configureAudioSession()});
  }
  const ctx=audio;
  // Resume synchronously in the tap/key gesture, before decoding can use its activation.
@@ -20,6 +50,7 @@ initAudio=async function(){
   audioReady=audioBuild42;
  }
  await Promise.all([resumed,audioBuild42]);
+ configureAudioSession();
  if(ctx!==audio||ctx.state!=='running')throw Error('Audio is paused by your browser. Tap Start to retry.');
  if(!snareNoise){snareNoise=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*.18),ctx.sampleRate);const d=snareNoise.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2)}
 };
@@ -60,10 +91,11 @@ start=async function(which,continuation=false){
 const animateBefore42=animate;
 animate=function(){lastPaint42=performance.now();try{return animateBefore42()}catch(error){audioError42(error)}};
 const stopBefore42=stop;
-stop=function(reset=true){const r=stopBefore42(reset);document.body.dataset.runActive='false';if(cfg.playMode==='maker'&&!appending&&makerBars[makerCursor42.bar]&&notes.some(n=>n.placeholder||n.makerIndex!==undefined))editorDecorateScore();return r};
+stop=function(reset=true){const r=stopBefore42(reset);releaseSilentAudio43(reset?0:8000);document.body.dataset.runActive='false';if(cfg.playMode==='maker'&&!appending&&makerBars[makerCursor42.bar]&&notes.some(n=>n.placeholder||n.makerIndex!==undefined))editorDecorateScore();return r};
 const pauseBefore42=setRoundPaused;
 setRoundPaused=async function(next){
- try{await timeout42(pauseBefore42(next),6500,'Audio pause timed out. Tap Start to restart.')}
+ if(!next&&running&&roundPaused&&!pauseBusy)unlockSilentAudio43();
+ try{await timeout42(pauseBefore42(next),6500,'Audio pause timed out. Tap Start to restart.');if(roundPaused&&!pauseBusy)releaseSilentAudio43()}
  catch(error){audioError42(error)}
 };
 setInterval(()=>{
@@ -274,6 +306,6 @@ function installUpdate42(){
  for(const button of document.querySelectorAll('#signatures button')){const fn=button.onclick;button.onclick=e=>{if(cfg.playMode!=='maker')return fn(e);makerOpenMark42('meter',0);$('maker42Numerator').value=button.textContent.split('/')[0];$('maker42Denominator').value=button.textContent.split('/')[1]}}
  $('pauseRound').onclick=()=>breaking?($('flagPause').click(),syncEndlessHandoffControls()):setRoundPaused(!roundPaused);
  const load=$('loadCloud');load.onclick=()=>profileRun34('loadCloud',async()=>{if(!cloudUser)throw Error('Sign in first.');const state=await cloudFetch42('/api/save');if(!state.save)throw Error('No cloud save yet.');localBackup42(cloudUser.id);hydrateSave42(state.save);cloudVersion=state.etag;cloudReady42=true;localStorage.setItem('rhythms-revision42-'+cloudUser.id,state.etag);$('playerAlias').value=cloudUser.alias||'Player';localStorage.setItem('beatbounce-alias',cloudUser.alias||'Player');renderAvatar33();$('saveCloud').disabled=false;},'Cloud save loaded.');
- document.querySelector('.version-chip').textContent='v42';$('updatesDialog').querySelector('h2').textContent='Rhythms · Update 42';const log=document.createElement('li');log.textContent='Update 42: Cleaner Endless round badge; quieter mobile taps and steady button spacing; account-bound cloud saves load automatically on sign-in with a local backup; count-in startup has timeouts, fallback sounds, cancellation, and an audio-clock watchdog; Rhythm Maker uses note/rest insertion buttons, left/right navigation, delete, undo/redo, and tappable tempo/meter markings with changes restricted to barlines.';$('updatesDialog').querySelector('ul').prepend(log);
+ document.querySelector('.version-chip').textContent='v43';$('updatesDialog').querySelector('h2').textContent='Rhythms · Update 43';const audioLog=document.createElement('li');audioLog.textContent='Update 43: Silent Mode audio support for iPhone and iPad, with an older-iOS fallback. Start and Resume unlock sound without changing note timing. The fallback stops when paused, stopped, or leaving the page.';$('updatesDialog').querySelector('ul').prepend(audioLog);const log=document.createElement('li');log.textContent='Update 42: Cleaner Endless round badge; quieter mobile taps and steady button spacing; account-bound cloud saves load automatically on sign-in with a local backup; count-in startup has timeouts, fallback sounds, cancellation, and an audio-clock watchdog; Rhythm Maker uses note/rest insertion buttons, left/right navigation, delete, undo/redo, and tappable tempo/meter markings with changes restricted to barlines.';audioLog.after(log);
  editorDrawToolbar();
 }
