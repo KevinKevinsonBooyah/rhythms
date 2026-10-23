@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46='47',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46='48',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -27,7 +27,7 @@ function maybeShowUpdate46(){
 const syncMenuBefore47=syncMode;
 syncMode=function(){const result=syncMenuBefore47();const tools=$('moddedTools');if(tools?.parentElement?.classList.contains('modifier-controls'))tools.parentElement.hidden=tools.hidden;return result};
 function installMenu47(){
- $('help').replaceWith($('device'));
+ $('help').replaceWith($('device'));$('updates').textContent='Updates';
  const notice=$('impossibleLockNotice');
  const experience=document.createElement('section');experience.id='experienceSettings47';experience.className='section poly-keep';experience.innerHTML='<h3>Modded</h3><div class="setting"><label for="moddedToggle">Modded<small>Gold, cosmetics, and the shop.</small></label></div>';
  const oldModded=$('moddedToggle').closest('label');experience.querySelector('.setting').append($('moddedToggle'));oldModded.remove();notice.after(experience);
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ['How to play has been removed. The Mobile/Computer switch now fills its spot in the header.','Modded and Hints & display are now inside Customize, with section shortcuts.','Loop, Metronome, and Snare controls now live under Playback & practice.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ['A more compact layout with a smaller header, tighter controls, and a simpler stats strip.','Reduced gradients, glow, colored framing, and repeated text across the game and menus.','Mobile keeps comfortable tap targets while leaving more room for the score.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }

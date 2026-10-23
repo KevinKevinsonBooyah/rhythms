@@ -1,0 +1,174 @@
+/* Update 48: a quieter interface, with notation and timing feedback unchanged. */
+:root{--bg:#181a1e;--panel:#212429;--line:#363b42;--ink:#eef0f3;--muted:#acb3bd}
+body,body[data-modded=true]{background:#181a1e;color:var(--ink)}
+body[data-device] header{padding:12px 20px;gap:12px;border-bottom:1px solid #30343a;background:#181a1e;max-width:none}
+body[data-device] .brand{font-size:23px;letter-spacing:-.7px;gap:7px}
+body[data-device] .brand i{width:28px;height:28px;background:none;color:#bac7d2;border-radius:0;box-shadow:none;filter:none;font-size:26px}
+body[data-device] .version-chip{font-size:9px;padding:2px 4px;color:#a6afb9;border-color:#3c424a;background:none}
+body[data-device] .top-actions{gap:6px;margin:0;padding:0}
+body[data-device] button,body[data-device] .action-link{border-radius:7px;box-shadow:none;letter-spacing:0}
+body[data-device] .top-actions button{min-height:38px;padding:7px 11px;font-size:12px;background:#262b31;color:#e1e6eb;border:1px solid #3a4149;box-shadow:none}
+body[data-device] .top-actions #custom{background:#35414c;color:#edf2f7;border-color:#526170;box-shadow:none;font-size:12px}
+body[data-device] #accountButton{background:#262b31;color:#e1e6eb;border-color:#3a4149;box-shadow:none}
+body[data-device] #accountMiniAvatar{width:21px;height:21px;font-size:11px;border-color:#4b555e;background:#39424c;color:#e5ebf2;box-shadow:none}
+body[data-device] main{padding:12px 20px 20px;gap:9px}
+body[data-device] .mode-strip{padding:0;margin:0;background:none;border:0;border-radius:0;box-shadow:none;gap:6px;min-width:0}
+body[data-device] .mode-tabs{background:none;border:0;border-radius:0;padding:0;gap:3px;min-width:0}
+body[data-device] .mode-tabs button{min-height:38px;padding:7px 10px;background:transparent;border:1px solid transparent;color:#acb4bf;font-size:11px;font-weight:650;box-shadow:none}
+body[data-device] .mode-tabs button[aria-pressed=true]{background:#30373f;border-color:#47525e;color:#f1f4f8;box-shadow:none}
+body[data-device] .modifier-controls,body[data-device] #moddedTools{gap:6px}
+body[data-device] #moddedTools .wallet{padding:5px 9px;font-size:13px;border:1px solid #444a4f;background:#25292d;color:#d6c794;box-shadow:none;backdrop-filter:none;border-radius:7px}
+body[data-device] #moddedTools #shop{min-height:38px;padding:7px 13px;font-size:12px;background:#30353c;color:#e5e9ef;border:1px solid #4b545f;box-shadow:none;font-weight:650;letter-spacing:0}
+body[data-device] main>.stats{min-height:0;gap:0;background:#202429;border:1px solid #363d44;border-radius:8px;overflow:hidden;box-shadow:none}
+body[data-device] main>.stats>div{padding:8px 12px;background:none;border:0;border-radius:0;box-shadow:none}
+body[data-device] main>.stats>div+div{border-left:1px solid #343b43}
+body[data-device] main>.stats b{font-size:22px!important;line-height:1.1;color:#eef1f5;font-weight:750}
+body[data-device] main>.stats span{font-size:9px;letter-spacing:.04em;line-height:1.4;margin-top:3px;color:#a9b3bf}
+body[data-device] .toolbar{padding:9px 12px;gap:12px;background:#202429;border:1px solid #363d44;border-radius:8px;box-shadow:none}
+body[data-device] .toolbar .control{gap:8px}
+body[data-device] .toolbar .caption{font-size:10px;color:#aeb7c1;letter-spacing:.04em}
+body[data-device] .toolbar .number{font-size:18px;color:#e3e9ef}
+body[data-device] .toolbar button{min-height:36px;padding:6px 10px;font-size:12px;background:#2a3037;color:#dce2e9;border-color:#444d58;box-shadow:none}
+body[data-device] input[type=range]::-webkit-slider-runnable-track{height:5px;background:#48515b;border:0}
+body[data-device] input[type=range]::-moz-range-track{height:5px;background:#48515b;border:0}
+body[data-device] input[type=range]::-webkit-slider-thumb{margin-top:-5px;width:15px;height:15px;background:#d4dde5;border:2px solid #2a3037;box-shadow:0 0 0 1px #8393a3}
+body[data-device] input[type=range]::-moz-range-thumb{width:12px;height:12px;background:#d4dde5;border:2px solid #2a3037;box-shadow:0 0 0 1px #8393a3}
+body[data-device] main>.transport{gap:6px;padding:0;margin:0}
+body[data-device] .transport button{padding:7px 12px;min-height:36px;font-size:12px;box-shadow:none}
+body[data-device] button.primary,body[data-device] #play{background:#b8c9d8;color:#18232d;border-color:#b8c9d8;box-shadow:none;font-weight:750}
+body[data-device] #generate{background:#2e3740;color:#e0e9f0;border-color:#596b7b;box-shadow:none}
+body[data-device] main .score-card{margin:0;border:1px solid #414a54;border-radius:9px;background:#202429;box-shadow:none}
+body[data-device] main .score-head{padding:10px 12px;gap:8px;background:#202429;border-bottom:1px solid #343b42}
+body[data-device] .title-controls{gap:9px}
+body[data-device] .title-controls h1{font-size:17px;line-height:1.3;letter-spacing:-.2px;margin:0}
+body[data-device] #titleActions{gap:5px}
+body[data-device] #titleActions button{min-height:38px;padding:7px 11px;font-size:12px;box-shadow:none}
+body[data-device] #pauseRound{background:#2d3838;border-color:#506361;color:#c6d6d3}
+body[data-device] #stop{background:#3b3033;border-color:#6a555a;color:#e0c7cc}
+body[data-device] #description,body[data-device] .score-foot{display:none}
+body[data-device] #status{font-size:10px;color:#aebbc8;min-height:0}
+body[data-device] #viewport{background:#202429;border:0;box-shadow:none}
+body[data-device] .progress{height:3px;background:#30383f}
+body[data-device] #progress{background:#839cb1}
+body[data-device] #roundLabel{font-size:10px;padding:2px 6px;background:#2b3339;border-color:#46525e;color:#c4ced8;margin-top:4px}
+body[data-device] #leaderboardPanel{padding:12px;border:1px solid #363d44;border-radius:8px;background:#202429;box-shadow:none}
+body[data-device] .board-heading h2{font-size:15px;margin:0}
+body[data-device] .board-heading{gap:6px;margin-bottom:8px}
+body[data-device] .board-heading button{padding:5px 8px;min-height:30px;background:#2b3138;border-color:#434c56}
+body[data-device] #leaderboardMode{padding:7px 30px 7px 9px;font-size:11px;min-height:34px}
+body[data-device] #boardStatus{margin:8px 0;font-size:10px;color:#a9b2be}
+body[data-device] #boardRows li{padding:9px 0;font-size:11px}
+body[data-device] #runResult{margin:0;padding:10px 12px;border-radius:8px;background:#2c2d26;border-color:#5d5d43;font-size:12px}
+body[data-device] .site-footer{padding:8px 20px 16px;font-size:10px}
+/* Reduce decorative framing in menus; preserve cosmetic previews and ownership. */
+body[data-device] dialog{border-radius:10px;border-color:#454e59;background:#21262c;box-shadow:0 12px 40px #0007}
+body[data-device] dialog .modal-head,body[data-device] dialog .modal-foot{padding:12px 15px;background:#21262c;border-color:#3b434d}
+body[data-device] dialog .modal-head h2{font-size:17px;margin:0;line-height:1.3}
+body[data-device] dialog .modal-head button{padding:6px 10px;min-height:36px}
+body[data-device] dialog .modal-body{padding:14px 15px}
+body[data-device] #settings{width:min(880px,calc(100vw - 20px))}
+body[data-device] #settings>.modal-body{padding:14px 16px 16px 166px;max-height:68dvh}
+body[data-device] #settingsNav{margin-left:-150px;width:134px;gap:2px;background:#21262c}
+body[data-device] #settingsNav button{padding:7px 8px;font-size:11px;min-height:33px;color:#aeb8c3}
+body[data-device] #settingsNav button:hover,body[data-device] #settingsNav button:focus-visible{background:#333d47;color:#eef2f7}
+body[data-device] #settings .section{margin-bottom:14px;padding-bottom:14px;border-color:#353d45}
+body[data-device] #settings .section h3{font-size:12px;color:#cbd4dd;margin:0 0 8px;letter-spacing:0}
+body[data-device] #settings .setting{padding:9px 0;min-height:44px;gap:12px}
+body[data-device] #settings .setting :is(label,.setting-label47){font-size:12px;line-height:1.4}
+body[data-device] #settings .setting small{font-size:10px;line-height:1.4;color:#a4afbb;margin-top:3px}
+body[data-device] #settings #experienceSettings47{padding:10px 0;background:none;border:0;border-bottom:1px solid #353d45;border-radius:0;margin-bottom:14px}
+body[data-device] #settings .settings-button47{min-height:38px;min-width:115px;padding:7px 10px;font-size:11px;background:#2b3239;border-color:#47525e;color:#d7e0e8}
+body[data-device] #settings .settings-button47[aria-pressed=true]{background:#364550;border-color:#768e9f;color:#e8f1f7}
+body[data-device] #settings :is(input[type=number],select){padding:7px 9px;font-size:12px;min-height:36px;border-color:#46515d;border-radius:6px;background-color:#20262d;box-shadow:none}
+body[data-device] #settings .tiles{gap:6px}
+body[data-device] #settings .tile{min-height:64px;padding:7px;border-radius:7px;background:#282f36;border-color:#3e4853;box-shadow:none}
+body[data-device] #settings .tile[aria-pressed=true]{background:#36414c;border-color:#788c9e;color:#dbe6ef}
+body[data-device] #settings .tile small{font-size:10px}
+body[data-device] #settings .modal-foot .toast{font-size:10px;color:#a7b2bf}
+body[data-device] #accountDialog .modal-body{gap:11px;padding:14px 15px}
+body[data-device] .profile-hero{padding:10px;gap:12px;border:1px solid #414b56;border-radius:8px;background:#293139;box-shadow:none}
+body[data-device] .profile-avatar{width:54px;height:54px;border-radius:12px;font-size:24px;box-shadow:none}
+body[data-device] .profile-hero strong{font-size:18px}
+body[data-device] .profile-label{font-size:12px;gap:5px}
+body[data-device] .profile-picture-actions{gap:5px}
+body[data-device] .profile-picture-actions button{padding:7px 10px;font-size:11px;min-height:36px}
+body[data-device] .shop-card{padding:10px;gap:8px;border-radius:8px;border-color:#434b55;background:#282e35;box-shadow:none}
+body[data-device] .shop-card h3{font-size:14px}
+body[data-device] .shop-card p{font-size:11px}
+body[data-device] #makerWorkbench{background:#222b29;border-radius:8px;border-color:#465a51;box-shadow:none}
+body[data-device] #makerWorkbench .maker42-head{padding:6px 8px}
+body[data-device] #makerMarkHint44{font-size:11px;margin-top:6px;color:#b3cec0}
+@media(max-width:1100px){body[data-device] main{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:700px){
+ body[data-device] header{padding:10px 12px;display:block}
+ body[data-device] .brand{font-size:22px}
+ body[data-device] main{padding:10px 10px 18px;gap:8px}
+ body[data-device] #settingsNav{margin:0 0 10px;padding:4px 0 7px;width:auto;max-height:none;float:none;display:flex;flex-direction:row;overflow-x:auto;position:sticky;top:-10px;gap:2px;border-color:#3d4650}
+ body[data-device] #settings>.modal-body{padding:10px 12px;max-height:65dvh}
+ body[data-device] #leaderboardPanel{max-height:180px}
+}
+body[data-device=mobile] header{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:10px;gap:7px}
+body[data-device=mobile] .top-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:8px;width:100%}
+body[data-device=mobile] .top-actions :is(#accountButton,#updates,#device,#custom){grid-row:1;grid-column:auto;min-height:44px;padding:6px 3px;font-size:11px;border-radius:7px;box-shadow:none;min-width:0}
+body[data-device=mobile] .top-actions #custom{background:#35414c;font-weight:700}
+body[data-device=mobile] .custom-button span{display:none}
+body[data-device=mobile] #accountMiniAvatar{width:17px;height:17px;font-size:10px}
+body[data-device=mobile] main{padding:8px 10px calc(82px + env(safe-area-inset-bottom));row-gap:8px}
+body[data-device=mobile] .mode-strip{gap:4px;margin:0;padding:0}
+body[data-device=mobile] .mode-tabs{gap:2px;padding-bottom:2px}
+body[data-device=mobile] .mode-tabs button{min-height:44px;min-width:76px;padding:7px 9px;font-size:10px}
+body[data-device=mobile] .modifier-controls{min-height:0;gap:5px}
+body[data-device=mobile] #moddedTools #shop{min-height:44px;padding:6px 11px}
+body[data-device=mobile] main>.stats{min-height:54px}
+body[data-device=mobile] main>.stats>div{padding:7px 10px}
+body[data-device=mobile] main>.stats b{font-size:21px!important}
+body[data-device=mobile] .toolbar{padding:7px 9px;gap:5px}
+body[data-device=mobile] .toolbar #mobileSliders44{gap:10px}
+body[data-device=mobile] #mobileSliders44 .control{padding:0;border:0;border-radius:0;background:none;gap:0 5px}
+body[data-device=mobile] #mobileSliders44 label{font-size:9px}
+body[data-device=mobile] #mobileSliders44 :is(output,strong){font-size:14px;color:#d5dfe9}
+body[data-device=mobile] #mobileSliders44 input[type=range]{height:30px}
+body[data-device=mobile] .toolbar :is(#meter,#barsBtn){min-height:44px;padding:4px 8px;font-size:11px}
+body[data-device=mobile] main>.transport button{min-height:36px;padding:6px 10px;font-size:11px}
+body[data-device=mobile] main .score-head{padding:8px 10px}
+body[data-device=mobile] .title-controls h1{font-size:16px;margin-bottom:6px}
+body[data-device=mobile] .title-controls #titleActions{gap:4px}
+body[data-device=mobile] #titleActions button{height:44px;min-height:44px;padding:5px 3px!important;font-size:10px!important}
+body[data-device=mobile] .score-head #status{margin-top:6px;font-size:10px;min-height:0}
+body[data-device=mobile] .practice{gap:5px}
+body[data-device=mobile] #tap,body[data-device=mobile][data-modded=true] #tap{min-height:60px;padding:8px 12px;border:1px solid #a9bac8!important;border-radius:9px;background:#c3d0da!important;color:#202c36!important;font-size:14px;box-shadow:none!important;bottom:calc(8px + env(safe-area-inset-bottom))}
+body[data-device=mobile] #tap :is(span,small),body[data-device=mobile] #feedback{color:#202c36!important;text-shadow:none!important}
+body[data-device=mobile] #tap.flash,body[data-device=mobile][data-modded=true] #tap.flash{background:#afc4d3!important;border-color:#90a9bc!important;box-shadow:none!important}
+body[data-device=mobile] #polyPads button{min-height:66px;border-radius:9px;font-size:14px;box-shadow:none!important}
+body[data-device=mobile] dialog:not(#deviceChoice){border-radius:10px}
+body[data-device=mobile] dialog .modal-head,body[data-device=mobile] dialog .modal-foot{padding:10px 12px}
+body[data-device=mobile] dialog .modal-head h2{font-size:16px}
+body[data-device=mobile] #settings .setting{min-height:48px;padding:8px 0}
+body[data-device=mobile] #settings :is(input[type=number],select,.settings-button47){min-height:44px}
+body[data-device=mobile] #settings .tiles button{min-height:68px}
+body[data-device=mobile] #makerWorkbench #maker42Values button{min-height:60px}
+body[data-device=mobile] .site-footer{padding:6px 12px 14px}
+#deviceChoice{background:#21262c;border:1px solid #454e59;border-radius:12px;box-shadow:0 12px 32px #0006}
+#deviceChoice .device-content{padding:22px}
+#deviceChoice .device-emblem{display:none}
+#deviceChoice h2{font-size:20px;margin:0 0 18px;letter-spacing:-.3px}
+#deviceChoice .device-options{gap:10px}
+#deviceChoice .device-options button{min-height:112px;padding:16px 12px;border-radius:8px;background:#2b323a;border:1px solid #4b5662;box-shadow:none}
+#deviceChoice .device-icon{font-size:32px}
+#deviceChoice .device-options strong{font-size:15px}
+body[data-device] .updates-copy{font-size:13px;line-height:1.5}
+body[data-device] .updates-copy li{padding:8px 0;border-color:#38414b}
+body[data-device=mobile] dialog :is(input[type=text],input[type=number],input:not([type]),select,textarea){font-size:16px!important}
+/* Override the older mode/theme selectors on the surrounding interface. */
+body[data-device] .top-actions #custom{background:#35414c!important;color:#edf2f7!important;border-color:#526170!important;box-shadow:none!important}
+body[data-device] .mode-tabs button[aria-pressed=true]{background:#30373f!important;border-color:#47525e!important;color:#f1f4f8!important;box-shadow:none!important}
+body[data-device] #play{background:#b8c9d8!important;color:#18232d!important;border-color:#b8c9d8!important;box-shadow:none!important}
+body[data-device] #pauseRound{background:#2d3838!important;color:#c6d6d3!important;border-color:#506361!important;box-shadow:none!important}
+body[data-device] #stop{background:#3b3033!important;color:#e0c7cc!important;border-color:#6a555a!important;box-shadow:none!important}
+body[data-device] main .score-card{background:#202429!important;border-color:#414a54!important;box-shadow:none!important}
+body[data-device] #settings #experienceSettings47 h3{color:#cbd4dd}
+body[data-device] #settings input[type=checkbox]:checked{background:#6b8294;border-color:#8ca3b5}
+body[data-device] #settings input[type=checkbox]:checked::after{background:#f0f4f7}
+body[data-device=mobile] #tap,body[data-device=mobile][data-modded=true] #tap{justify-content:flex-start;padding-top:9px}
+body[data-device=mobile] #tap>span:first-child{font-size:14px!important;line-height:18px!important;margin:0}
+body[data-device=mobile] #feedback{bottom:calc(14px + env(safe-area-inset-bottom));font-size:10px;line-height:12px;min-height:12px;font-weight:500}
