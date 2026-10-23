@@ -1,0 +1,37 @@
+/* Keep the compact layout, with a consistent score-navigation rail. */
+body[data-device] #stop[hidden]{display:none!important}
+body[data-device=mobile] .title-controls #titleActions{grid-template-columns:repeat(3,minmax(0,1fr))}
+body[data-device=mobile][data-transport-active=true] .title-controls #titleActions{grid-template-columns:repeat(4,minmax(0,1fr))}
+body[data-device] #viewport{overflow-x:auto;overflow-y:hidden;touch-action:pan-x pan-y;scrollbar-width:none}
+body[data-device] #viewport::-webkit-scrollbar{display:none}
+.score-scroll50{padding:3px 12px 5px;background:#1b2025;border-top:1px solid #41495266;line-height:0}
+body[data-device] #rhythmScroll50{display:block;width:100%;height:22px;padding:0;margin:0;cursor:ew-resize;touch-action:none;accent-color:#9dafb9;background:transparent}
+#rhythmScroll50::-webkit-slider-runnable-track{height:8px;border:0;border-radius:8px;background:#303942}
+#rhythmScroll50::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:var(--scroll-thumb50,40px);height:12px;margin-top:-2px;border-radius:8px;border:1px solid #a0b2ba;background:#738892;box-shadow:none}
+#rhythmScroll50::-moz-range-track{height:8px;border:0;border-radius:8px;background:#303942}
+#rhythmScroll50::-moz-range-thumb{width:var(--scroll-thumb50,40px);height:12px;border-radius:8px;border:1px solid #a0b2ba;background:#738892;box-shadow:none}
+#rhythmScroll50:disabled{opacity:.35;cursor:default}
+#rhythmScroll50:focus-visible{outline:2px solid #c5e8d5;outline-offset:1px}
+body[data-play-mode=maker] [data-maker-barline50]{cursor:pointer;outline:none}
+body[data-play-mode=maker] [data-maker-barline50]:is(:hover,:focus-visible) rect{fill:#a4e6bd25;stroke:#a4e6bd}
+body[data-play-mode=maker] [data-maker-barline50]:is(:hover,:focus-visible) line{opacity:1;stroke-width:3}
+body[data-device] #countInPanel{display:flex!important;flex-direction:column!important;gap:5px!important}
+body[data-device] #countInPanel[hidden]{display:none!important}
+#countLoading50{font:750 11px/1.2 system-ui;letter-spacing:.08em;text-transform:uppercase;color:#c9dfd1;text-align:center}
+#countLoading50[data-loading=true]{color:#f0d590}
+#countLoading50+.count-in-heading .caption{display:none}
+body[data-device] #scoreOverlays #breakCard{display:grid!important;grid-template-columns:36px 1fr 36px;gap:9px;align-items:center;padding:8px 12px!important}
+body[data-device] #scoreOverlays #breakCard[hidden]{display:none!important}
+body[data-device] #scoreOverlays #breakCard #breakCount{grid-column:1;grid-row:1;order:initial}
+body[data-device] #scoreOverlays #breakCard #nextRound{grid-column:2;grid-row:1;order:initial;align-self:center;text-align:center;justify-self:center;line-height:1.3}
+body[data-device] #scoreOverlays #breakCard::after{content:'';width:36px;grid-column:3;grid-row:1}
+body[data-device] #moddedTools #shop{background:#393121!important;border-color:#ad8c48!important;color:#ffe6a5!important;box-shadow:inset 0 1px 0 #ffe4a61a!important}
+.wallet{display:inline-flex;align-items:center;gap:8px}
+.wallet-coin50{display:inline-block;position:relative;flex:0 0 13px;width:13px;height:17px;border-radius:50%;border:1.5px solid #fff3ad;background:#ffd255;box-shadow:inset 2px 0 0 #f0b93c}
+.wallet-coin50::after{content:'';position:absolute;left:5px;top:3px;width:2px;height:8px;background:#b87f1f;border-radius:1px}
+#loginTip50{position:fixed;z-index:150;bottom:20px;right:20px;max-width:min(330px,calc(100vw - 24px));padding:17px 38px 15px 17px;border:1px solid #8b79a8;border-radius:13px;background:#292632;color:#e9e1f3;box-shadow:0 10px 35px #0006}
+#loginTip50[hidden]{display:none!important}
+#loginTip50 strong{display:block;font-size:13px;line-height:1.5;margin-bottom:10px}
+#loginTip50 .login-tip-close50{position:absolute;top:6px;right:6px;border:0;background:transparent;padding:2px;min-width:30px;min-height:30px;font-size:22px;color:#c9bbdc}
+#loginTip50 .login-tip-open50{min-height:38px;padding:7px 15px;border:1px solid #b7a0d3;background:#c7b2e1;color:#2c203c;font-size:12px;font-weight:750}
+body[data-device=mobile] #loginTip50{bottom:calc(115px + env(safe-area-inset-bottom));right:12px}

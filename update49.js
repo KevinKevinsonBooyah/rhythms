@@ -73,7 +73,7 @@ function poseKevin49(){
 let settingsRestored49=false;
 function restoreStartupSettings49(){
  try{const raw=localStorage.getItem('pulse-rhythm-v1');if(!raw)return;const saved=JSON.parse(raw);if(!saved||typeof saved!=='object'||Array.isArray(saved))return;
-  cfg={...cfg,...saved};cfg.level=Math.round(clamp(cfg.level,0,12));cfg.bpm=Math.round(clamp(cfg.bpm,30,240));cfg.count=Math.round(clamp(cfg.count,0,2));cfg.standardBars=Math.round(clamp(cfg.standardBars||cfg.bars||8,1,32));cfg.bars=cfg.playMode==='endless'?8:cfg.playMode==='impossible'?cfg.standardBars+2:Math.round(clamp(cfg.bars,1,32));if(!meters.includes(cfg.meter))cfg.meter='4/4';
+  cfg={...cfg,...saved};cfg.level=Math.round(clamp(cfg.level,0,12));cfg.bpm=Math.round(clamp(cfg.bpm,20,240));cfg.count=Math.round(clamp(cfg.count,0,2));cfg.standardBars=Math.round(clamp(cfg.standardBars||cfg.bars||8,1,32));cfg.bars=cfg.playMode==='endless'?8:cfg.playMode==='impossible'?cfg.standardBars+2:Math.round(clamp(cfg.bars,1,32));if(!meters.includes(cfg.meter))cfg.meter='4/4';
   cfg.enabled=Array.isArray(saved.enabled)?saved.enabled.filter(id=>patterns.some(p=>p.id===id)):patterns.filter(p=>!p.manual&&p.level<=cfg.level).map(p=>p.id);if(!cfg.enabled.length)cfg.enabled=['quarter'];isCustom=!!saved.custom;settingsRestored49=true;
  }catch(e){}
 }

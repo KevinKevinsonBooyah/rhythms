@@ -1,6 +1,11 @@
 import './text-filter.js?v=46';
 const filter=globalThis.rhythmsTextFilter;
-const MODES=['standard','endless','impossible','echo','polyrhythms','strange'];
+const MODES=['standard','endless','impossible','echo','polyrhythms','maker'];
+// Reuse the retired legacy score slot with an explicit format marker. This keeps
+// Maker scores compatible with the already-published Firestore rules. Unmarked
+// Strange scores are never shown as Maker scores or included in Overall.
+const makerRecord=s=>s?.mode==='strange'&&typeof s.date==='string'&&s.date.startsWith('maker:');
+const visibleBest=best=>Object.fromEntries(MODES.map(mode=>[mode,mode==='maker'?(best.maker||(makerRecord(best.strange)?{...best.strange,mode:'maker',date:best.strange.date.slice(6)}:null)):best[mode]]).filter(([,v])=>v));
 const SAVE_KEYS=['pulse-rhythm-v1','pulse-modded-v1','pulse-maker-v1','beatbounce-scores','beatbounce-alias','rhythms-avatar-v1'];
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const name=filter.publicName;
@@ -50,7 +55,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
    if(url.pathname==='/api/leaderboard'&&method==='GET'){
     const mode=url.searchParams.get('mode')||'all';if(mode!=='all'&&!MODES.includes(mode))throw Error('Unknown mode');
     const [snap,owners]=await Promise.all([getDocs(collection(db,'ranks')),ownerIds()]);
-    const rows=[];snap.forEach(item=>{const data=item.data(),best=data.best||{};
+    const rows=[];snap.forEach(item=>{const data=item.data(),best=visibleBest(data.best||{});
      const score=mode==='all'?Object.values(best).reduce((n,v)=>n+Number(v?.score||0),0):Number(best[mode]?.score||0);
      if(score>0)rows.push({alias:name(data.alias),score,profileId:item.id,isOwner:owners.has(item.id)});
     });rows.sort((a,b)=>b.score-a.score);return json({rows:rows.slice(0,100)});
@@ -83,8 +88,9 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
    if(url.pathname==='/api/score'&&method==='POST'){
     const score=cleanScore(JSON.parse(options.body)),rank=ref('ranks',uid);
     let bestScore=score.score;await runTransaction(db,async t=>{const profile=await t.get(ref('profiles',uid));if(profile.exists())score.alias=name(profile.data()?.alias);const old=await t.get(rank),data=old.data()||{best:{}},best={...(data.best||{})};
-     if(!best[score.mode]||best[score.mode].score<score.score)best[score.mode]=score;
-     bestScore=best[score.mode].score;t.set(rank,{alias:score.alias,best});
+     const prior=visibleBest(best)[score.mode];
+     if(!prior||prior.score<score.score){if(score.mode==='maker')best.strange={...score,mode:'strange',date:'maker:'+score.date};else best[score.mode]=score}
+     bestScore=visibleBest(best)[score.mode].score;t.set(rank,{alias:score.alias,best});
     });return json({score:bestScore});
    }
    return json({error:'Not found'},404);

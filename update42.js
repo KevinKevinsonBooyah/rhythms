@@ -62,7 +62,7 @@ start=async function(which,continuation=false){
  if(starting||transitioning||cloudLoading42)return;
  if(cfg.playMode==='endless'&&!continuation&&generatedRound!==1){endlessRound=1;generate({randomize:true})}
  if(!continuation)stop();
- const ticket=++session;starting=true;$('play').textContent='Starting…';$('stop').textContent='■ Stop';$('stop').disabled=false;$('status').textContent='Starting audio…';
+ const ticket=++session;starting=true;$('play').textContent='Starting…';$('stop').textContent='■ Stop';$('stop').disabled=false;$('status').textContent='Starting audio…';window.showLoadingCount50?.();
  if(!continuation){endlessRound=1;beginResultsSession()}
  try{
   await timeout42(initAudio(),6000,'Audio took too long. Tap Start to retry.');if(ticket!==session)return;
@@ -160,9 +160,9 @@ function makerInsert42(value){
 function makerDelete42(){
  if(running||starting)return;makerClamp42();let {bar,index}=makerCursor42;
  if(index===0){if(bar===0)return;bar--;index=makerBars[bar].length;if(!index){makerCursor42={bar,index};editorDecorateScore();return}}
- editorRemember();const list=makerBars[bar],entry=list[index-1];
- if(entry.tuplet){const first=list.findIndex(e=>e.groupId===entry.groupId);makerBars[bar]=list.filter(e=>e.groupId!==entry.groupId);index=first}else{list.splice(--index,1);if(list[index])list[index].tied=false}
- makerCursor42={bar,index};saveMaker();generateMaker();makerFollow42();editorMessage('Deleted.');
+ const list=makerBars[bar],entry=list[index-1];if(!entry)return;
+ editorRemember();list[index-1]={...entry,rest:true,tied:false};if(list[index])list[index].tied=false;
+ makerCursor42={bar,index:index-1};saveMaker();generateMaker();makerFollow42();editorMessage('Replaced with a rest of the same value.');
 }
 generateMaker=function(){
  stop();scoreOffset=0;historyMarkup='';historyChunks=[];normalizeMaker();notes=[];groups=[];barRanges=[];totalTicks=0;
@@ -199,7 +199,7 @@ editorDecorateScore=function(){
   makerClamp42();const {bar,index}=makerCursor42,br=barRanges[bar],ns=notes.filter(n=>n.bar===bar),selected=ns.find(n=>n.makerIndex===index-1);
   if(selected)overlay.append(svgEl('rect',{x:selected.x-15,y:105,width:Math.max(30,selected.w-4),height:83,rx:9,fill:'#a4e6bd13',stroke:'#a4e6bd66'}));
   const elapsed=makerBars[bar].slice(0,index).reduce((t,e)=>t+makerTicks(e),0),x=br.first+elapsed/Q*br.spacing;
-  line(overlay,x-7,126,x-7,186,2,'#a4e6bd');text(overlay,x-7,211,'▼',13,'#a4e6bd');
+
   for(let b=0;b<cfg.bars;b++){const r=barRanges[b],m=meterInfo(r.meter);for(let beat=0;beat<m.beats;beat++)line(overlay,r.first+beat*m.unit*r.spacing,151,r.first+beat*m.unit*r.spacing,166,1,'#a4e6bd22')}
  }
  svg.prepend(overlay);
@@ -239,8 +239,8 @@ function validateSave42(payload){
 }
 function hydrateSave42(payload,replace=true){
  validateSave42(payload);stop();for(const key of SAVE_KEYS){const value=payload.data[key];if(value!=null)localStorage.setItem(key,value);else if(replace)localStorage.removeItem(key)}
- const saved=JSON.parse(localStorage.getItem('pulse-rhythm-v1')||'{}');cfg={...defaultConfig42,...saved};cfg.level=Math.round(clamp(cfg.level,0,12));cfg.bpm=clamp(cfg.bpm,30,240);cfg.count=Math.round(clamp(cfg.count,0,2));cfg.standardBars=Math.round(clamp(cfg.standardBars||cfg.bars||8,1,32));cfg.bars=cfg.playMode==='endless'?8:cfg.playMode==='impossible'?cfg.standardBars+2:Math.round(clamp(cfg.bars||8,1,32));
- if(!['standard','endless','impossible','maker','echo','strange','polyrhythms'].includes(cfg.playMode))cfg.playMode='standard';if(!meters.includes(cfg.meter))cfg.meter='4/4';cfg.manualBpm=clamp(cfg.manualBpm||cfg.bpm,30,240);cfg.polyA=Math.round(clamp(cfg.polyA||3,2,16));cfg.polyB=Math.round(clamp(cfg.polyB||2,2,16));cfg.polyKey0=cfg.polyKey0||'d';cfg.polyKey1=cfg.polyKey1||'k';isCustom=!!saved.custom;
+ const saved=JSON.parse(localStorage.getItem('pulse-rhythm-v1')||'{}');cfg={...defaultConfig42,...saved};cfg.level=Math.round(clamp(cfg.level,0,12));cfg.bpm=clamp(cfg.bpm,20,240);cfg.count=Math.round(clamp(cfg.count,0,2));cfg.standardBars=Math.round(clamp(cfg.standardBars||cfg.bars||8,1,32));cfg.bars=cfg.playMode==='endless'?8:cfg.playMode==='impossible'?cfg.standardBars+2:Math.round(clamp(cfg.bars||8,1,32));
+ if(!['standard','endless','impossible','maker','echo','polyrhythms'].includes(cfg.playMode))cfg.playMode='standard';if(!meters.includes(cfg.meter))cfg.meter='4/4';cfg.manualBpm=clamp(cfg.manualBpm||cfg.bpm,20,240);cfg.polyA=Math.round(clamp(cfg.polyA||3,2,16));cfg.polyB=Math.round(clamp(cfg.polyB||2,2,16));cfg.polyKey0=cfg.polyKey0||'d';cfg.polyKey1=cfg.polyKey1||'k';isCustom=!!saved.custom;
  cfg.enabled=Array.isArray(saved.enabled)?saved.enabled.filter(id=>patterns.some(p=>p.id===id)):[];if(!cfg.enabled.length)cfg.enabled=patterns.filter(p=>!p.manual&&p.level<=cfg.level).map(p=>p.id);
  const stored=JSON.parse(localStorage.getItem('pulse-modded-v1')||'{}');economy={gold:Math.max(0,Math.floor(Number(stored.gold)||0)),owned:['classic','clean','stageNone','buddyNone','headNone'],theme:'classic',effect:'clean',stage:'stageNone',buddy:'buddyNone',head:'headNone',pets:stored.pets||{}};
  for(const id of Array.isArray(stored.owned)?stored.owned:[])if(catalog.some(c=>c.id===id)&&!economy.owned.includes(id))economy.owned.push(id);
@@ -285,7 +285,7 @@ window.rhythmsBeforeSignOut42=async()=>{localBackup42(localStorage.getItem(owner
 window.rhythmsAfterSignOut42=()=>{const guest=localStorage.getItem('rhythms-backup42-guest');for(const key of SAVE_KEYS)localStorage.removeItem(key);if(guest){const data=JSON.parse(guest).data;for(const key of SAVE_KEYS)if(data[key]!=null)localStorage.setItem(key,data[key])}localStorage.removeItem(BIO_KEY);localStorage.setItem(ownerKey42,'guest')};
 
 function installUpdate42(){
- const work=$('makerWorkbench');work.innerHTML='<div class="maker42-head"><strong>Rhythm Maker</strong><span>Choose a value to insert it</span></div><div class="maker42-row"><button id="maker42Prev" aria-label="Previous note or rest">←</button><span id="maker42Cursor" aria-live="polite"></span><button id="maker42Next" aria-label="Next note or rest">→</button><button id="maker42Delete">⌫ Delete</button></div><div class="maker42-row"><button id="maker42Rest" aria-pressed="false">Note entry</button><button id="maker42Undo">Undo</button><button id="maker42Redo">Redo</button><div id="maker42Marks"><button id="maker42Tempo">＋ Tempo</button><button id="maker42Meter">＋ Time signature</button></div></div><div id="maker42Values"></div><span id="makerEditorStatus" role="status">Use arrows to move. Delete removes the previous entry.</span>';
+ const work=$('makerWorkbench');work.innerHTML='<div class="maker42-head"><strong>Rhythm Maker</strong><span>Choose a value to insert it</span></div><div class="maker42-row"><button id="maker42Prev" aria-label="Previous note or rest">←</button><span id="maker42Cursor" aria-live="polite"></span><button id="maker42Next" aria-label="Next note or rest">→</button><button id="maker42Delete">⌫ Delete</button></div><div class="maker42-row"><button id="maker42Rest" aria-pressed="false">Note entry</button><button id="maker42Undo">Undo</button><button id="maker42Redo">Redo</button><div id="maker42Marks"><button id="maker42Tempo">＋ Tempo</button><button id="maker42Meter">＋ Time signature</button></div></div><div id="maker42Values"></div><span id="makerEditorStatus" role="status">Use arrows to move. Delete replaces the previous note with a rest.</span>';
  if(!makerValues.some(v=>v.base===.25&&v.dot))makerValues.splice(7,0,{base:.25,dot:1,label:'Dotted 16th',symbol:'♬·'});
  if(!makerValues.some(v=>v.base===.125&&v.dot))makerValues.splice(10,0,{base:.125,dot:1,label:'Dotted 32nd',symbol:'♬·'});
  for(const [index,value] of makerValues.entries()){const button=document.createElement('button');button.type='button';button.dataset.value=index;button.title='Add '+value.label;const icon=svgEl('svg',{viewBox:'-20 -58 45 69','aria-hidden':'true'});glyph(icon,{base:value.base,dot:value.dot,rest:false},0,0,.95);if(value.count)text(icon,14,-37,value.count,13,'#b9e6c9');const label=document.createElement('small');label.textContent=value.label;button.append(icon,label);button.onclick=()=>makerInsert42(value);$('maker42Values').append(button)}
