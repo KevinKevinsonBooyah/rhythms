@@ -7,3 +7,21 @@ body[data-device=mobile] .toolbar #mobileSliders44{grid-column:1/-1;width:100%;m
 body[data-device=mobile] .title-controls #titleActions{grid-column:1/-1}
 #playerAlias[aria-invalid=true],#playerBio[aria-invalid=true]{border-color:#e6a3ad;box-shadow:0 0 0 2px #e6a3ad20}
 body[data-device=mobile] .toolbar #mobileSliders44>.control{grid-column:auto}
+/* Update 47: one settings home, and a compact three-button mobile header. */
+#settings .setting-label47{flex:1;font-size:14px;line-height:1.45}
+#settings .settings-button47{min-width:122px;min-height:42px;padding:9px 12px;font-size:12px;font-weight:650;white-space:normal}
+#settings .settings-button47[aria-pressed=true]{border-color:#ac95ca;background:#463653;color:#eee0ff}
+#settings #moddedToggle{margin:0;flex-shrink:0}
+#settings #experienceSettings47 h3{color:#f1d492}
+#settings #experienceSettings47{border:1px solid #ad8d5140;border-radius:13px;padding:0 13px 6px;background:#cba25108;margin-bottom:22px}
+#settings #hintSettings47{scroll-margin-top:70px}
+#settings .section:has(.settings-button47){scroll-margin-top:70px}
+.score-head #roundLabel{display:inline-block;margin-top:6px}
+body[data-device=mobile] .top-actions #accountButton{grid-column:1;grid-row:1}
+body[data-device=mobile] .top-actions #updates{grid-column:2;grid-row:1}
+body[data-device=mobile] .top-actions #device{grid-column:3;grid-row:1}
+body[data-device=mobile] .top-actions #custom{grid-column:1/-1;grid-row:2}
+body[data-device=mobile] #settings .settings-button47{min-width:112px;min-height:44px}
+body[data-device=mobile] #settings #experienceSettings47 .setting{flex-wrap:nowrap}
+#settings #experienceSettings47{scroll-margin-top:70px}
+body[data-device=mobile] #moddedTools .wallet{position:static;inset:auto;margin:0;backdrop-filter:none}

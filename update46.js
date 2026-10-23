@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46='46',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46='47',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -23,13 +23,31 @@ function maybeShowUpdate46(){
  if($('deviceChoice').open){$('deviceChoice').addEventListener('close',maybeShowUpdate46,{once:true});return}
  if(!document.querySelector('dialog[open]')){$('updatesDialog').showModal();try{localStorage.setItem('rhythms-last-seen-update',RELEASE46)}catch(e){}}
 }
+// Keep the existing controls and handlers while consolidating their location.
+const syncMenuBefore47=syncMode;
+syncMode=function(){const result=syncMenuBefore47();const tools=$('moddedTools');if(tools?.parentElement?.classList.contains('modifier-controls'))tools.parentElement.hidden=tools.hidden;return result};
+function installMenu47(){
+ $('help').replaceWith($('device'));
+ const notice=$('impossibleLockNotice');
+ const experience=document.createElement('section');experience.id='experienceSettings47';experience.className='section poly-keep';experience.innerHTML='<h3>Modded</h3><div class="setting"><label for="moddedToggle">Modded<small>Gold, cosmetics, and the shop.</small></label></div>';
+ const oldModded=$('moddedToggle').closest('label');experience.querySelector('.setting').append($('moddedToggle'));oldModded.remove();notice.after(experience);
+ const hints=document.createElement('section');hints.id='hintSettings47';hints.className='section poly-keep';hints.innerHTML='<h3>Hints & display</h3>';
+ for(const [id,title,description] of [['showCounts','Beat counts','Show counting hints below the score.'],['showPlayhead','Moving bar','Off: pulse at each measure. The camera still follows.']]){const row=document.createElement('div');row.className='setting';const label=document.createElement('label');label.htmlFor=id;label.append(document.createTextNode(title));const small=document.createElement('small');small.textContent=description;label.append(small);row.append(label,$(id));hints.append(row)}experience.after(hints);
+ $('description').after($('roundLabel'));document.querySelector('main>.hints-bar').remove();
+ const guideRow=$('guide').closest('.setting'),playback=guideRow.closest('.section');
+ for(const [id,title] of [['loop','Repeat rhythm'],['metro','Metronome']]){const row=document.createElement('div');row.className='setting';const label=document.createElement('span');label.className='setting-label47';label.textContent=title;row.append(label,$(id));playback.insertBefore(row,guideRow)}
+ $('guide').hidden=true;guideRow.querySelector('label').removeAttribute('for');guideRow.append($('snare'));
+ for(const id of ['loop','metro','snare'])$(id).classList.add('settings-button47');
+ const nav=$('settingsNav');for(const [id,title] of [['hintSettings47','Hints & display'],['experienceSettings47','Modded']]){const button=document.createElement('button');button.type='button';button.textContent=title;button.dataset.section=id;button.onclick=()=>{const body=$('settings').querySelector('.modal-body'),top=body.scrollTop+$(id).getBoundingClientRect().top-body.getBoundingClientRect().top-nav.getBoundingClientRect().height-14;body.scrollTo({top:Math.max(0,top),behavior:'instant'})};nav.prepend(button)}
+ syncMode();
+}
 function installUpdate46(){
- cleanLocalProfile46();const aliasChange=$('playerAlias').onchange,saveProfile=$('saveProfile').onclick;
+ installMenu47();cleanLocalProfile46();const aliasChange=$('playerAlias').onchange,saveProfile=$('saveProfile').onclick;
  $('playerAlias').onchange=event=>{try{filter46.validate(event.target.value,'name');event.target.setCustomValidity('');event.target.removeAttribute('aria-invalid');return aliasChange(event)}catch(error){event.target.setCustomValidity(error.message);event.target.setAttribute('aria-invalid','true');$('profileActionStatus').textContent=error.message}};
  $('saveProfile').onclick=event=>{if(validProfile46())return saveProfile(event)};
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ['Names and bios now filter profanity and slurs. Existing matching profile and leaderboard text is hidden.','Level, Intensity, and Tempo controls now sit directly below Accuracy, Hits, and Best streak.','New update notes open once after an update. This log shows only the current release.','Modded is on by default. Your saved toggle choice is preserved.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ['How to play has been removed. The Mobile/Computer switch now fills its spot in the header.','Modded and Hints & display are now inside Customize, with section shortcuts.','Loop, Metronome, and Snare controls now live under Playback & practice.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }
