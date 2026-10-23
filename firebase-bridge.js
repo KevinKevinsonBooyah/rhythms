@@ -13,7 +13,7 @@ if(firebaseConfig.apiKey.startsWith('PASTE_')||firebaseConfig.projectId.startsWi
   await new Promise((resolve,reject)=>{let unsubscribe=()=>{};unsubscribe=onAuthStateChanged(auth,()=>{unsubscribe();resolve()},reject)});
   window.rhythmsApiReady(createGateway({auth,db,sdk:{doc,getDoc,setDoc,collection,getDocs,runTransaction}}));
   const signIn=document.getElementById('signInLink'),signOutLink=document.getElementById('signOutLink');
-  signIn.addEventListener('click',async e=>{e.preventDefault();try{await signInWithPopup(auth,new GoogleAuthProvider());location.reload()}catch(error){document.getElementById('accountStatus').textContent='Google sign-in: '+(error.message||'Could not sign in.')}});
-  signOutLink.addEventListener('click',async e=>{e.preventDefault();try{await signOut(auth);location.reload()}catch(error){document.getElementById('accountStatus').textContent=error.message||'Could not sign out.'}});
+  signIn.addEventListener('click',async e=>{e.preventDefault();try{await signInWithPopup(auth,new GoogleAuthProvider());localStorage.removeItem('rhythms-bio-v1');location.reload()}catch(error){document.getElementById('accountStatus').textContent='Google sign-in: '+(error.message||'Could not sign in.')}});
+  signOutLink.addEventListener('click',async e=>{e.preventDefault();try{await signOut(auth);localStorage.removeItem('rhythms-bio-v1');document.getElementById('playerBio').value='';location.reload()}catch(error){document.getElementById('accountStatus').textContent=error.message||'Could not sign out.'}});
  }catch(error){window.rhythmsApiReady(unavailable)}
 }
