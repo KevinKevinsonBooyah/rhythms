@@ -1,0 +1,59 @@
+/* Modest color returns to the compact interface. */
+body[data-device] .top-actions #custom{background:#bda9dc!important;color:#271d3d!important;border-color:#d0c0ea!important}
+body[data-device] #play{background:#b2d9c8!important;color:#172f27!important;border-color:#c2e7d8!important}
+body[data-device] #generate{background:#3b3544;border-color:#9983b4;color:#e6daef}
+body[data-device] #stop{background:#4b333c!important;color:#f0d0da!important;border-color:#856270!important}
+body[data-device] .brand i{color:#c8b3e5}
+body[data-device] main>.stats>div:first-child b{color:#b4dfcf}
+body[data-device] main>.stats>div:nth-child(2) b{color:#bad5ef}
+body[data-device] main>.stats>div:nth-child(3) b{color:#d5bfea}
+body[data-device] .toolbar .control{border:1px solid #ac996150;background:#d4b7650a;border-radius:7px;padding:5px 7px}
+body[data-device=mobile] #mobileSliders44 .control{border:1px solid #ac996150;background:#d4b7650a;border-radius:7px;padding:3px 6px}
+body[data-device] .toolbar .control :is(.caption,label){color:#d8c996}
+body[data-device] .toolbar input[type=range]::-webkit-slider-runnable-track{background:#655b40}
+body[data-device] .toolbar input[type=range]::-webkit-slider-thumb{background:#ead799;box-shadow:0 0 0 1px #ac9554}
+body[data-device] .toolbar input[type=range]::-moz-range-track{background:#655b40}
+body[data-device] .toolbar input[type=range]::-moz-range-thumb{background:#ead799;box-shadow:0 0 0 1px #ac9554}
+/* Make room for all three account-button elements, including the owner crown. */
+body[data-device] #accountButton{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;justify-content:center;gap:5px;min-width:0;overflow:hidden;max-width:100%}
+body[data-device] #accountButton>span:last-of-type{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body[data-device] #accountMiniAvatar{display:grid;place-items:center;flex-shrink:0;overflow:hidden;aspect-ratio:1;min-width:0;margin:0;border-radius:50%}
+body[data-device] #accountMiniAvatar img{display:block;width:100%;height:100%;object-fit:cover;max-width:100%;border-radius:inherit}
+body[data-owner=true][data-device] #accountButton::after{font-size:14px;line-height:1;margin:0;filter:none;align-self:center;justify-self:center}
+body[data-device=mobile] #accountButton{gap:3px;padding-inline:4px}
+body[data-device=mobile][data-owner=true] #accountButton::after{font-size:12px}
+body[data-device=mobile] #accountButton>span:last-of-type{font-size:10px}
+.profile-hero>div{min-width:0;max-width:100%}
+.profile-avatar{flex-shrink:0;overflow:hidden}
+#profileTitle,#leaderProfileName{max-width:100%;overflow-wrap:anywhere;white-space:normal}
+#profileTitle.owner-profile,#leaderProfileName:has(.owner-name){display:flex;align-items:center;flex-wrap:wrap;gap:5px;line-height:1.5}
+#profileTitle .owner-name,#leaderProfileName .owner-name{min-width:0;overflow-wrap:anywhere}
+#profileTitle .owner-crown,#leaderProfileName .owner-crown{flex-shrink:0;margin:0}
+/* Only the scores scroll. All board controls remain outside this region. */
+body[data-device] #leaderboardPanel{overflow:visible;max-height:none;display:flex;flex-direction:column;min-width:0}
+#leaderboardScroll49{overflow-y:auto;overflow-x:hidden;min-height:0;max-height:calc(100dvh - 245px);overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#617084 transparent}
+#leaderboardScroll49 #boardRows{margin:0;padding:0}
+body[data-device=mobile] #leaderboardScroll49{max-height:150px}
+#kevinSpeech{min-height:86px}
+body[data-device=mobile] #kevinSpeech{min-height:74px}
+/* The perfect celebration is a dedicated moment, above the results dialog. */
+body[data-device] #perfectOverlay{position:fixed;inset:0;width:100%;height:100%;z-index:10000;display:grid;place-items:center;padding:20px;background:#0c141be8;backdrop-filter:blur(9px);pointer-events:auto;isolation:isolate;overflow:hidden}
+body[data-device] #perfectOverlay[hidden]{display:none!important}
+body[data-device] #perfectOverlay .perfect-content{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;max-width:520px;width:min(100%,520px);padding:28px 24px;border:1px solid #e7cc80;border-radius:24px;background:radial-gradient(ellipse at top,#8d71382e,transparent 62%),#172329;box-shadow:0 0 0 5px #e9ca7710,0 18px 65px #0008;animation:perfectArrival49 .65s cubic-bezier(.16,1,.3,1) both}
+body[data-device] #perfectOverlay .perfect-rays{position:absolute;inset:-70%;width:auto;height:auto;border-radius:50%;background:repeating-conic-gradient(from 0deg,#e4c1710d 0deg 8deg,transparent 8deg 24deg);animation:perfectOrbit49 35s linear infinite;z-index:-1;opacity:1}
+body[data-device] #perfectOverlay .perfect-medal49{width:96px;height:96px;margin-bottom:2px;filter:drop-shadow(0 0 20px #e2bc6750);animation:perfectMedal49 2.4s ease-in-out infinite}
+.perfect-medal49 svg{width:100%;height:100%;overflow:visible}
+.perfect-medal49 circle{fill:#9e7b2315;stroke:#e5c777;stroke-width:1.4}
+.perfect-medal49 circle+circle{stroke:#e5c77760;stroke-dasharray:2 4}
+.perfect-medal49 path{fill:#e6cb83;stroke:#fff0bf;stroke-width:1.5;stroke-linejoin:round}
+body[data-device] #perfectOverlay .perfect-kicker49{font:750 11px/1.3 system-ui;letter-spacing:.2em;color:#d8c692}
+body[data-device] #perfectOverlay strong{font:900 clamp(24px,5.5vw,38px)/1.1 system-ui;letter-spacing:.04em;color:#fff1c8;text-shadow:0 2px 20px #e7c37133}
+body[data-device] #perfectOverlay b{font:900 clamp(66px,15vw,98px)/1 system-ui;color:#c2efdd;letter-spacing:-.06em;filter:drop-shadow(0 0 18px #9dd9c12b)}
+body[data-device] #perfectOverlay .perfect-detail49{font-size:12px;color:#bfcdd3;line-height:1.5}
+body[data-device] #perfectOverlay small{margin-top:3px;padding:9px 16px;border:1px solid #a78e4e;border-radius:30px;background:#57482250;color:#ffe7aa;font-size:13px;font-weight:800;letter-spacing:.06em}
+body[data-device] #perfectOverlay button{margin-top:10px;min-height:44px;padding:10px 30px;background:#cce9dc;color:#193329;border:1px solid #def4e9;border-radius:9px;font-size:13px;font-weight:750;pointer-events:auto}
+@keyframes perfectArrival49{from{opacity:0;transform:translateY(20px) scale(.88)}to{opacity:1;transform:none}}
+@keyframes perfectOrbit49{to{transform:rotate(360deg)}}
+@keyframes perfectMedal49{50%{transform:translateY(-4px) rotate(3deg)}}
+@media(max-width:600px){body[data-device] #perfectOverlay{padding:14px}body[data-device] #perfectOverlay .perfect-content{padding:22px 14px;gap:8px}body[data-device] #perfectOverlay .perfect-medal49{width:76px;height:76px}body[data-device] #perfectOverlay .perfect-detail49{font-size:11px}}
+@media(prefers-reduced-motion:reduce){body[data-device] #perfectOverlay :is(.perfect-content,.perfect-rays,.perfect-medal49){animation:none}}
