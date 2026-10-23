@@ -1,0 +1,38 @@
+/* Update 44 */
+#mobileSliders44[hidden],#makerMarkHint44[hidden]{display:none!important}
+.maker-beta44{display:inline-flex;vertical-align:middle;align-items:center;margin-left:9px;padding:3px 7px;border-radius:6px;border:1px solid #b4d8c750;background:#a4d9bd15;color:#b8e6cb;font:750 10px/1.3 system-ui;letter-spacing:.06em;text-transform:uppercase}
+#makerMarkHint44{margin:9px 0 0;font-size:12px;color:#b8ddca;line-height:1.4}
+body[data-play-mode=maker] [data-maker-edit][data-maker-bar="0"]{stroke:#a4d9bd80;stroke-dasharray:3 4;fill:#a4d9bd0a}
+#makerWorkbench{min-width:0;overflow:hidden;border-radius:14px}
+#makerWorkbench .maker42-head{padding:7px 10px;gap:8px}
+#makerWorkbench .maker42-head strong{font-size:13px}
+#makerWorkbench .maker42-head span{font-size:10px}
+#makerWorkbench .maker42-row{padding:6px 8px;gap:5px}
+#makerWorkbench .maker42-row+.maker42-row{padding-top:0}
+#makerWorkbench .maker42-row button{min-height:34px;padding:5px 9px;font-size:11px}
+#makerWorkbench #maker42Prev,#makerWorkbench #maker42Next{font-size:21px;min-width:38px}
+#makerWorkbench #maker42Cursor{font-size:11px;min-width:95px}
+#makerWorkbench #maker42Values{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;padding:0 8px 7px}
+#makerWorkbench #maker42Values button{min-height:52px;padding:3px 2px;gap:1px}
+#makerWorkbench #maker42Values button svg{height:31px;width:38px}
+#makerWorkbench #maker42Values button small{font-size:9px;line-height:1.3}
+#makerWorkbench #makerEditorStatus{padding:0 10px 7px;font-size:10px;min-height:21px}
+#makerWorkbench #maker42Marks{width:auto;margin:0 0 0 auto;gap:5px}
+.maker44-mobile-help{display:none}
+body[data-device=mobile] main{display:flex;flex-direction:column;min-width:0;max-width:100%}
+body[data-device=mobile] main>*{min-width:0;max-width:100%}
+body[data-device=mobile] .score-card{width:100%;min-width:0}
+body[data-device=mobile] #mobileSliders44{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid #ffffff12;min-width:0}
+body[data-device=mobile] #mobileSliders44 .control{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:0 5px;min-width:0;padding:4px 9px 0;background:#ffffff04;border:1px solid #ffffff10;border-radius:10px}
+body[data-device=mobile] #mobileSliders44 .control[hidden]{display:none!important}
+body[data-device=mobile] #mobileSliders44 label{grid-column:1;grid-row:1;font-size:10px;letter-spacing:.07em}
+body[data-device=mobile] #mobileSliders44 :is(output,strong){grid-column:2;grid-row:1;font-size:15px;font-weight:750;color:#e8dcf7;text-align:right;line-height:1.4}
+body[data-device=mobile] #mobileSliders44 input[type=range]{grid-column:1/-1;grid-row:2;width:100%!important;min-width:0!important;height:35px;margin:0;touch-action:pan-y}
+body[data-device=mobile] #makerWorkbench .maker42-row button{min-height:40px;padding:5px 7px}
+body[data-device=mobile] #makerWorkbench #maker42Values{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:68px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scroll-snap-type:x proximity;padding:0 8px 7px;gap:5px}
+body[data-device=mobile] #makerWorkbench #maker42Values button{min-height:65px;scroll-snap-align:start}
+body[data-device=mobile] #makerWorkbench .maker42-head span{max-width:none;text-align:right}
+body[data-device=mobile] .maker44-desktop-help{display:none}
+body[data-device=mobile] .maker44-mobile-help{display:inline}
+body[data-device=mobile] #makerMarkHint44{font-size:11px;margin-top:8px}
+@media(min-width:720px){body[data-device=mobile] .title-controls{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;align-items:center}body[data-device=mobile] .title-controls h1{grid-column:1/-1}body[data-device=mobile] #mobileSliders44{margin:0;padding:0;border:0}}
