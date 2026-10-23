@@ -1,0 +1,94 @@
+/* The companion is part of the scene, without a status/control panel. */
+#companionDock,#petDialog{display:none!important}
+#petWorld52{height:78px;position:relative;overflow:hidden;background:linear-gradient(0deg,#15221b30,transparent);border-top:1px solid #b3cfba0a;contain:layout paint}
+#petWorld52[hidden]{display:none!important}
+#petWorld52::after{content:'';position:absolute;left:12px;right:12px;bottom:7px;height:1px;background:linear-gradient(90deg,transparent,#b9d3b922,transparent);pointer-events:none}
+body[data-device] #petWorld52 #practiceBuddy{position:absolute;inset:auto auto 3px 0;width:70px;height:70px;z-index:1;pointer-events:auto;cursor:pointer;filter:none;animation:none;will-change:transform;outline:none;touch-action:manipulation}
+#petWorld52 #practiceBuddy:focus-visible{border-radius:50%;outline:1px dashed #cce6ce;outline-offset:-8px}
+.pet-facing52{display:block;width:100%;height:100%;transform:scaleX(var(--pet-face52,1));transform-origin:center}
+#petWorld52 svg{display:block;width:100%;height:100%;overflow:visible}
+.pet-body52{transform-origin:50px 80px;animation:petBreathe52 3s ease-in-out infinite}
+.pet-eyes52{transform-origin:50px 43px;animation:petBlink52 7s infinite}
+.face-sad52{display:none}
+#practiceBuddy[data-mood=walk] .pet-foot52{transform-origin:50px 74px;animation:petStep52 .48s ease-in-out infinite alternate}
+#practiceBuddy[data-mood=walk] .foot-right52{animation-delay:-.48s}
+#practiceBuddy[data-mood=walk] .pet-body52{animation:petWalk52 .48s ease-in-out infinite}
+#practiceBuddy[data-mood=miss] .pet-body52{transform:rotate(-6deg) translateY(3px);animation:none}
+#practiceBuddy[data-mood=miss] .face-happy52{display:none}
+#practiceBuddy[data-mood=miss] .face-sad52{display:block}
+#practiceBuddy[data-mood=sleep] .pet-eyes52{transform:scaleY(.15);animation:none}
+#practiceBuddy[data-mood=sleep] .pet-body52{transform:translateY(4px) scaleY(.91)}
+#practiceBuddy[data-mood=cheer] .pet-body52,#practiceBuddy[data-mood=gold] .pet-body52,#practiceBuddy[data-mood=pet] .pet-body52{animation:petHop52 .5s ease-in-out}
+#practiceBuddy[data-mood=win] .pet-body52{animation:petDance52 .6s ease-in-out 3}
+#practiceBuddy[data-buddy=firefly] .pet-body52{animation:petHover52 2.2s ease-in-out infinite}
+.pet-bubble52{position:absolute;left:43px;top:-1px;color:#c5e8d1;font:700 14px system-ui;pointer-events:none;text-shadow:0 1px 2px #14231d;transform:rotate(5deg)}
+#practiceBuddy[data-mood=gold] .pet-bubble52,#practiceBuddy[data-mood=win] .pet-bubble52{color:#f3d28d}
+#practiceBuddy[data-mood=miss] .pet-bubble52{color:#c4b5bd}
+@keyframes petBreathe52{50%{transform:translateY(-1.5px)}}
+@keyframes petBlink52{0%,42%,46%,100%{transform:scaleY(1)}44%{transform:scaleY(.1)}}
+@keyframes petStep52{to{transform:rotate(14deg)}}
+@keyframes petWalk52{50%{transform:translateY(-2px) rotate(2deg)}}
+@keyframes petHop52{45%{transform:translateY(-10px) rotate(-5deg)}}
+@keyframes petDance52{25%{transform:translateY(-7px) rotate(-8deg)}75%{transform:translateY(-7px) rotate(8deg)}}
+@keyframes petHover52{50%{transform:translateY(-7px)}}
+/* Kevin's little timber workshop, lit by warm string lights. */
+#shopDialog .kevin-market{grid-template-columns:300px minmax(0,1fr);gap:20px}
+#shopDialog .kevin-booth{border:1px solid #9b8356;border-radius:17px;overflow:hidden;background:#283b34;box-shadow:0 12px 30px #0003,inset 0 0 0 4px #d8b5770b}
+#shopDialog .booth-sign{display:flex;align-items:center;justify-content:center;gap:15px;padding:17px 12px;background:linear-gradient(135deg,#354d42,#253b34);border-bottom:3px solid #c2a371;text-align:left;color:#f3e3bc;text-shadow:0 2px 0 #10221a}
+.booth-sign>svg{width:43px;height:43px;fill:none;stroke:#dbc38b;stroke-width:2;stroke-linejoin:round}
+.booth-sign>svg ellipse{fill:#dbc38b;stroke:none}
+.booth-sign strong{font:850 25px/1.1 system-ui;letter-spacing:.06em}
+#shopDialog .booth-sign small{display:block;font:650 9px/1.4 system-ui;letter-spacing:.19em;margin-top:6px;color:#c7c6a7}
+.booth-star52{color:#e0c07e;font-size:19px;text-shadow:none}
+#shopDialog .booth-awning{height:25px;background:repeating-linear-gradient(90deg,#72927b 0 24px,#e3d3a8 24px 48px);border-bottom:5px solid #c9b88f;box-shadow:0 5px 8px #0003;position:relative;z-index:2}
+#shopDialog .booth-scene{display:flex;flex-direction:column;position:relative;isolation:isolate;padding:17px 14px 0;background:radial-gradient(ellipse at 50% 0,#e3be6b24,transparent 60%),repeating-linear-gradient(90deg,#423c31 0 46px,#3e382e 46px 48px);gap:9px}
+.booth-wall52{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.8}
+#shopDialog #kevinSpeech{position:relative;z-index:2;margin:0;width:100%;min-height:84px;padding:13px 14px;border:1px solid #d4bd85;border-radius:12px;background:#ede0bd;color:#3d3528;font:500 13px/1.5 system-ui;box-shadow:0 4px 0 #18170d28}
+#shopDialog #kevinSpeech::after{border-top-color:#ede0bd}
+#shopDialog #kevinGuy{display:block;width:100%;height:254px;max-width:270px;margin:0 auto;order:initial;overflow:visible;flex-shrink:0}
+#shopDialog .kevin-idle{transform-origin:120px 150px;animation:kevinShift52 5s ease-in-out infinite}
+#shopDialog .talking .kevin-idle{animation:kevinGreet52 .38s ease-in-out infinite}
+#shopDialog .kevin-controls{padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:7px;border-top:1px solid #81957944;background:#2a3b32}
+#shopDialog .kevin-controls button{padding:9px 5px;min-height:38px;font-size:11px;background:#d5c19012;border:1px solid #91a28266;color:#eadfc2}
+@keyframes kevinShift52{50%{transform:rotate(-1.5deg) translateY(-1px)}}
+@keyframes kevinGreet52{50%{transform:rotate(1deg) translateY(-1.5px)}}
+/* New rooms and their previews use a few lightweight vector/CSS layers. */
+.room52{position:relative;width:100%;height:100%;overflow:hidden}
+.rooftop52{background:linear-gradient(#253449,#6b4e62 75%,#bd8870)}
+.sun52{position:absolute;left:64%;top:14%;width:34px;height:34px;border-radius:50%;background:#f4d8ad;box-shadow:0 0 22px #f4cba42b}
+.cloud52{position:absolute;left:14%;top:32%;width:80px;height:8px;background:#c4c0d340;border-radius:50%;animation:cloudDrift52 9s ease-in-out infinite alternate}
+.skyline52{position:absolute;inset:58% 0 0;background:#19262d;clip-path:polygon(0 40%,10% 40%,10% 10%,22% 10%,22% 54%,35% 54%,35% 0,45% 0,45% 37%,61% 37%,61% 16%,70% 16%,70% 51%,85% 51%,85% 25%,96% 25%,96% 70%,100% 70%,100% 100%,0 100%)}
+.reef52{background:linear-gradient(#264855,#122f3d)}
+.reef-light52{position:absolute;inset:-30% -10%;background:repeating-linear-gradient(115deg,transparent 0 36px,#83d4bb0c 40px 57px,transparent 63px 96px);animation:reefLight52 8s ease-in-out infinite alternate}
+.kelp52{position:absolute;inset:44% 0 0;background:#367c7050;clip-path:polygon(0 100%,4% 18%,8% 72%,12% 0,16% 90%,80% 100%,85% 10%,88% 80%,95% 0,100% 100%)}
+.fish52{position:absolute;left:55%;top:40%;color:#c9d9ae;font-size:35px;animation:fishSwim52 5s ease-in-out infinite alternate}
+.bubbles52{position:absolute;width:5px;height:5px;border:1px solid #b2e3d170;border-radius:50%;left:26%;top:70%;box-shadow:55px -25px 0 -1px #8ac3bf55,104px 8px 0 -1px #8ac3bf55;animation:reefBubble52 4s ease-in-out infinite}
+body[data-device][data-stage=rooftop]{background:linear-gradient(#24252e,#202027 45%,#22252b)}
+body[data-device][data-stage=rooftop] #viewport{background:linear-gradient(180deg,#253245,#32313e 75%,#5b414b)}
+body[data-device][data-stage=deepReef]{background:#17252c}
+body[data-device][data-stage=deepReef] #viewport{background:linear-gradient(170deg,#20404a,#1b303a 70%,#17332f)}
+body[data-stage=rooftop] #scoreStage::before,body[data-stage=deepReef] #scoreStage::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.38}
+body[data-stage=rooftop] #scoreStage::before{background:radial-gradient(circle at 82% 19%,#f3d5a8 0 13px,transparent 14px),linear-gradient(90deg,transparent 0 10%,#111e2b 10% 14%,transparent 14% 72%,#17212b 72% 78%,transparent 78%);background-size:auto,100% 38px;background-position:0 0,0 100%;background-repeat:no-repeat}
+body[data-stage=deepReef] #scoreStage::before{background:repeating-linear-gradient(115deg,transparent 0 70px,#9adfc110 80px 100px,transparent 115px 220px);animation:reefLight52 10s ease-in-out infinite alternate}
+body[data-stage=rooftop] #score,body[data-stage=deepReef] #score{position:relative;z-index:1}
+body[data-head=cometTail] #playhead line{stroke:#e1c3ff!important}
+body[data-head=cometTail] #playhead>rect{fill:#bfa6e1!important}
+.comet-preview52{width:100%;height:100%;background:#2e2940}
+.shop-swatch[data-preview=mochi],.shop-swatch[data-preview=pocketDragon]{background:radial-gradient(ellipse,#43534a,#242e30)!important}
+.shop-swatch[data-preview=mochi]>svg,.shop-swatch[data-preview=pocketDragon]>svg{height:100%;width:100px}
+@keyframes cloudDrift52{to{transform:translateX(30px)}}
+@keyframes reefLight52{to{transform:translateX(12px);opacity:.7}}
+@keyframes reefBubble52{to{transform:translateY(-30px);opacity:0}}
+@keyframes fishSwim52{to{transform:translateX(-25px)}}
+@media(max-width:1000px){#shopDialog .kevin-market{grid-template-columns:240px minmax(0,1fr);gap:14px}}
+@media(max-width:600px){#shopDialog .kevin-market{display:block}#shopDialog .booth-sign{padding:11px;gap:15px}#shopDialog .booth-sign strong{font-size:22px}#shopDialog .booth-sign small{font-size:8px}#shopDialog .booth-awning{height:20px}#shopDialog .booth-scene{display:grid;grid-template-columns:125px minmax(0,1fr);padding:12px 10px 0;gap:8px;align-items:center}#shopDialog #kevinGuy{grid-column:1;grid-row:1;height:164px;width:130px;margin:0 -5px}#shopDialog #kevinSpeech{grid-column:2;grid-row:1;min-height:85px;font-size:11px;padding:10px}#shopDialog .kevin-controls{padding:9px}#shopDialog .kevin-controls button{min-height:42px}}
+@media(prefers-reduced-motion:reduce){#petWorld52 *,#shopDialog .kevin-idle,#shopDialog .talking .kevin-idle,.room52 *,body[data-stage=deepReef] #scoreStage::before{animation:none!important}}
+body[data-stage=rooftop] #scoreStage::after{content:'';position:absolute;left:16%;top:24%;width:125px;height:7px;border-radius:50%;background:#d6c5d41a;pointer-events:none;z-index:0;animation:cloudDrift52 12s ease-in-out infinite alternate}
+body[data-stage=deepReef] #scoreStage::after{content:'';position:absolute;right:16%;bottom:25px;width:7px;height:7px;border:1px solid #b1dfd03b;border-radius:50%;box-shadow:40px -22px 0 -1px #9dd1c025,-58px 3px 0 -1px #9dd1c025;pointer-events:none;z-index:0;animation:reefBubble52 6s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){body[data-stage] #scoreStage::after{animation:none!important}}
+#roomArt52{position:absolute;inset:0;z-index:1;opacity:.48;pointer-events:none;overflow:hidden}
+#roomArt52>svg{display:block;width:100%;height:100%;pointer-events:none}
+body[data-stage=rooftop] #score,body[data-stage=deepReef] #score{z-index:2}
+body[data-device=mobile] #petWorld52{scroll-margin-bottom:115px}
+body[data-head=cometTail] #playhead [data-comet52] path:first-child{fill:#c3a8ed!important}
+body[data-head=cometTail] #playhead [data-comet52] path:nth-child(2){fill:#f4d7ff!important}
