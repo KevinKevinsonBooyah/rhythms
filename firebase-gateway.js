@@ -26,28 +26,35 @@ function cleanProfile(p){
 export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
  const {doc,getDoc,setDoc,collection,getDocs,runTransaction}=sdk;
  const ref=(path,id)=>doc(db,path,id);
- async function ownerId(){try{return (await getDoc(ref('meta','owner'))).data()?.uid||''}catch(e){return ''}}
+ async function ownerIds(){try{const data=(await getDoc(ref('meta','owner'))).data()||{};return new Set([data.uid,data.uid2,...(Array.isArray(data.uids)?data.uids:[])].filter(id=>typeof id==='string'&&id.length>0))}catch(e){return new Set()}}
  async function api(path,options={}){
   const url=new URL(path,location.origin),method=options.method||'GET',uid=auth.currentUser?.uid,user=auth.currentUser;
   try{
    if(url.pathname==='/api/me'&&method==='GET'){
-    if(uid){const profile=ref('profiles',uid),existing=await getDoc(profile);if(!existing.exists())await setDoc(profile,{alias:name(user.displayName),bio:'',avatar:'',picture:(user.photoURL||'').slice(0,500)})}
-    const owner=uid?await ownerId():'';
-    return json({user:uid?{signedIn:true,name:user.displayName||'Player',picture:user.photoURL||'',isOwner:owner===uid}:null});
+    let alias=null;
+    if(uid){
+     const profile=ref('profiles',uid),existing=await getDoc(profile);
+     alias=existing.exists()?name(existing.data()?.alias):name(user.displayName);
+     if(!existing.exists())await setDoc(profile,{alias,bio:'',avatar:'',picture:(user.photoURL||'').slice(0,500)});
+     const rank=await getDoc(ref('ranks',uid)),rankAlias=rank.data()?.alias;
+     if(rankAlias&&rankAlias!=='Player'&&alias===name(user.displayName)&&rankAlias!==alias){alias=name(rankAlias);await setDoc(profile,{alias},{merge:true})}
+    }
+    const owners=uid?await ownerIds():new Set();
+    return json({user:uid?{signedIn:true,name:alias,alias,picture:user.photoURL||'',isOwner:owners.has(uid)}:null});
    }
    if(url.pathname==='/api/leaderboard'&&method==='GET'){
     const mode=url.searchParams.get('mode')||'all';if(mode!=='all'&&!MODES.includes(mode))throw Error('Unknown mode');
-    const [snap,owner]=await Promise.all([getDocs(collection(db,'ranks')),ownerId()]);
+    const [snap,owners]=await Promise.all([getDocs(collection(db,'ranks')),ownerIds()]);
     const rows=[];snap.forEach(item=>{const data=item.data(),best=data.best||{};
      const score=mode==='all'?Object.values(best).reduce((n,v)=>n+Number(v?.score||0),0):Number(best[mode]?.score||0);
-     if(score>0)rows.push({alias:data.alias||'Player',score,profileId:item.id,isOwner:item.id===owner});
+     if(score>0)rows.push({alias:data.alias||'Player',score,profileId:item.id,isOwner:owners.has(item.id)});
     });rows.sort((a,b)=>b.score-a.score);return json({rows:rows.slice(0,100)});
    }
    if(url.pathname.startsWith('/api/profile/')&&url.pathname!=='/api/profile/me'&&method==='GET'){
     const id=url.pathname.slice('/api/profile/'.length);if(!/^[A-Za-z0-9_-]{5,128}$/.test(id))return json({error:'Profile unavailable'},404);
-    const [p,r,owner]=await Promise.all([getDoc(ref('profiles',id)),getDoc(ref('ranks',id)),ownerId()]);
+    const [p,r,owners]=await Promise.all([getDoc(ref('profiles',id)),getDoc(ref('ranks',id)),ownerIds()]);
     if(!r.exists())return json({error:'Profile unavailable'},404);const data=p.data()||{};
-    return json({alias:data.alias||r.data()?.alias||'Player',bio:data.bio||'',avatar:data.avatar||'',picture:data.picture||'',isOwner:owner===id});
+    return json({alias:data.alias||r.data()?.alias||'Player',bio:data.bio||'',avatar:data.avatar||'',picture:data.picture||'',isOwner:owners.has(id)});
    }
    if(!uid)return json({error:'Sign in required'},401);
    if(url.pathname==='/api/profile/me'&&method==='GET'){
@@ -70,7 +77,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
    }
    if(url.pathname==='/api/score'&&method==='POST'){
     const score=cleanScore(JSON.parse(options.body)),rank=ref('ranks',uid);
-    let bestScore=score.score;await runTransaction(db,async t=>{const old=await t.get(rank),data=old.data()||{best:{}},best={...(data.best||{})};
+    let bestScore=score.score;await runTransaction(db,async t=>{const profile=await t.get(ref('profiles',uid));if(profile.exists())score.alias=name(profile.data()?.alias);const old=await t.get(rank),data=old.data()||{best:{}},best={...(data.best||{})};
      if(!best[score.mode]||best[score.mode].score<score.score)best[score.mode]=score;
      bestScore=best[score.mode].score;t.set(rank,{alias:score.alias,best});
     });return json({score:bestScore});
