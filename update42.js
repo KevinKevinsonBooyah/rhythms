@@ -81,7 +81,7 @@ start=async function(which,continuation=false){
   queue.sort((a,b)=>a.time-b.time);qi=0;setupCountIn(m,countQ);starting=false;running=true;lastBeat='';
   document.body.dataset.makerPlaying=String(cfg.playMode==='maker');if(cfg.playMode==='maker')editorDecorateScore();
   $('play').disabled=false;$('listen').disabled=false;$('play').textContent='↻ Restart';$('listen').textContent=mode==='listen'?'Listening…':'Listen';
-  $('feedback').textContent=mode==='listen'?'Listen':'Ready';$('echoListenBanner').hidden=!(cfg.playMode==='echo'&&echoDemoActive);
+  $('feedback').textContent=mode==='listen'?'Listen':'Ready';$('echoListenBanner').hidden=true;
   if(!continuation)$('viewport').scrollLeft=0;setTransportPosition(notes[0].x,1);syncPauseControl();
   runClock42={time:audio.currentTime,at:performance.now()};lastPaint42=performance.now();
   clearInterval(interval);interval=setInterval(()=>{try{schedule()}catch(error){audioError42(error)}},25);schedule();animate();

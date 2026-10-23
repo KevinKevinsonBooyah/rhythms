@@ -939,6 +939,7 @@ function setupCountIn(m,countQ){
 }
 function fillCountIn(q,m,spq){
  const panel=$('countInPanel'),wrap=$('countInDots');
+ $('echoListenBanner').hidden=!(running&&cfg.playMode==='echo'&&echoDemoActive&&mode==='listen'&&q>=0);
  if(q>=0||countInState.quarters<=0){panel.hidden=true;return}
  panel.hidden=false;
  // q and the count-in duration both use quarter-note units.
