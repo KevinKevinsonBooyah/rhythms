@@ -1,5 +1,5 @@
 const MODES=['standard','endless','impossible','echo','polyrhythms','strange'];
-const SAVE_KEYS=['pulse-rhythm-v1','pulse-modded-v1','pulse-maker-v1','beatbounce-scores','beatbounce-alias','rhythms-avatar-v1','rhythms-bio-v1'];
+const SAVE_KEYS=['pulse-rhythm-v1','pulse-modded-v1','pulse-maker-v1','beatbounce-scores','beatbounce-alias','rhythms-avatar-v1'];
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const name=s=>typeof s==='string'?s.replace(/[\x00-\x1f]/g,'').trim().slice(0,20)||'Player':'Player';
 const conflict=()=>Object.assign(new Error('Another device changed your cloud save. Load it before saving again.'),{status:409});
