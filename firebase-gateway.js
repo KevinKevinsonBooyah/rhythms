@@ -24,7 +24,7 @@ function cleanScore(s){
  if(!s||!MODES.includes(s.mode))throw Error('Unknown mode');
  filter.validate(s.alias,'name');
  for(const key of ['hits','misses','extras','best','level'])if(!Number.isInteger(s[key])||s[key]<0||s[key]>100000)throw Error('Invalid score');
- if(s.level>12||s.best>s.hits||s.hits+s.misses<4)throw Error('Invalid run');
+ if(s.level>13||s.best>s.hits||s.hits+s.misses<4)throw Error('Invalid run');
  const score=Math.max(0,Math.round((s.hits*100+s.best*15)*(1+s.level*.1)*(s.hits/Math.max(1,s.hits+s.misses+s.extras))));
  return {mode:s.mode,score,alias:name(s.alias),level:s.level,accuracy:Math.round(s.hits/Math.max(1,s.hits+s.misses+s.extras)*10000)/100,date:new Date().toISOString()};
 }
@@ -103,7 +103,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
     const score=cleanScore(JSON.parse(options.body)),rank=ref('ranks',uid);
     let bestScore=score.score;await runTransaction(db,async t=>{const profile=await t.get(ref('profiles',uid));if(profile.exists())score.alias=name(profile.data()?.alias);const old=await t.get(rank),data=old.data()||{best:{}},best={...(data.best||{})};
      const prior=visibleBest(best)[score.mode];
-     if(!prior||prior.score<score.score){if(score.mode==='maker')best.strange={...score,mode:'strange',date:'maker:'+score.date};else best[score.mode]=score}
+     if(!prior||prior.score<score.score){if(score.mode==='maker')best.strange={...score,mode:'strange',date:'maker:'+score.date};else best[score.mode]=score.level===13?{...score,level:12,date:'level13:'+score.date}:score}
      bestScore=visibleBest(best)[score.mode].score;t.set(rank,{alias:score.alias,best});
     });return json({score:bestScore});
    }

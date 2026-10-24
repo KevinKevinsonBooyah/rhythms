@@ -241,7 +241,7 @@ function validateSave42(payload){
 }
 function hydrateSave42(payload,replace=true){
  validateSave42(payload);stop();for(const key of SAVE_KEYS){const value=payload.data[key];if(value!=null)localStorage.setItem(key,value);else if(replace)localStorage.removeItem(key)}
- const saved=JSON.parse(localStorage.getItem('pulse-rhythm-v1')||'{}');cfg={...defaultConfig42,...saved};cfg.level=Math.round(clamp(cfg.level,0,12));cfg.bpm=clamp(cfg.bpm,20,240);cfg.count=Math.round(clamp(cfg.count,0,2));cfg.standardBars=Math.round(clamp(cfg.standardBars||cfg.bars||8,1,32));cfg.bars=cfg.playMode==='endless'?8:cfg.playMode==='impossible'?cfg.standardBars+2:Math.round(clamp(cfg.bars||8,1,32));
+ const saved=JSON.parse(localStorage.getItem('pulse-rhythm-v1')||'{}');cfg={...defaultConfig42,...saved};cfg.level=Math.round(clamp(cfg.level,0,13));cfg.bpm=clamp(cfg.bpm,20,240);cfg.count=Math.round(clamp(cfg.count,0,2));cfg.standardBars=Math.round(clamp(cfg.standardBars||cfg.bars||8,1,32));cfg.bars=cfg.playMode==='endless'?Math.round(clamp(cfg.endlessBars||8,1,32)):cfg.playMode==='impossible'?cfg.standardBars+2:Math.round(clamp(cfg.bars||8,1,32));
  if(!['standard','endless','impossible','maker','echo','polyrhythms'].includes(cfg.playMode))cfg.playMode='standard';if(!meters.includes(cfg.meter))cfg.meter='4/4';cfg.manualBpm=clamp(cfg.manualBpm||cfg.bpm,20,240);cfg.polyA=Math.round(clamp(cfg.polyA||3,2,16));cfg.polyB=Math.round(clamp(cfg.polyB||2,2,16));cfg.polyKey0=cfg.polyKey0||'d';cfg.polyKey1=cfg.polyKey1||'k';isCustom=!!saved.custom;
  cfg.enabled=Array.isArray(saved.enabled)?saved.enabled.filter(id=>patterns.some(p=>p.id===id)):[];if(!cfg.enabled.length)cfg.enabled=patterns.filter(p=>!p.manual&&p.level<=cfg.level).map(p=>p.id);
  const stored=JSON.parse(localStorage.getItem('pulse-modded-v1')||'{}');economy={gold:Math.max(0,Math.floor(Number(stored.gold)||0)),owned:['classic','clean','stageNone','buddyNone','headNone'],theme:'classic',effect:'clean',stage:'stageNone',buddy:'buddyNone',head:'headNone',pets:stored.pets||{}};
@@ -270,7 +270,7 @@ initCloud=async function(){
   const bio=typeof profile.bio==='string'?profile.bio.slice(0,180):'';localStorage.setItem(BIO_KEY,bio);$('playerBio').value=bio;
   if(profile.avatar)localStorage.setItem('rhythms-avatar-v1',JSON.stringify({image:profile.avatar}));else localStorage.removeItem('rhythms-avatar-v1');
   window.rhythmsGoogleAvatar=cloudUser.picture||'';cloudReady42=true;cloudAuto=true;$('saveCloud').disabled=false;$('loadCloud').disabled=!state.save;$('saveProfile').disabled=false;$('accountStatus').textContent=state.save?'Signed in · cloud save ready':'Signed in · progress saves after runs';syncBioCount36();renderAvatar33();syncOwner35();
- }catch(error){cloudAuto=false;$('accountStatus').textContent='Cloud could not load. Local progress is available.';$('saveStatus').textContent=error.message;$('loadCloud').disabled=!cloudUser;$('saveProfile').disabled=!!cloudUser}
+ }catch(error){cloudAuto=false;$('accountStatus').textContent="Couldn't connect cloud! Try turning off a VPN or checking your connection.";$('saveStatus').textContent=error.message;$('loadCloud').disabled=!cloudUser;$('saveProfile').disabled=!!cloudUser}
  finally{cloudLoading42=false;$('play').disabled=$('listen').disabled=false;syncBioCount36();refreshLeaderboard()}
 };
 saveCloud=async function(auto=false){

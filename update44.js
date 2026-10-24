@@ -16,8 +16,8 @@ addFx=function(p){if(p.type==='coin'&&cfg.coinVisuals===false){creditHiddenCoins
 // All randomized tempos share a comfortable pulse range, regardless of the
 // printed beat unit. The manual tempo sliders retain their full range.
 function tempoPool44(meter,level=generatedLevel){
- const levelNumber=Math.round(clamp(level,0,12));if(levelNumber<9)return tempoSets[tempoKind(meter)];
- const [lo,hi]=({9:[64,100],10:[60,92],11:[56,84],12:[52,76]})[levelNumber],unit=meterInfo(meter).unit;
+ const levelNumber=Math.round(clamp(level,0,13));if(levelNumber<9)return tempoSets[tempoKind(meter)];
+ const [lo,hi]=({9:[64,100],10:[60,92],11:[56,84],12:[52,76],13:[72,112]})[levelNumber],unit=meterInfo(meter).unit;
  return [...new Set(Array.from({length:Math.floor((hi-lo)/4)+1},(_,i)=>Math.round(clamp((lo+i*4)/unit,30,240))))];
 }
 const pickTempoBefore44=pickTempo;
@@ -48,8 +48,7 @@ function syncUpdate44(){
  const maker=cfg.playMode==='maker';
  if(maker&&$('makerEditorStatus')?.textContent==='Choose a value, then tap the score.')$('makerEditorStatus').textContent='Choose a value to insert. Arrows move the cursor.';
  $('makerMarkHint44')?.toggleAttribute('hidden',!maker||running||starting);
- if(maker&&!$('makerBeta44')){const beta=document.createElement('span');beta.id='makerBeta44';beta.className='maker-beta44';beta.textContent='Beta';$('title').append(beta)}
- else if(!maker)$('makerBeta44')?.remove();
+ $('makerBeta44')?.remove();
 }
 const syncBefore44=sync;sync=function(){const result=syncBefore44();syncUpdate44();return result};
 const syncModeBefore44=syncMode;syncMode=function(){const result=syncModeBefore44();syncUpdate44();return result};
