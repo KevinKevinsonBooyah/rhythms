@@ -32,3 +32,5 @@ body[data-wide53=true] #sharedHeader58,body[data-wide53=true] #viewerSocial58{di
 @media(max-width:600px){#sharedHeader58{flex-wrap:wrap;padding:12px;gap:10px}#sharedHeader58>div{order:3;flex-basis:100%}#sharedDiscuss58{margin-left:auto}.viewer-social-head58{align-items:stretch;flex-direction:column}.viewer-social-head58 .community-ratings57{min-width:0}#viewerSocial58{padding:14px}#leaderProfileAvatar{width:112px!important;height:112px!important;min-width:112px;min-height:112px}.saved-banner56{padding-left:57%!important}.saved-bio56{padding-left:57%!important}.saved-banner56 img{width:62%!important}.public-card57{padding-left:54%!important}.public-card57>img{width:60%!important}.public-card57 strong{font-size:14px}}
 
 body[data-shared-view=true] #makerMarkHint44{display:none!important}
+
+#sharedHeader58{order:1}#viewerSocial58{order:8}
