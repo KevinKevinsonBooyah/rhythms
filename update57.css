@@ -15,14 +15,15 @@ body[data-wide53=true][data-play-mode=maker] #viewport{overflow-x:auto!important
 .display-profile57{margin:0 12px 10px;border-color:#749a82;background:#244638;color:#d1f4d5;min-height:40px;font-size:12px}.remove-public57{margin:-3px 12px 10px;min-height:34px;font-size:11px;background:transparent;color:#afbec5}
 #savedStatus57,#communityError57{font-size:12px;color:#eed09d;line-height:1.6;overflow-wrap:anywhere}#savedStatus57:empty,#communityError57:empty{display:none}
 [data-profile-ring]{position:relative;isolation:isolate;box-sizing:border-box}[data-profile-ring]:not([data-profile-ring=""]){border:4px solid transparent!important;background-origin:border-box;background-clip:border-box;padding:2px}
+[data-profile-ring]:not([data-profile-ring=""]){border-radius:50%!important}
 [data-profile-ring] img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
-[data-profile-ring=ringSun]{background:conic-gradient(#f3dc98,#a97b3c,#fff0ad,#ae8141,#f3dc98)!important;box-shadow:0 0 0 2px #e7c36c55,inset 0 0 0 2px #f7e6aa}
+[data-profile-ring=ringSun]{background:radial-gradient(circle,#243b3f 0 60%,transparent 63%),conic-gradient(#f3dc98,#a97b3c,#fff0ad,#ae8141,#f3dc98)!important;box-shadow:0 0 0 2px #e7c36c55,inset 0 0 0 2px #f7e6aa}
 [data-profile-ring=ringSun]::after{content:'✦';position:absolute;right:-1px;bottom:-4px;font-size:20px;color:#ffe7a3;text-shadow:0 1px 3px #322817;pointer-events:none}
-[data-profile-ring=ringMoon]{background:linear-gradient(140deg,#d0e8ff,#647baf,#e2efff)!important;box-shadow:0 0 0 2px #9db9e36b,inset 0 0 0 2px #e3edff}
-[data-profile-ring=ringRose]{background:conic-gradient(from 20deg,#ffdeea,#ac658e,#f5b9d7,#a57299,#ffdeea)!important;box-shadow:0 0 0 2px #c383a655}
-[data-profile-ring=ringPrism]{background:conic-gradient(#ffdd9d,#a2e3c8,#abc5ff,#e3b1ef,#ffdd9d)!important;box-shadow:0 0 0 2px #d3b7e344}
+[data-profile-ring=ringMoon]{background:radial-gradient(circle,#243b3f 0 60%,transparent 63%),linear-gradient(140deg,#d0e8ff,#647baf,#e2efff)!important;box-shadow:0 0 0 2px #9db9e36b,inset 0 0 0 2px #e3edff}
+[data-profile-ring=ringRose]{background:radial-gradient(circle,#243b3f 0 60%,transparent 63%),conic-gradient(from 20deg,#ffdeea,#ac658e,#f5b9d7,#a57299,#ffdeea)!important;box-shadow:0 0 0 2px #c383a655}
+[data-profile-ring=ringPrism]{background:radial-gradient(circle,#243b3f 0 60%,transparent 63%),conic-gradient(#ffdd9d,#a2e3c8,#abc5ff,#e3b1ef,#ffdd9d)!important;box-shadow:0 0 0 2px #d3b7e344}
 [data-profile-ring=ringPrism]::after{content:'◆';position:absolute;top:-10px;left:calc(50% - 7px);font-size:14px;color:#eed8ff;text-shadow:0 1px 3px #211c34;pointer-events:none}
-[data-profile-ring=ringVine]{background:repeating-conic-gradient(#c5e4b0 0 13deg,#4c8361 13deg 26deg)!important;box-shadow:0 0 0 2px #81ad7355}
+[data-profile-ring=ringVine]{background:radial-gradient(circle,#243b3f 0 60%,transparent 63%),repeating-conic-gradient(#c5e4b0 0 13deg,#4c8361 13deg 26deg)!important;box-shadow:0 0 0 2px #81ad7355}
 [data-profile-gradient=gradientDawn]{background:linear-gradient(120deg,#704958,#b6786b 55%,#6e608b)!important}
 [data-profile-gradient=gradientTide]{background:linear-gradient(120deg,#1c3559,#286a78 60%,#407c6e)!important}
 [data-profile-gradient=gradientBerry]{background:radial-gradient(ellipse at 85% 0,#b77cbd66,transparent 65%),linear-gradient(120deg,#49304c,#5f4379)!important}
