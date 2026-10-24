@@ -2,7 +2,7 @@ let publicList57=[],publicOwner57=null,communityCurrent57=null,communityRequest5
 const rhythmSchema57=import('./rhythm-schema57.js?v=58');
 const socialMessage57=e=>e?.message||'Could not connect. Try again.';
 function communityApi57(path,method='GET',body){return cloudFetch42('/api/community/'+path,{method,...(body?{headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})})}
-function styleProfile57(root,avatar,s={}){if(root)root.dataset.profileGradient=profileCatalog57.some(i=>i.id===s.gradient&&i.category==='gradient')?s.gradient:'';if(avatar)avatar.dataset.profileRing=profileCatalog57.some(i=>i.id===s.ring&&i.category==='ring')?s.ring:''}
+function styleProfile57(root,avatar,s={}){if(root)root.dataset.profileGradient=profileCatalog57.some(i=>i.id===s.gradient&&i.category==='gradient')?s.gradient:'';if(root?.classList.contains('leader-profile-body'))$('leaderProfileDialog').dataset.profileGradient=root.dataset.profileGradient;if(avatar)avatar.dataset.profileRing=profileCatalog57.some(i=>i.id===s.ring&&i.category==='ring')?s.ring:''}
 function ownStyle57(){return{ring:economy.owned.includes(economy.ring)?economy.ring:'',gradient:economy.owned.includes(economy.gradient)?economy.gradient:''}}
 function syncProfileStyle57(){const s=ownStyle57();styleProfile57(document.querySelector('#accountDialog .profile-hero'),$('profileAvatar'),s);styleProfile57($('accountButton'),$('accountMiniAvatar'),s)}
 const avatarBefore57=renderAvatar33;renderAvatar33=function(){const r=avatarBefore57();syncProfileStyle57();return r};

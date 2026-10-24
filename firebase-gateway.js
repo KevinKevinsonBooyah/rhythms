@@ -1,4 +1,4 @@
-import './release.js?v=59';
+import './release.js?v=60';
 import {createSocial57} from './social-gateway57.js?v=59';
 import {appendBackup55,readHistory55,listBackups55,unpackBackup55} from './save-history55.js';
 import './text-filter.js?v=46';
@@ -68,7 +68,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
    if(url.pathname.startsWith('/api/profile/')&&url.pathname!=='/api/profile/me'&&method==='GET'){
     const id=url.pathname.slice('/api/profile/'.length);if(!/^[A-Za-z0-9_-]{5,128}$/.test(id))return json({error:'Profile unavailable'},404);
     const [p,r,owners]=await Promise.all([getDoc(ref('profiles',id)),getDoc(ref('ranks',id)),ownerIds()]);
-    if(!r.exists())return json({error:'Profile unavailable'},404);const data=p.data()||{};
+    if(!p.exists()&&!r.exists())return json({error:'Profile unavailable'},404);const data=p.data()||{};
     return json({alias:name(data.alias||r.data()?.alias),bio:filter.publicBio(data.bio),avatar:data.avatar||'',picture:data.picture||'',isOwner:owners.has(id)});
    }
    if(!uid)return json({error:'Sign in required'},401);
