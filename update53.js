@@ -11,6 +11,7 @@ function syncWideScore53(){
 function syncWideButton53(){
  const pause=$('widePause54');if(pause){pause.hidden=!wideActive53||(!running&&!breaking);pause.disabled=$('pauseRound').disabled||starting||resumeCounting;pause.textContent=$('pauseRound').textContent;pause.setAttribute('aria-pressed',breaking?String(countdownPaused):$('pauseRound').getAttribute('aria-pressed')||'false')}
  if(!wideActive53)return;
+ if(cfg.playMode==='maker'&&pause){pause.hidden=false;pause.disabled=!running||starting||resumeCounting}
  const label=starting?'Loading…':breaking?'Next round…':resumeCounting?'Resuming…':roundPaused?'Tap to resume':running?(mode==='listen'?'Listen first':'Tap the rhythm'):'Tap to start';
  $('tap').querySelector('span:first-child').textContent=label;
  const disabled=starting||breaking||resumeCounting||running&&mode==='listen';$('tap').disabled=disabled;

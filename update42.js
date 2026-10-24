@@ -246,7 +246,7 @@ function hydrateSave42(payload,replace=true){
  cfg.enabled=Array.isArray(saved.enabled)?saved.enabled.filter(id=>patterns.some(p=>p.id===id)):[];if(!cfg.enabled.length)cfg.enabled=patterns.filter(p=>!p.manual&&p.level<=cfg.level).map(p=>p.id);
  const stored=JSON.parse(localStorage.getItem('pulse-modded-v1')||'{}');economy={gold:Math.max(0,Math.floor(Number(stored.gold)||0)),owned:['classic','clean','stageNone','buddyNone','headNone'],theme:'classic',effect:'clean',stage:'stageNone',buddy:'buddyNone',head:'headNone',pets:stored.pets||{}};
  for(const id of Array.isArray(stored.owned)?stored.owned:[])if(catalog.some(c=>c.id===id)&&!economy.owned.includes(id))economy.owned.push(id);
- for(const category of ['theme','effect','stage','buddy','head'])if(economy.owned.includes(stored[category]))economy[category]=stored[category];
+ for(const category of ['theme','effect','stage','buddy','head','ring','gradient'])if(economy.owned.includes(stored[category]))economy[category]=stored[category];
  const maker=JSON.parse(localStorage.getItem('pulse-maker-v1')||'{}');makerBars=Array.isArray(maker.bars)?maker.bars:[];makerMarks42=maker.marks||{};makerCursor42={bar:0,index:0};editorHistory.length=editorFuture.length=0;
  const scores=JSON.parse(localStorage.getItem('beatbounce-scores')||'[]');localScores=Array.isArray(scores)?scores:[];endlessRound=1;generate();renderAvatar33();
 }

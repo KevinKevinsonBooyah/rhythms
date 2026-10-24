@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46='56',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46='57',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ['Rhythm Maker: clickable rests, no Beta badge, and five named saved rhythm slots with bios, first-measure banners, loading, overwrite and delete. Saved rhythms travel with your cloud save.','Kevin has 40 extra lines, louder letter sounds, and gentle booth motion. Mobile tap buttons have a livelier response.','Celebrations appear above results and the perfect screen. Perfect runs add extra confetti, corner trumpets with banners and a short synthesized fanfare.','Level 13 builds on Level 12 with faster tempos, unusual meters and more frequent changes. Endless now lets you choose bars per score.','Leaving mobile landscape pauses your run. Echo controls its snare automatically. Count-in dropdown spacing and active Customize section tracking are fixed.','Startup shows Loading while progress syncs. Cloud connection errors include connection/VPN help. Profile pictures now have a draggable crop-and-zoom editor.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ["A smaller Endless countdown bubble. Backups keep the newest 50 and automatically delete older saves.", "Rhythm Maker has full-size rest selections and landscape practice controls, including Exit and Pause.", "Saved rhythms show the pattern on the left and the title and bio on the right.", "Display saved rhythms on profiles for others to play, comment, and rate. Profile sharing needs the Update 57 Firebase rules.", "Kevin now sells five profile rings and five profile gradients. They save with your progress."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }

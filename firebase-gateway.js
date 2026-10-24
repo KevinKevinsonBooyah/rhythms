@@ -1,3 +1,4 @@
+import {createSocial57} from './social-gateway57.js';
 import {appendBackup55,readHistory55,listBackups55,unpackBackup55} from './save-history55.js';
 import './text-filter.js?v=46';
 const filter=globalThis.rhythmsTextFilter;
@@ -36,11 +37,13 @@ function cleanProfile(p){
 }
 export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
  const {doc,getDoc,setDoc,collection,getDocs,runTransaction}=sdk;
+ const social57=createSocial57({auth,db,sdk});
  const ref=(path,id)=>doc(db,path,id);
  async function ownerIds(){try{const data=(await getDoc(ref('meta','owner'))).data()||{};return new Set([data.uid,data.uid2,...(Array.isArray(data.uids)?data.uids:[])].filter(id=>typeof id==='string'&&id.length>0))}catch(e){return new Set()}}
  async function api(path,options={}){
   const url=new URL(path,location.origin),method=options.method||'GET',uid=auth.currentUser?.uid,user=auth.currentUser;
   try{
+   if(url.pathname.startsWith('/api/community/'))return await social57(url,options);
    if(url.pathname==='/api/me'&&method==='GET'){
     let alias=null;
     if(uid){
