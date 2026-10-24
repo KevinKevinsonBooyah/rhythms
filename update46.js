@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46=globalThis.RHYTHMS_RELEASE||'58',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46=globalThis.RHYTHMS_RELEASE||'59',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ["Shared rhythms open in a dedicated viewer with the author\u2019s title, inline likes, dislikes and comments. Your modes and Maker draft return when you leave.", "Profile rings stay circular without clipping. Leaderboard profile pictures are larger, and your profile has a Rhythms tab.", "Rhythm cards give the pattern more room, with titles and details farther right. Remove rings or gradients separately.", "Verified owners receive 100,000 test coins once per update, synced through cloud saves.", "Maker supports tempo changes at individual notes and meter changes at barlines. Trailing rests make room for smaller meters."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ["Post multiple comments with profile pictures and like or dislike comments in both rhythm views.", "Rhythm ratings now include a like/dislike bar. Authors can rate their own rhythms too.", "Play rhythm opens the viewer without starting playback. Created rhythms remain free of gold and silver notes.", "Your equipped gradient appears on the Profile button, and the shop is available in Impossible.", "Comment features and author ratings require the Update 59 Firebase rules."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }

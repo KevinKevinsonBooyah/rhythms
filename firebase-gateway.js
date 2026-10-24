@@ -1,5 +1,5 @@
-import './release.js?v=58';
-import {createSocial57} from './social-gateway57.js?v=58';
+import './release.js?v=59';
+import {createSocial57} from './social-gateway57.js?v=59';
 import {appendBackup55,readHistory55,listBackups55,unpackBackup55} from './save-history55.js';
 import './text-filter.js?v=46';
 const filter=globalThis.rhythmsTextFilter;

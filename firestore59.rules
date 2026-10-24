@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) { return request.auth != null && request.auth.uid == uid; }
+    function aliasOk(alias) { return alias is string && alias.size() > 0 && alias.size() <= 20; }
+    function scoreOk(s, mode) {
+      return s is map
+        && s.keys().hasOnly(['mode','score','alias','level','accuracy','date'])
+        && s.mode == mode && s.score is int && s.score >= 0 && s.score <= 100000000
+        && aliasOk(s.alias) && s.level is int && s.level >= 0 && s.level <= 13
+        && s.accuracy is number && s.accuracy >= 0 && s.accuracy <= 100
+        && s.date is string && s.date.size() <= 40;
+    }
+    function validBest(b) {
+      return b is map && b.keys().hasOnly(['standard','endless','impossible','echo','polyrhythms','strange','maker'])
+        && (!('standard' in b) || scoreOk(b.standard,'standard'))
+        && (!('endless' in b) || scoreOk(b.endless,'endless'))
+        && (!('impossible' in b) || scoreOk(b.impossible,'impossible'))
+        && (!('echo' in b) || scoreOk(b.echo,'echo'))
+        && (!('polyrhythms' in b) || scoreOk(b.polyrhythms,'polyrhythms'))
+        && (!('maker' in b) || scoreOk(b.maker,'maker'))
+        && (!('strange' in b) || scoreOk(b.strange,'strange'));
+    }
+    match /meta/{id} {
+      allow read: if id == 'owner';
+      allow write: if false; // Set meta/owner from the Firebase console.
+    }
+    match /saves/{uid} {
+      allow read: if owns(uid);
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['payload','etag'])
+        && request.resource.data.etag is string && request.resource.data.etag.size() <= 80
+        && request.resource.data.payload is map
+        && request.resource.data.payload.format == 'beatbounce-save'
+        && request.resource.data.payload.version == 1
+        && request.resource.data.payload.data is map
+        && request.resource.data.payload.data.keys().hasOnly(['pulse-rhythm-v1','pulse-modded-v1','pulse-maker-v1','beatbounce-scores','beatbounce-alias','rhythms-avatar-v1','rhythms-bio-v1']);
+    }
+    match /profiles/{uid} {
+      allow read: if true;
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['alias','bio','avatar','picture'])
+        && aliasOk(request.resource.data.alias)
+        && request.resource.data.bio is string && request.resource.data.bio.size() <= 180
+        && request.resource.data.avatar is string && request.resource.data.avatar.size() <= 120000
+        && request.resource.data.picture is string && request.resource.data.picture.size() <= 500;
+    }
+    match /ranks/{uid} {
+      allow read: if true;
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['alias','best'])
+        && aliasOk(request.resource.data.alias)
+        && validBest(request.resource.data.best);
+    }
+
+    // Update 57: only explicitly shared rhythms are public.
+    match /profileStyles/{uid} {
+      allow read: if true;
+      allow create, update: if owns(uid)
+        && request.resource.data.keys().hasOnly(['ring','gradient'])
+        && request.resource.data.ring in ['', 'ringSun','ringMoon','ringRose','ringPrism','ringVine']
+        && request.resource.data.gradient in ['', 'gradientDawn','gradientTide','gradientBerry','gradientForest','gradientAurora'];
+    }
+    match /publicRhythms/{rhythmId} {
+      function rhythmExists() { return exists(/databases/$(database)/documents/publicRhythms/$(rhythmId)); }
+      function rhythmData() { return get(/databases/$(database)/documents/publicRhythms/$(rhythmId)).data; }
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && request.resource.data.keys().hasOnly(['ownerId','slot','rhythmKey','name','bio','composition','barCount','banner','updatedAt'])
+        && request.resource.data.ownerId == request.auth.uid
+        && request.resource.data.slot is int && request.resource.data.slot >= 0 && request.resource.data.slot <= 4
+        && rhythmId == request.auth.uid + '_' + string(request.resource.data.slot)
+        && request.resource.data.rhythmKey is string && request.resource.data.rhythmKey.size() <= 80
+        && aliasOk(request.resource.data.name)
+        && request.resource.data.bio is string && request.resource.data.bio.size() <= 180
+        && request.resource.data.composition is string && request.resource.data.composition.size() <= 120000
+        && request.resource.data.barCount is int && request.resource.data.barCount >= 1 && request.resource.data.barCount <= 32
+        && request.resource.data.banner is string && request.resource.data.banner.size() <= 80000
+        && request.resource.data.updatedAt is number;
+      allow delete: if owns(resource.data.ownerId);
+      match /votes/{uid} {
+        allow read: if rhythmExists();
+        allow create, update: if owns(uid) && rhythmExists() 
+          && request.resource.data.keys().hasOnly(['value','rhythmKey'])
+          && request.resource.data.rhythmKey == rhythmData().rhythmKey
+          && request.resource.data.value in [-1,1];
+        allow delete: if owns(uid);
+      }
+      match /comments/{commentId} {
+        allow read: if rhythmExists();
+        allow create: if request.auth != null && rhythmExists()
+          && request.resource.data.keys().hasOnly(['authorId','alias','body','updatedAt','rhythmKey'])
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.rhythmKey == rhythmData().rhythmKey
+          && aliasOk(request.resource.data.alias)
+          && request.resource.data.body is string && request.resource.data.body.size() > 0 && request.resource.data.body.size() <= 180
+          && request.resource.data.updatedAt is number;
+        allow delete: if request.auth != null && (resource.data.get('authorId', commentId) == request.auth.uid || (rhythmExists() && request.auth.uid == rhythmData().ownerId));
+      }
+      match /commentVotes/{voteId} {
+        allow read: if rhythmExists();
+        allow create, update: if request.auth != null && rhythmExists()
+          && request.resource.data.keys().hasOnly(['commentId','userId','value','rhythmKey'])
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.commentId is string
+          && voteId == request.resource.data.commentId + '_' + request.auth.uid
+          && request.resource.data.value in [-1,1]
+          && request.resource.data.rhythmKey == rhythmData().rhythmKey
+          && exists(/databases/$(database)/documents/publicRhythms/$(rhythmId)/comments/$(request.resource.data.commentId))
+          && get(/databases/$(database)/documents/publicRhythms/$(rhythmId)/comments/$(request.resource.data.commentId)).data.rhythmKey == rhythmData().rhythmKey;
+        allow delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      }
+    }
+  }
+}
