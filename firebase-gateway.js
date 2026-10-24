@@ -1,3 +1,4 @@
+import {appendBackup55,readHistory55,listBackups55,unpackBackup55} from './save-history55.js';
 import './text-filter.js?v=46';
 const filter=globalThis.rhythmsTextFilter;
 const MODES=['standard','endless','impossible','echo','polyrhythms','maker'];
@@ -81,9 +82,22 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
    if(url.pathname==='/api/save'&&method==='PUT'){
     const body=JSON.parse(options.body),save=cleanSave(body.save);
     if(body.etag!==null&&typeof body.etag!=='string')throw Error('Invalid save version');
-    const etag=randomId();await runTransaction(db,async t=>{const r=ref('saves',uid),s=await t.get(r);
-     if((s.exists()?s.data()?.etag:null)!==body.etag)throw conflict();t.set(r,{payload:save,etag});
+    const etag=typeof body.requestId==='string'&&/^[A-Za-z0-9_-]{8,80}$/.test(body.requestId)?body.requestId:randomId(),at=new Date().toISOString(),reason=['run','manual','before-restore','recovery'].includes(body.reason)?body.reason:'manual';
+    await runTransaction(db,async t=>{const r=ref('saves',uid),s=await t.get(r),old=s.data();if(old?.etag===etag)return;
+     if((s.exists()?old?.etag:null)!==body.etag)throw conflict();const payload=await appendBackup55(old?.payload,save,{id:etag,at,reason,legacyId:old?.etag});t.set(r,{payload,etag});
     });return json({etag});
+   }
+   if(url.pathname==='/api/backups'&&method==='GET'){
+    const s=await getDoc(ref('saves',uid)),data=s.data();return json({backups:listBackups55(data?.payload,data?.etag),limit:50,etag:data?.etag||null});
+   }
+   const backupMatch=url.pathname.match(/^\/api\/backups\/([A-Za-z0-9_-]{8,80})(\/restore)?$/);
+   if(backupMatch){
+    const id=backupMatch[1];
+    if(!backupMatch[2]&&method==='GET'){const s=await getDoc(ref('saves',uid)),payload=s.data()?.payload,history=readHistory55(payload),item=history.items.find(i=>i.id===id);if(!item&&s.data()?.etag===id&&payload)return json({backup:{id,at:payload.savedAt55||null,reason:'previous'},save:cleanSave(payload),etag:id});if(!item)return json({error:'Backup unavailable'},404);return json({backup:{id:item.id,at:item.at,reason:item.reason,meta:item.meta},save:cleanSave(await unpackBackup55(item,history)),etag:s.data()?.etag||null})}
+    if(backupMatch[2]&&method==='POST'){
+     const body=JSON.parse(options.body),before=cleanSave(body.before),etag=randomId(),beforeId=randomId(),at=new Date().toISOString();let save;
+     await runTransaction(db,async t=>{const r=ref('saves',uid),s=await t.get(r),old=s.data();if(!old||old.etag!==body.etag)throw conflict();const history=readHistory55(old.payload),item=history.items.find(i=>i.id===id);if(id==='device-recovery')save=cleanSave(body.recovery);else if(item)save=cleanSave(await unpackBackup55(item,history));else if(id===old.etag)save=cleanSave(old.payload);else throw Error('Backup unavailable');const protectedPayload=await appendBackup55(old.payload,before,{id:beforeId,at,reason:'before-restore',legacyId:old.etag});const payload=await appendBackup55(protectedPayload,save,{id:etag,at,reason:'restored',legacyId:beforeId});t.set(r,{payload,etag})});return json({save,etag});
+    }
    }
    if(url.pathname==='/api/score'&&method==='POST'){
     const score=cleanScore(JSON.parse(options.body)),rank=ref('ranks',uid);

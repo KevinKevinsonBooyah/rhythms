@@ -281,7 +281,7 @@ saveCloud=async function(auto=false){
  finally{cloudBusy=false;if(cloudRetry42){cloudRetry42=false;queueCloudSave42()}}
 };
 function queueCloudSave42(){clearTimeout(cloudSaveTimer42);cloudSaveTimer42=setTimeout(()=>saveCloud(true),1600)}
-const recordBefore42=recordRunResult;recordRunResult=function(reward,completed){recordBefore42(reward,completed);if(mode==='practice'&&(completed||cfg.playMode==='endless'))queueCloudSave42()};
+const recordBefore42=recordRunResult;recordRunResult=function(reward,completed){recordBefore42(reward,completed)};
 window.rhythmsBeforeSignIn42=()=>localBackup42(localStorage.getItem(ownerKey42));
 window.rhythmsBeforeSignOut42=async()=>{localBackup42(localStorage.getItem(ownerKey42));await saveCloud(true)};
 window.rhythmsAfterSignOut42=()=>{const guest=localStorage.getItem('rhythms-backup42-guest');for(const key of SAVE_KEYS)localStorage.removeItem(key);if(guest){const data=JSON.parse(guest).data;for(const key of SAVE_KEYS)if(data[key]!=null)localStorage.setItem(key,data[key])}localStorage.removeItem(BIO_KEY);localStorage.setItem(ownerKey42,'guest')};

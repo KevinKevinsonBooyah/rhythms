@@ -1,0 +1,28 @@
+body[data-device] .brand i{transform:translateY(-7px)}
+.profile-tabs55{display:flex;gap:5px;padding:4px;border:1px solid #475760;border-radius:10px;background:#142027;margin:0 0 16px}
+.profile-tabs55 button{flex:1;padding:10px 14px;border:0;background:transparent;color:#aabcc7;font-weight:750;min-height:42px;border-radius:7px}
+.profile-tabs55 button[aria-selected=true]{background:#344a52;color:#e5f7ee;box-shadow:0 1px 3px #0003}
+#profileDetails55[hidden],#backupsPanel55[hidden],#backupReview55[hidden]{display:none!important}
+.backups-head55{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.backups-head55 h3{margin:0 0 5px;color:#e2f0e9;font-size:18px}.backups-head55 p{margin:0;font-size:12px;color:#acbec6;line-height:1.5}
+#backupsRefresh55{min-height:42px;flex-shrink:0}
+#backupStatus55{font-size:12px;color:#c1d9cb;min-height:18px;line-height:1.5;margin:12px 0}
+#backupList55{list-style:none;padding:0;margin:0;display:grid;gap:8px;max-height:340px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#backupList55 li{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px;border:1px solid #52636c66;border-radius:10px;background:#18262d}
+#backupList55 li>div{display:grid;gap:4px;min-width:0}
+#backupList55 strong{font-size:13px;color:#e2ece8;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#backupList55 strong small{font-size:9px;text-transform:uppercase;color:#b8e3ca;border:1px solid #5d876e;border-radius:4px;padding:2px 4px;letter-spacing:.05em}
+#backupList55 :is(time,span){font-size:11px;color:#a9bdc8;line-height:1.5;overflow-wrap:anywhere}
+#backupList55 b{font-size:12px;color:#eed296}#backupList55 button{flex-shrink:0;min-height:42px;font-size:12px;padding:8px 12px}
+#backupList55 .backup-empty55{font-size:13px;color:#b4c4cd;line-height:1.5;padding:20px 14px}
+#backupReview55{border:1px solid #bba36d;border-radius:12px;background:#3b362530;margin-top:14px;padding:14px}
+#backupReview55>div:first-child{display:flex;gap:6px 16px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+#backupReviewTitle55{font-size:14px;color:#f4dfaa}#backupReviewDate55{font-size:11px;color:#bcc9ce}
+#backupReview55 p{font-size:12px;line-height:1.6;margin:10px 0;color:#c0cdd1}#backupReviewStats55{color:#e0eae4!important}
+#backupReview55 .row{justify-content:flex-end;margin-top:12px;gap:8px}
+.backup-limit55{display:block;font-size:10px;color:#91a5b0;line-height:1.6;margin-top:14px}
+body[data-device=mobile] #accountDialog .modal-body{padding:14px}
+body[data-device=mobile] #backupList55{max-height:42dvh}
+body[data-device=mobile] #backupList55 li{padding:10px;gap:8px}
+body[data-device=mobile] #backupReview55 .row button{min-height:44px}
+@media(prefers-reduced-motion:reduce){#backupReview55{scroll-behavior:auto}}

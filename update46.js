@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46='54',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46='55',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ['Landscape results now stay in the focused view, with a compact accuracy, stats, and rewards layout.','A visible Pause / Resume button is available at the top right in landscape, including the usual resume countdown.','Landscape gold and silver rewards have larger coins, a wider burst, a longer fade, and a clearer +amount label. Particle counts stay limited and the coin visuals setting is respected.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ['The note beside Rhythms sits a little higher.','Every completed practice run now queues its own cloud save and dated backup, including Endless rounds. Failed requests retry without silently replacing a newer save from another device.','Profile now has a Backups tab: preview and restore up to 50 recent cloud versions. Restoring protects your current progress first. Large saves may retain fewer versions to fit cloud storage.']){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }
