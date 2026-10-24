@@ -1,4 +1,5 @@
-import {createSocial57} from './social-gateway57.js';
+import './release.js?v=58';
+import {createSocial57} from './social-gateway57.js?v=58';
 import {appendBackup55,readHistory55,listBackups55,unpackBackup55} from './save-history55.js';
 import './text-filter.js?v=46';
 const filter=globalThis.rhythmsTextFilter;
@@ -79,6 +80,18 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
     const rank=ref('ranks',uid);await runTransaction(db,async t=>{const old=await t.get(rank);if(old.exists())t.set(rank,{...old.data(),alias:data.alias})});
     return json({saved:true});
    }
+   if(url.pathname==='/api/owner-grant'&&method==='POST'){
+    if(!(await ownerIds()).has(uid))return json({error:'Owner access required'},403);
+    const body=JSON.parse(options.body),incoming=cleanSave(body.save),release=globalThis.RHYTHMS_RELEASE,newTag=randomId();let output;
+    await runTransaction(db,async t=>{const r=ref('saves',uid),snap=await t.get(r),old=snap.data(),ledger=old?.payload?.ownerRewards58||{};
+     if(ledger[release]){output={granted:false,release};return}
+     if((old?.etag||null)!==body.etag)throw conflict();
+     const economy=JSON.parse(incoming.data['pulse-modded-v1']||'{}');economy.gold=Math.max(0,Math.floor(Number(economy.gold)||0))+100000;
+     const save={...incoming,data:{...incoming.data,'pulse-modded-v1':JSON.stringify(economy)}};
+     const at=new Date().toISOString(),payload=await appendBackup55(old?.payload,save,{id:newTag,at,reason:'manual',legacyId:old?.etag});
+     payload.ownerRewards58={...ledger,[release]:at};t.set(r,{payload,etag:newTag});output={granted:true,release,amount:100000,save:cleanSave(payload),etag:newTag};
+    });return json(output);
+   }
    if(url.pathname==='/api/save'&&method==='GET'){
     const s=await getDoc(ref('saves',uid));return json({save:s.data()?.payload||null,etag:s.data()?.etag||null});
    }
@@ -87,7 +100,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
     if(body.etag!==null&&typeof body.etag!=='string')throw Error('Invalid save version');
     const etag=typeof body.requestId==='string'&&/^[A-Za-z0-9_-]{8,80}$/.test(body.requestId)?body.requestId:randomId(),at=new Date().toISOString(),reason=['run','manual','before-restore','recovery'].includes(body.reason)?body.reason:'manual';
     await runTransaction(db,async t=>{const r=ref('saves',uid),s=await t.get(r),old=s.data();if(old?.etag===etag)return;
-     if((s.exists()?old?.etag:null)!==body.etag)throw conflict();const payload=await appendBackup55(old?.payload,save,{id:etag,at,reason,legacyId:old?.etag});t.set(r,{payload,etag});
+     if((s.exists()?old?.etag:null)!==body.etag)throw conflict();const payload=await appendBackup55(old?.payload,save,{id:etag,at,reason,legacyId:old?.etag});payload.ownerRewards58=old?.payload?.ownerRewards58||{};t.set(r,{payload,etag});
     });return json({etag});
    }
    if(url.pathname==='/api/backups'&&method==='GET'){
@@ -99,7 +112,7 @@ export function createGateway({auth,db,sdk,randomId=()=>crypto.randomUUID()}){
     if(!backupMatch[2]&&method==='GET'){const s=await getDoc(ref('saves',uid)),payload=s.data()?.payload,history=readHistory55(payload),item=history.items.find(i=>i.id===id);if(!item&&s.data()?.etag===id&&payload)return json({backup:{id,at:payload.savedAt55||null,reason:'previous'},save:cleanSave(payload),etag:id});if(!item)return json({error:'Backup unavailable'},404);return json({backup:{id:item.id,at:item.at,reason:item.reason,meta:item.meta},save:cleanSave(await unpackBackup55(item,history)),etag:s.data()?.etag||null})}
     if(backupMatch[2]&&method==='POST'){
      const body=JSON.parse(options.body),before=cleanSave(body.before),etag=randomId(),beforeId=randomId(),at=new Date().toISOString();let save;
-     await runTransaction(db,async t=>{const r=ref('saves',uid),s=await t.get(r),old=s.data();if(!old||old.etag!==body.etag)throw conflict();const history=readHistory55(old.payload),item=history.items.find(i=>i.id===id);if(id==='device-recovery')save=cleanSave(body.recovery);else if(item)save=cleanSave(await unpackBackup55(item,history));else if(id===old.etag)save=cleanSave(old.payload);else throw Error('Backup unavailable');const protectedPayload=await appendBackup55(old.payload,before,{id:beforeId,at,reason:'before-restore',legacyId:old.etag});const payload=await appendBackup55(protectedPayload,save,{id:etag,at,reason:'restored',legacyId:beforeId});t.set(r,{payload,etag})});return json({save,etag});
+     await runTransaction(db,async t=>{const r=ref('saves',uid),s=await t.get(r),old=s.data();if(!old||old.etag!==body.etag)throw conflict();const history=readHistory55(old.payload),item=history.items.find(i=>i.id===id);if(id==='device-recovery')save=cleanSave(body.recovery);else if(item)save=cleanSave(await unpackBackup55(item,history));else if(id===old.etag)save=cleanSave(old.payload);else throw Error('Backup unavailable');const protectedPayload=await appendBackup55(old.payload,before,{id:beforeId,at,reason:'before-restore',legacyId:old.etag});const payload=await appendBackup55(protectedPayload,save,{id:etag,at,reason:'restored',legacyId:beforeId});payload.ownerRewards58=old?.payload?.ownerRewards58||{};t.set(r,{payload,etag})});return json({save,etag});
     }
    }
    if(url.pathname==='/api/score'&&method==='POST'){

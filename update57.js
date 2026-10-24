@@ -1,5 +1,5 @@
 let publicList57=[],publicOwner57=null,communityCurrent57=null,communityRequest57=0,profileRequest57=0;
-const rhythmSchema57=import('./rhythm-schema57.js');
+const rhythmSchema57=import('./rhythm-schema57.js?v=58');
 const socialMessage57=e=>e?.message||'Could not connect. Try again.';
 function communityApi57(path,method='GET',body){return cloudFetch42('/api/community/'+path,{method,...(body?{headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{})})}
 function styleProfile57(root,avatar,s={}){if(root)root.dataset.profileGradient=profileCatalog57.some(i=>i.id===s.gradient&&i.category==='gradient')?s.gradient:'';if(avatar)avatar.dataset.profileRing=profileCatalog57.some(i=>i.id===s.ring&&i.category==='ring')?s.ring:''}

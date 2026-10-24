@@ -1,5 +1,5 @@
 import './text-filter.js?v=46';
-import {cleanRhythm57} from './rhythm-schema57.js';
+import {cleanRhythm57} from './rhythm-schema57.js?v=58';
 const filter=globalThis.rhythmsTextFilter,validId=s=>typeof s==='string'&&/^[A-Za-z0-9_-]{5,180}$/.test(s);
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 export function createSocial57({auth,db,sdk}){
