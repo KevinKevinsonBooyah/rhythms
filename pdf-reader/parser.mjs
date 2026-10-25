@@ -11,8 +11,9 @@ export function linesFromItems(items) {
 function metadata(lines,fallback) {
   const text=lines.map(l=>l.text).join('\n');
   const value=(name)=>text.match(new RegExp('(?:^|\\n|\\s)'+name+'\\s*:\\s*(.*?)(?=\\s+(?:Performer|Symbol|Label|Printed|Page)\\s*:|\\n|$)','i'))?.[1]?.trim()||'';
-  const movement=lines.find(l=>/\b(?:Mvt\.?|Movement)\s*\d+/i.test(l.text)&&!/^Printed/i.test(l.text))?.text||fallback;
-  return {instrument:value('Performer'),symbol:value('Symbol'),label:value('Label'),movement};
+  const movementLine=lines.find(l=>/\b(?:Mvt\.?|Movement)\s*\d+/i.test(l.text)&&!/^Printed/i.test(l.text))?.text||fallback;
+  const movement=movementLine.replace(/^.*?Label\s*:\s*\S+\s*/i,'').trim()||fallback;
+  return {instrument:value('Performer'),symbol:value('Symbol'),label:value('Label').split(/\s/)[0],movement};
 }
 export function parsePage(items,{source='PDF',page=1,method='pdf',fallback='Unassigned movement'}={}) {
   const lines=linesFromItems(items),meta=metadata(lines,fallback),text=lines.map(l=>l.text).join('\n');
@@ -24,7 +25,7 @@ export function parsePage(items,{source='PDF',page=1,method='pdf',fallback='Unas
     if(xs.every(x=>Number.isFinite(x))) columns=xs;
   }
   const rows=[]; const blocks=[]; let current=null;
-  const footerY=lines.find(l=>/Performer\s*:/i.test(l.text))?.y??Infinity;
+  const footerY=lines.find(l=>l.y>(header?.y??-Infinity)&&/Performer\s*:/i.test(l.text))?.y??Infinity;
   if(columns) {
     const bounds=columns.map((x,i)=>i?x-3:-Infinity);
     for(const l of lines){
