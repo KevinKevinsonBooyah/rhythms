@@ -1,5 +1,5 @@
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows} from './core.mjs';
-import {extractPDF} from './parser.mjs';
+import {extractPDF} from './parser.mjs?v=3';
 import {Field} from './field.mjs';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
