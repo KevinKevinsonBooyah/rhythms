@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Read PDFs · Simple PDF Reader</title>
+  <style>
+    /* Layout only. Everything else uses your browser's default appearance. */
+    #fileInput, .file-list-wrap, .reader { display: none; }
+    .file-list-wrap.visible, .reader.visible { display: block; }
+    .uploaded-file { margin: 0.5em 0; }
+    .uploaded-file.selected .file-select { font-weight: bold; }
+    .file-list-head { margin-top: 1em; }
+    #textOutput { max-height: 400px; overflow: auto; }
+    .page-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Read PDFs</h1>
+    <p class="lead">Upload up to 3 PDFs. View each file's text or listen to them out loud.</p>
+    <section class="card" aria-label="PDF reader">
+      <div class="dropzone" id="dropZone">
+        <button type="button" id="pickButton" class="big-button">READ PDFS</button>
+        <input id="fileInput" type="file" accept=".pdf,application/pdf" multiple aria-label="Choose up to three PDF files" />
+        <p class="help" id="dropHelp">Choose up to 3 PDFs at once, add them one at a time, or drag and drop them here.</p>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite">Choose up to 3 PDFs to get started.</p>
+      <div class="file-list-wrap" id="fileListWrap">
+        <div class="file-list-head"><p class="heading">Uploaded PDFs</p><span class="count" id="fileCount">0 / 3</span></div>
+        <div class="file-list" id="fileList" aria-label="Uploaded PDF files"></div>
+      </div>
+      <div class="reader" id="reader">
+        <div class="file-row">
+          <div>
+            <div class="file-name" id="fileName"></div>
+            <div class="file-meta" id="fileMeta"></div>
+          </div>
+        </div>
+        <div class="controls">
+          <button type="button" class="small-button" id="playButton">Read selected</button>
+          <button type="button" class="small-button" id="readAllButton">Read all PDFs</button>
+          <button type="button" class="small-button" id="pauseButton" disabled>Pause</button>
+          <button type="button" class="small-button" id="stopButton" disabled>Stop</button>
+          <label class="speed" for="speedInput">Speed
+            <input type="range" id="speedInput" min="0.5" max="2" step="0.25" value="1" />
+            <strong id="speedValue">1×</strong>
+          </label>
+        </div>
+        <p class="heading extracted-heading">Extracted text</p>
+        <div class="text-output" id="textOutput" aria-label="Selected PDF contents"></div>
+      </div>
+    </section>
+    <p class="privacy">Your PDFs are processed in your browser, not uploaded to a server. Internet is needed to load the PDF-reading library. Image-only/scanned PDFs need OCR and aren't supported in this prototype.</p>
+  </main>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    (() => {
+      'use strict';
+      const $ = (id) => document.getElementById(id);
+      const MAX_FILES = 3;
+      const pickButton = $('pickButton');
+      const fileInput = $('fileInput');
+      const dropZone = $('dropZone');
+      const dropHelp = $('dropHelp');
+      const status = $('status');
+      const fileListWrap = $('fileListWrap');
+      const fileList = $('fileList');
+      const fileCount = $('fileCount');
+      const reader = $('reader');
+      const textOutput = $('textOutput');
+      const playButton = $('playButton');
+      const readAllButton = $('readAllButton');
+      const pauseButton = $('pauseButton');
+      const stopButton = $('stopButton');
+      const speedInput = $('speedInput');
+      const speedValue = $('speedValue');
+
+      let entries = [];
+      let selectedId = null;
+      let nextId = 1;
+      let loading = false;
+      let speechQueue = [];
+      let nextChunk = 0;
+      let currentReadingName = '';
+      let session = 0;
+      let speaking = false;
+      let paused = false;
+      const hasSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+      const synth = hasSpeech ? window.speechSynthesis : null;
+
+      function setStatus(message) { status.textContent = message; }
+      function selectedEntry() { return entries.find(entry => entry.id === selectedId); }
+      function readyEntries() { return entries.filter(entry => entry.state === 'ready' && entry.text); }
+      function updateButtons() {
+        const selected = selectedEntry();
+        playButton.disabled = loading || !hasSpeech || !selected || !selected.text;
+        readAllButton.disabled = loading || !hasSpeech || readyEntries().length === 0;
+        pauseButton.disabled = !speaking;
+        pauseButton.textContent = paused ? 'Resume' : 'Pause';
+        stopButton.disabled = !speaking;
+        pickButton.disabled = loading || entries.length >= MAX_FILES;
+        dropZone.classList.toggle('full', entries.length >= MAX_FILES);
+        dropHelp.textContent = entries.length >= MAX_FILES
+          ? '3 / 3 PDFs added. Remove one to upload another.'
+          : `You can add ${MAX_FILES - entries.length} more PDF${MAX_FILES - entries.length === 1 ? '' : 's'}. Select several at once or drag and drop.`;
+        fileCount.textContent = `${entries.length} / ${MAX_FILES}`;
+      }
+      function renderList() {
+        fileList.replaceChildren();
+        fileListWrap.classList.toggle('visible', entries.length > 0);
+        for (const entry of entries) {
+          const row = document.createElement('div');
+          row.className = 'uploaded-file' + (entry.id === selectedId ? ' selected' : '');
+          const select = document.createElement('button');
+          select.type = 'button';
+          select.className = 'file-select';
+          select.setAttribute('aria-pressed', String(entry.id === selectedId));
+          const name = document.createElement('span');
+          name.className = 'list-name';
+          name.textContent = entry.file.name;
+          const meta = document.createElement('span');
+          meta.className = 'list-meta';
+          meta.textContent = entry.state === 'loading' ? 'Extracting text…'
+            : entry.state === 'error' ? 'Could not read this PDF'
+            : `${entry.pageCount} page${entry.pageCount === 1 ? '' : 's'} · ${entry.text ? 'Ready to read' : 'No selectable text'}`;
+          select.append(name, meta);
+          select.addEventListener('click', () => {
+            selectedId = entry.id;
+            renderList();
+            renderSelected();
+            updateButtons();
+          });
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'remove-button';
+          remove.textContent = 'Remove';
+          remove.setAttribute('aria-label', `Remove ${entry.file.name}`);
+          remove.disabled = loading;
+          remove.addEventListener('click', () => {
+            if (loading) return;
+            stopReading(true);
+            entries = entries.filter(item => item.id !== entry.id);
+            if (selectedId === entry.id) selectedId = entries.length ? entries[0].id : null;
+            renderList();
+            renderSelected();
+            updateButtons();
+            setStatus(entries.length ? `${entry.file.name} removed. You can add another PDF.` : 'All PDFs removed. Choose up to 3 PDFs to get started.');
+          });
+          row.append(select, remove);
+          fileList.append(row);
+        }
+        updateButtons();
+      }
+      function renderSelected() {
+        const entry = selectedEntry();
+        reader.classList.toggle('visible', !!entry);
+        textOutput.replaceChildren();
+        if (!entry) return;
+        $('fileName').textContent = entry.file.name;
+        $('fileMeta').textContent = entry.state === 'loading' ? 'Processing PDF…'
+          : entry.state === 'error' ? entry.error
+          : `${entry.pageCount} page${entry.pageCount === 1 ? '' : 's'} · ${entry.text.length.toLocaleString()} characters`;
+        if (entry.state !== 'ready') return;
+        entry.pages.forEach((text, index) => {
+          const section = document.createElement('section');
+          section.className = 'page';
+          const label = document.createElement('div');
+          label.className = 'page-title';
+          label.textContent = `PAGE ${index + 1}`;
+          const paragraph = document.createElement('pre');
+          paragraph.className = 'page-text';
+          paragraph.textContent = text || '(No selectable text on this page)';
+          section.append(label, paragraph);
+          textOutput.append(section);
+        });
+      }
+      function stopReading(silent = false) {
+        session++;
+        speaking = false;
+        paused = false;
+        currentReadingName = '';
+        nextChunk = 0;
+        speechQueue = [];
+        if (hasSpeech) synth.cancel();
+        updateButtons();
+        if (!silent && readyEntries().length) setStatus('Stopped. Choose Read selected or Read all PDFs to start again.');
+      }
+      // Small chunks help avoid speech cutting out on very long documents.
+      function splitForSpeech(text, limit = 180) {
+        const words = text.replace(/\s+/g, ' ').trim().split(' ');
+        const result = [];
+        let buffer = '';
+        for (const word of words) {
+          if (!word) continue;
+          if (buffer && buffer.length + word.length + 1 > limit) {
+            result.push(buffer);
+            buffer = word;
+          } else {
+            buffer += (buffer ? ' ' : '') + word;
+          }
+        }
+        if (buffer) result.push(buffer);
+        return result;
+      }
+      function speakNext(token) {
+        if (token !== session || !speaking || paused) return;
+        if (nextChunk >= speechQueue.length) {
+          speaking = false;
+          updateButtons();
+          setStatus('Finished reading aloud.');
+          return;
+        }
+        const part = speechQueue[nextChunk++];
+        if (part.name !== currentReadingName) {
+          currentReadingName = part.name;
+          setStatus(`Reading ${part.name} aloud…`);
+        }
+        const utterance = new SpeechSynthesisUtterance(part.text);
+        utterance.rate = Number(speedInput.value);
+        utterance.lang = document.documentElement.lang;
+        utterance.onend = () => speakNext(token);
+        utterance.onerror = (event) => {
+          if (token !== session || event.error === 'interrupted' || event.error === 'canceled') return;
+          speaking = false;
+          paused = false;
+          updateButtons();
+          setStatus('Audio playback had an issue. Please try again.');
+        };
+        synth.speak(utterance);
+      }
+      function readEntries(filesToRead) {
+        if (!hasSpeech) {
+          setStatus('This browser does not support text-to-speech. You can still read the text shown below.');
+          return;
+        }
+        stopReading(true);
+        speechQueue = filesToRead.filter(entry => entry && entry.text)
+          .flatMap(entry => splitForSpeech(entry.text).map(text => ({text, name: entry.file.name})));
+        if (!speechQueue.length) { setStatus('No readable text found in these PDFs.'); return; }
+        speaking = true;
+        updateButtons();
+        speakNext(session);
+      }
+      async function extractPDF(entry) {
+        const pdf = await pdfjsLib.getDocument({data: new Uint8Array(await entry.file.arrayBuffer())}).promise;
+        const pages = [];
+        try {
+          for (let num = 1; num <= pdf.numPages; num++) {
+            setStatus(`Extracting ${entry.file.name}: page ${num} of ${pdf.numPages}…`);
+            const page = await pdf.getPage(num);
+            const items = (await page.getTextContent()).items;
+            let text = '';
+            for (const item of items) {
+              if (typeof item.str !== 'string') continue;
+              text += item.str;
+              text += item.hasEOL ? '\n' : ' ';
+            }
+            pages.push(text.replace(/[ \t]+\n/g, '\n').trim());
+          }
+        } finally {
+          await pdf.destroy();
+        }
+        entry.pages = pages;
+        entry.pageCount = pages.length;
+        entry.text = pages.filter(Boolean).join('\n\n');
+        entry.state = 'ready';
+      }
+      async function addFiles(fileListLike) {
+        const files = Array.from(fileListLike || []);
+        if (!files.length) return;
+        if (loading) { setStatus('Finish processing the current PDFs before adding more.'); return; }
+        const slotsLeft = MAX_FILES - entries.length;
+        if (files.length > slotsLeft) {
+          setStatus(slotsLeft === 0
+            ? '3 PDFs is the maximum. Remove a PDF before adding another.'
+            : `You can add only ${slotsLeft} more PDF${slotsLeft === 1 ? '' : 's'}. You selected ${files.length}.`);
+          return;
+        }
+        if (files.some(file => !(file.type === 'application/pdf' || /\.pdf$/i.test(file.name)))) {
+          setStatus('Please select only PDF files.');
+          return;
+        }
+        const newEntries = files.map(file => ({id: nextId++, file, state: 'loading', pages: [], pageCount: 0, text: '', error: ''}));
+        // Stop the current reading and make the first newly added PDF visible.
+        stopReading(true);
+        loading = true;
+        entries.push(...newEntries);
+        selectedId = newEntries[0].id;
+        renderList();
+        renderSelected();
+        try {
+          if (!window.pdfjsLib) throw new Error('PDF library did not load. Connect to the internet and reload.');
+          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          for (const entry of newEntries) {
+            try {
+              await extractPDF(entry);
+            } catch (error) {
+              console.error('PDF reader error:', error);
+              entry.state = 'error';
+              entry.error = error && error.name === 'PasswordException'
+                ? 'This PDF is password-protected. Please select an unlocked PDF.'
+                : 'Could not read this PDF. ' + (error.message || 'Invalid or damaged PDF.');
+            }
+            renderList();
+            renderSelected();
+          }
+        } catch (error) {
+          for (const entry of newEntries) { entry.state = 'error'; entry.error = error.message || 'Unable to read PDF.'; }
+        } finally {
+          loading = false;
+          renderList();
+          renderSelected();
+        }
+        const successful = newEntries.filter(entry => entry.state === 'ready' && entry.text);
+        if (successful.length) {
+          selectedId = successful[0].id;
+          renderList();
+          renderSelected();
+          setStatus(`${successful.length} PDF${successful.length === 1 ? '' : 's'} ready. Starting audio…`);
+          // As with a single PDF, try playing automatically; the controls also work if autoplay is blocked.
+          readEntries(successful);
+        } else {
+          setStatus(newEntries.some(entry => entry.state === 'error')
+            ? 'One or more PDFs could not be opened. Remove them and try again.'
+            : 'No selectable text found. Scanned PDFs require OCR.');
+        }
+      }
+      pickButton.addEventListener('click', () => { if (!pickButton.disabled) fileInput.click(); });
+      fileInput.addEventListener('change', () => {
+        const files = Array.from(fileInput.files || []);
+        fileInput.value = ''; // Allows selecting the same file again later.
+        addFiles(files);
+      });
+      ['dragenter','dragover'].forEach(name => dropZone.addEventListener(name, event => {
+        event.preventDefault();
+        dropZone.classList.add('dragging');
+      }));
+      ['dragleave','drop'].forEach(name => dropZone.addEventListener(name, event => {
+        event.preventDefault();
+        dropZone.classList.remove('dragging');
+      }));
+      dropZone.addEventListener('drop', event => {
+        if (event.dataTransfer) addFiles(event.dataTransfer.files);
+      });
+      playButton.addEventListener('click', () => readEntries([selectedEntry()]));
+      readAllButton.addEventListener('click', () => readEntries(readyEntries()));
+      pauseButton.addEventListener('click', () => {
+        if (!speaking) return;
+        if (paused) {
+          paused = false;
+          synth.resume();
+          setStatus(`Reading ${currentReadingName} aloud…`);
+        } else {
+          paused = true;
+          synth.pause();
+          setStatus('Paused. Press Resume to continue.');
+        }
+        updateButtons();
+      });
+      stopButton.addEventListener('click', () => stopReading());
+      speedInput.addEventListener('input', () => {
+        speedValue.textContent = `${Number(speedInput.value).toLocaleString()}×`;
+      });
+      window.addEventListener('beforeunload', () => stopReading(true));
+      updateButtons();
+    })();
+  </script>
+</body>
+</html>
