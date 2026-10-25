@@ -1,6 +1,6 @@
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows} from './core.mjs';
 import {extractPDF} from './parser.mjs?v=3';
-import {Field} from './field.mjs';
+import {Field} from './field.mjs?v=4';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const $=id=>document.getElementById(id),make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
