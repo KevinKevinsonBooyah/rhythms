@@ -45,3 +45,9 @@ Verified in Chromium: 108-page PDF, 648 extracted rows, 108 unique performers, o
 - Paths are linear estimates. No curved choreography, body orientation, or follow-the-leader behavior is inferred.
 - Metronome clicks are animation-scheduled, not a sample-accurate professional audio sequencer. Dots follow audio time and therefore do not accumulate separate-clock drift.
 - Latest evergreen browsers are recommended. Audio format decoding and fullscreen availability depend on browser support. MP3/WAV are the safest choices; M4A is browser-dependent.
+
+## Audio cutter and timing calibration update
+
+Add audio now opens a waveform editor. Every current movement gets a start/end range that must be confirmed before applying. Drag the gold handles, use Start here/End here at the preview playhead, or enter seconds. Nonoverlapping ranges create separate PCM WAV blobs for each movement and persist in browser saves. Initial equal divisions are only suggestions. Times and delay controls become relative to the resulting clip; previous sync markers are cleared when replacing clips.
+
+Hide labels/Show labels is an explicit button above the field. New Atlantis template projects use a 12.7-second Movement 1 offset. The first transition still uses the source card's 40 counts; default tempo is not a verified Atlantis tempo. Audio & timing includes a preview and set alignment control that creates count/audio sync anchors, allowing real recording timings to replace the default tempo-derived durations. Pausing during the initial wait now resumes the remaining wait rather than restarting it.
