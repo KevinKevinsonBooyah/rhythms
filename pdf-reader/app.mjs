@@ -52,7 +52,7 @@ async function play(){if(playing){pause();return;}const m=current();if(!m?.sets.
   if(maxCount()<=0){status('Add at least two sets with a positive transition duration.',true);return;}
   if($('loop').checked && +$('loopEnd').value<=+$('loopStart').value){status('Choose a loop end after the loop start.',true);return;}
   if(count>=maxCount())seek(0);if($('loop').checked){const ss=starts(m.sets);if(count<ss[+$('loopStart').value]||count>=ss[+$('loopEnd').value])seek(ss[+$('loopStart').value]);}
-  seconds=timing().toSeconds(count);playing=true;lastFrame=performance.now();lastClick=-1;
+  seconds=audioUrls.has(active)&&count===0?0:timing().toSeconds(count);playing=true;lastFrame=performance.now();lastClick=-1;
   countInLeft=+m.settings.countIn||0;countInElapsed=0;if(countInLeft){beep(true);}else await startAudio();draw();}
 function frame(now){if(playing){const dt=((now-lastFrame)/1000)*+$('speed').value;const m=current();
     if(countInLeft>0){const before=Math.ceil(countInLeft);countInLeft-=dt*m.settings.bpm*m.settings.subdivision/60;if(Math.ceil(countInLeft)!==before&&countInLeft>0)beep();if(countInLeft<=0){countInLeft=0;startAudio();}}
@@ -61,7 +61,7 @@ function frame(now){if(playing){const dt=((now-lastFrame)/1000)*+$('speed').valu
       else seconds+=dt;
       count=timing().toCount(seconds);const end=$('loop').checked?starts(m.sets)[+$('loopEnd').value]:maxCount();
       if(count>=end){if($('loop').checked){seek(starts(m.sets)[+$('loopStart').value]);if(audioUrls.has(active)&&audio.paused)startAudio();}else{seek(maxCount());pause();}}
-      const pulse=Math.floor(count);if(pulse!==lastClick){beep(pulse%(m.settings.beats*m.settings.subdivision)===0);lastClick=pulse;inspector();}
+      const pulse=Math.floor(count);if(pulse!==lastClick&&seconds>=timing().toSeconds(0)){beep(pulse%(m.settings.beats*m.settings.subdivision)===0);lastClick=pulse;inspector();}
     }draw();}lastFrame=now;requestAnimationFrame(frame);}
 function stepSet(delta){pause();const m=current();if(!m)return;const l=located();goSet(Math.max(0,Math.min(m.sets.length-1,l.index+delta)));}
 function updateFiles(){$('fileCount').textContent=`${project.files.length} / 3 PDFs`;$('fileList').replaceChildren();for(const file of project.files){const div=make('div',undefined,'file-entry'),span=make('span',`${file.name} · ${file.pages||0} pages${file.error?' · '+file.error:''}`),b=make('button','Remove');b.disabled=busy;b.onclick=()=>{pause();project.files=project.files.filter(f=>f.id!==file.id);project.rows=project.rows.filter(r=>{r.sources=(r.sources||[r.fileId]).filter(id=>id!==file.id);if(r.fileId===file.id)r.fileId=r.sources[0];return r.sources.length||!r.source||r.source==='Manual';});project.pages=project.pages.filter(p=>p.fileId!==file.id);rebuild();changed();};div.append(span,b);$('fileList').append(div);}$('pickPDF').disabled=busy||project.files.length>=3;$('cancelImport').disabled=!busy;}
@@ -123,3 +123,7 @@ audio.addEventListener('loadedmetadata',()=>{seek(count);draw();});audio.addEven
 document.addEventListener('keydown',e=>{if(e.target.closest('input,select,textarea,button')||document.querySelector('dialog[open]'))return;if(e.code==='Space'){e.preventDefault();play();}else if(e.key==='ArrowRight'){e.preventDefault();stepSet(1);}else if(e.key==='ArrowLeft'){e.preventDefault();stepSet(-1);}else if(e.key==='Escape'){pause();seek(0);}});
 window.addEventListener('beforeunload',e=>{if(dirty||busy){e.preventDefault();e.returnValue='';}});
 rebuild();syncFieldInputs();requestAnimationFrame(frame);get('project').then(data=>{if(data&& !project.rows.length&&!busy)status('A saved project is available. Open Project → Load browser save to continue.');}).catch(()=>status('Browser storage unavailable. Use project JSON exports to save your work.',true));
+
+$('updatesButton').onclick=()=>open('updatesDialog');
+$('templatesButton').onclick=()=>open('templatesDialog');
+$('atlantisTemplate').onclick=async()=>{if(project.rows.length&&!confirm('Load Atlantis and replace the current project? Export your project first to keep it.'))return;const button=$('atlantisTemplate');button.disabled=true;$('templateStatus').textContent='Loading Atlantis and show audio…';try{const [pr,ar]=await Promise.all([fetch('templates/atlantis/project.json'),fetch('templates/atlantis/show.mp3')]);if(!pr.ok||!ar.ok)throw Error('Template files could not load.');const data=await pr.json(),blob=await ar.blob();applyProject(data);followId='';pathIds.clear();for(const m of movements){audioBlobs.set(m.name,blob);audioNames.set(m.name,'ATLANTIS - FULL MIX.mp3');audioUrls.set(m.name,URL.createObjectURL(blob));}attachCurrentAudio();changed();close('templatesDialog');status('Atlantis loaded: all three movements and full mix. Set each movement’s start delay and tempo in Audio & timing.');}catch(e){$('templateStatus').textContent=e.message;}finally{button.disabled=false;}};
