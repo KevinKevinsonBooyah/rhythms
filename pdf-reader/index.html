@@ -5,14 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Read PDFs · Simple PDF Reader</title>
   <style>
-    /* Layout only. Everything else uses your browser's default appearance. */
+
+    :root {
+      color-scheme: light;
+      --bg: #f6f7fb;
+      --paper: #ffffff;
+      --ink: #252d42;
+      --muted: #66718a;
+      --border: #e3e7f1;
+      --accent: #5968d9;
+      --accent-deep: #4656c1;
+      --accent-pale: #eff1ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, #edf0ff 0, var(--bg) 34%, var(--bg) 100%);
+      color: var(--ink);
+      font: 15px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+    }
+    main { width: min(900px, calc(100% - 32px)); margin: 46px auto 56px; }
+    h1 { font-size: clamp(2rem, 5vw, 2.7rem); letter-spacing: -0.045em; line-height: 1.1; margin: 0 0 9px; }
+    .lead { color: var(--muted); font-size: 1rem; margin: 0 0 25px; }
+    .card { background: var(--paper); border: 1px solid var(--border); border-radius: 18px; padding: 24px; box-shadow: 0 10px 32px rgba(39, 49, 98, 0.05); }
+    .dropzone { background: #fafbff; border: 2px dashed #b7bff0; border-radius: 13px; padding: 31px 18px 25px; text-align: center; transition: background .15s, border-color .15s; }
+    .dropzone.dragover, .dropzone.dragging { background: var(--accent-pale); border-color: var(--accent); }
+    .dropzone.full { border-color: var(--border); background: #f9fafc; }
     #fileInput, .file-list-wrap, .reader { display: none; }
     .file-list-wrap.visible, .reader.visible { display: block; }
-    .uploaded-file { margin: 0.5em 0; }
-    .uploaded-file.selected .file-select { font-weight: bold; }
-    .file-list-head { margin-top: 1em; }
-    #textOutput { max-height: 400px; overflow: auto; }
-    .page-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+    button { font: inherit; cursor: pointer; border-radius: 8px; padding: 9px 14px; border: 1px solid var(--border); background: #fff; color: var(--ink); transition: background .15s, box-shadow .15s, border-color .15s; }
+    button:hover:not(:disabled) { border-color: #b7bff0; background: #f7f8ff; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #a4adff; outline-offset: 3px; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .big-button { color: #fff; font-size: .95rem; font-weight: 750; letter-spacing: .035em; padding: 13px 24px; background: var(--accent); border-color: var(--accent); box-shadow: 0 5px 14px rgba(89, 104, 217, .20); }
+    .big-button:hover:not(:disabled) { background: var(--accent-deep); border-color: var(--accent-deep); }
+    .help { color: var(--muted); font-size: .88rem; margin: 15px 0 0; }
+    .status { margin: 15px 0 0; font-size: .92rem; color: #475674; }
+    .file-list-wrap { margin-top: 28px; }
+    .file-list-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .heading { font-weight: 750; font-size: .98rem; margin: 0; }
+    .count { background: var(--accent-pale); border: 1px solid #e0e3ff; border-radius: 999px; padding: 3px 11px; color: #525fbc; font-size: .85rem; font-weight: 700; }
+    .file-list { display: grid; gap: 8px; }
+    .uploaded-file { display: flex; align-items: stretch; gap: 9px; padding: 8px; border-radius: 11px; border: 1px solid var(--border); background: #fff; }
+    .uploaded-file.selected { border-color: #b9c0f6; background: #fafaff; }
+    .file-select { flex: 1; min-width: 0; border: 0; background: transparent; padding: 5px 9px; text-align: left; }
+    .file-select:hover:not(:disabled) { border-color: transparent; background: transparent; }
+    .list-name { display: block; font-weight: 680; overflow-wrap: anywhere; }
+    .list-meta { display: block; color: var(--muted); font-size: .82rem; margin-top: 2px; }
+    .remove-button { padding: 7px 12px; align-self: center; font-size: .85rem; }
+    .reader { margin-top: 25px; padding-top: 23px; border-top: 1px solid var(--border); }
+    .file-name { font-size: 1.15rem; font-weight: 750; overflow-wrap: anywhere; }
+    .file-meta { color: var(--muted); font-size: .85rem; margin-top: 3px; }
+    .controls { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin: 20px 0 23px; }
+    #playButton, #readAllButton { background: var(--accent-pale); border-color: #dce0ff; color: #404fa9; font-weight: 650; }
+    #playButton:hover:not(:disabled), #readAllButton:hover:not(:disabled) { background: #e4e8ff; }
+    .speed { display: inline-flex; gap: 9px; align-items: center; margin-left: auto; white-space: nowrap; color: var(--muted); font-size: .87rem; }
+    .speed input { width: 100px; accent-color: var(--accent); }
+    .speed strong { color: var(--ink); min-width: 27px; }
+    .extracted-heading { margin: 0 0 10px; }
+    #textOutput { max-height: 410px; overflow: auto; background: #fcfcfe; border: 1px solid var(--border); border-radius: 11px; padding: 6px 18px; }
+    .page { padding: 15px 0; }
+    .page + .page { border-top: 1px solid var(--border); }
+    .page-title { color: #6975ae; font-size: .73rem; letter-spacing: .10em; font-weight: 800; margin-bottom: 8px; }
+    .page-text { margin: 0; font: inherit; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .privacy { color: var(--muted); font-size: .82rem; margin: 19px 4px 0; }
+    @media (max-width: 640px) {
+      main { margin-top: 29px; }
+      .card { padding: 15px; border-radius: 14px; }
+      .dropzone { padding: 27px 13px 21px; }
+      .controls { gap: 8px; }
+      .speed { margin: 5px 0 0; width: 100%; justify-content: flex-start; }
+      #textOutput { padding: 5px 12px; }
+    }
   </style>
 </head>
 <body>
