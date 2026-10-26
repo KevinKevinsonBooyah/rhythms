@@ -141,3 +141,10 @@ estimate using the configured step size. Next dot expands to show the
 destination's source coordinates. X hides the card; selecting or following a
 marcher opens it again. The inspector also separates left/right and front/back
 values. Coordinates retain canonical card orientation when the field is flipped.
+
+Update 19 replaces the floating coordinate card with two small text lines above
+the selected/followed dot. The annotation follows movement and stays readable
+through zoom and viewport changes. Identifiers use the original performer
+symbol and label, centered inside each circle; SVG text bounds are measured to
+fit the glyphs, including wider symbols. The separate inspector retains the
+coordinate details. Existing coordinate formatting and timing are unchanged.

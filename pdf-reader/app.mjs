@@ -3,18 +3,17 @@ import {setupDevice} from './device.mjs?v=9';
 import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows,performerPhase} from './core.mjs?v=14';
 import {extractPDF} from './parser.mjs?v=3';
-import {Field} from './field.mjs?v=14';
+import {Field} from './field.mjs?v=19';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const $=id=>document.getElementById(id),make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
 let project={version:1,name:'My marching show',rows:[],pages:[],files:[],settings:{},field:{step:22.5,swap:false,flip:false,grid:false,colors:true,labels:true,paths:true,ghosts:false,calibration:false}};
 let projectRevision=0;
-let coordinateCardHidden=false;
 let followId='',pathIds=new Set();
 let movements=[],active='',selected='',manualSet=null,count=0,playing=false,seconds=0,lastFrame=0,lastClick=-1,countInLeft=0,countInElapsed=0,busy=false,cancelled=false,rowPage=0,dirty=false,saveTimer;
 let audio=new Audio(),audioUrls=new Map(),audioBlobs=new Map(),audioNames=new Map(),audioContext;
 audio.preload='auto';audio.volume=.8;
-const field=new Field($('field'),id=>{selected=id;coordinateCardHidden=false;draw();inspector();});
+const field=new Field($('field'),id=>{selected=id;draw();inspector();});
 const current=()=>movements.find(m=>m.name===active),maxCount=()=>starts(current()?.sets||[]).at(-1)||0;
 const located=()=>manualSet===null?locate(current()?.sets||[],count):{index:manualSet,next:Math.min(manualSet+1,(current()?.sets.length||1)-1),t:0};
 function goSet(i){const m=current();if(!m)return;pause();if(m.sets.some(s=>s.timingIssue)){manualSet=i;draw();inspector();}else seek(starts(m.sets)[i]);}
@@ -35,19 +34,13 @@ function renderMovement(){const m=current();$('toggleLabels').textContent=projec
 function renderSets(){const m=current();$('setList').replaceChildren();for(const id of ['jumpSet','loopStart','loopEnd','playerSet'])$(id).replaceChildren();
   if(!m){$('setList').append(make('p','Your sets and subsets will appear here.','empty'));return;}
   const ss=starts(m.sets);m.sets.forEach((s,i)=>{const btn=make('button',undefined,'set-row');btn.dataset.index=i;const text=make('span',s.title||'Untitled set');text.append(make('small',`${s.timingIssue?'Needs timing':i?`${s.duration} counts${s.holdCounts?` (${s.moveCounts} march + ${s.holdCounts} hold)`:''}${s.motionIssue?' · Split needs review':''}`:'Opening position'} · ${s.measure||'No measure'}`));btn.append(make('b',s.id),text);btn.onclick=()=>goSet(i);$('setList').append(btn);for(const id of ['jumpSet','loopStart','loopEnd','playerSet'])$(id).append(new Option(s.id,String(i)));});$('loopEnd').selectedIndex=Math.max(0,m.sets.length-1);}
-function renderPeople(){const m=current(),q=$('search').value.toLowerCase();$('peopleList').replaceChildren();for(const p of m?.people||[])if(`${p.instrument} ${p.symbol}${p.label} ${p.label}`.toLowerCase().includes(q)){const row=make('div',undefined,'person-row'),b=make('button',`${p.instrument} ${p.symbol}${p.label}`),follow=make('button',followId===p.id?'Following':'Follow'),paths=make('button','Paths');b.onclick=()=>{selected=p.id;coordinateCardHidden=false;draw();inspector();};follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>{followId=followId===p.id?'':p.id;if(followId){selected=p.id;coordinateCardHidden=false;field.zoom=Math.max(field.zoom,2);}renderPeople();draw();inspector();};paths.onclick=()=>{pathIds.has(p.id)?pathIds.delete(p.id):pathIds.add(p.id);renderPeople();draw();};row.append(b,follow,paths);$('peopleList').append(row);}}
+function renderPeople(){const m=current(),q=$('search').value.toLowerCase();$('peopleList').replaceChildren();for(const p of m?.people||[])if(`${p.instrument} ${p.symbol}${p.label} ${p.label}`.toLowerCase().includes(q)){const row=make('div',undefined,'person-row'),b=make('button',`${p.instrument} ${p.symbol}${p.label}`),follow=make('button',followId===p.id?'Following':'Follow'),paths=make('button','Paths');b.onclick=()=>{selected=p.id;draw();inspector();};follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>{followId=followId===p.id?'':p.id;if(followId){selected=p.id;field.zoom=Math.max(field.zoom,2);}renderPeople();draw();inspector();};paths.onclick=()=>{pathIds.has(p.id)?pathIds.delete(p.id):pathIds.add(p.id);renderPeople();draw();};row.append(b,follow,paths);$('peopleList').append(row);}}
 
-function draw(){const m=current();renderMarcherCard();field.draw(count,selected,$('search').value,manualSet,followId,pathIds);const l=located();$('currentSet').textContent=(m?.sets[l.holding?l.next:l.index]?.id||'·')+(l.holding?' · Hold':'');$('nextSet').textContent=m?.sets[l.holding?Math.min(l.next+1,m.sets.length-1):l.next]?.id||'·';$('playerReadout').textContent=`Count ${count.toFixed(1)} · ${formatTime(audioUrls.has(active)?audio.currentTime:seconds)}${l.holding?' · HOLD':''}`;$('currentCount').textContent=countInLeft>0?`In ${Math.ceil(countInLeft)}`:manualSet!==null?'?':count.toFixed(1);$('timeline').max=maxCount()||1;$('timeline').value=count;$('jumpSet').value=l.holding?l.next:l.index;$('playerSet').value=l.holding?l.next:l.index;$('playerMovement').value=active;
+function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds);const l=located();$('currentSet').textContent=(m?.sets[l.holding?l.next:l.index]?.id||'·')+(l.holding?' · Hold':'');$('nextSet').textContent=m?.sets[l.holding?Math.min(l.next+1,m.sets.length-1):l.next]?.id||'·';$('playerReadout').textContent=`Count ${count.toFixed(1)} · ${formatTime(audioUrls.has(active)?audio.currentTime:seconds)}${l.holding?' · HOLD':''}`;$('currentCount').textContent=countInLeft>0?`In ${Math.ceil(countInLeft)}`:manualSet!==null?'?':count.toFixed(1);$('timeline').max=maxCount()||1;$('timeline').value=count;$('jumpSet').value=l.holding?l.next:l.index;$('playerSet').value=l.holding?l.next:l.index;$('playerMovement').value=active;
   $('play').textContent=playing?'Ⅱ Pause':'▶ Play';$('play').setAttribute('aria-label',playing?'Pause playback':'Start playback');for(const b of $('setList').children)b.classList.toggle('active',+b.dataset.index===(l.holding?l.next:l.index));
   const unknown=m?.people.filter(p=>!p.positions[m.sets[l.index]?.id]||(l.t>0&&!p.positions[m.sets[l.next]?.id])).length||0;
   $('fieldHint').textContent=m?`${m.sets.length} sets · ${unknown} unknown positions · ${m.sets.filter(s=>s.motionIssue).length} timing conflicts${m.sets.some(s=>s.timingIssue)?' · Timing review needed':''}`:'Import cards to place your marchers. Drag to pan, scroll or pinch to zoom.';
   $('audioReadout').textContent=audioUrls.has(active)?`${audioNames.get(active)||'Show audio'} · ${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`:'No audio attached';
-}
-function renderMarcherCard(){
-  const m=current(),p=m?.people.find(p=>p.id===selected),card=$('marcherCard');card.hidden=!p||coordinateCardHidden;if(card.hidden)return;
-  const data=marcherReadout(p,m,count,project.field.step/36,manualSet);if(!data){card.hidden=true;return;}
-  for(const [id,key]of [['cardPerson','name'],['cardStatus','status'],['cardSide','side'],['cardDepth','depth'],['cardNextSide','nextSide'],['cardNextDepth','nextDepth']])if($(id).textContent!==data[key])$(id).textContent=data[key];
-  $('cardNextLabel').textContent=`Next dot · set ${data.nextSet}`;$('cardNext').hidden=!data.hasNext;
 }
 function formatTime(s){return Number.isFinite(s)?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:'0:00';}
 function inspector(){const m=current(),p=m?.people.find(p=>p.id===selected);$('detail').replaceChildren(make('span','MARCHER INSPECTOR','eyebrow'));if(!p){$('detail').append(make('p','Select a dot to inspect its position and next transition.'));return;}
@@ -175,4 +168,4 @@ $('resetPerformerPhase').onclick=()=>{const m=current(),s=m.sets[+$('performerTa
 // Load the default show in memory; preserve any existing browser save.
 loadAtlantis(true);
 
-$('closeMarcherCard').onclick=()=>{coordinateCardHidden=true;renderMarcherCard();};
+
