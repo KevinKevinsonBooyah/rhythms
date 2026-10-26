@@ -152,3 +152,10 @@ coordinate details. Existing coordinate formatting and timing are unchanged.
 Update 20 increases the label size while keeping the measured glyphs within
 each dot. Darker text and a thin light outline improve contrast across the
 instrument colors. The device choice uses phone and laptop emojis.
+
+Update 21 draws the selected marcher's route from its current interpolated
+position to the next known dot as a thin solid line with an endpoint marker.
+Thin horizontal and vertical guides show screen left/right and up/down travel
+in standard steps when there is room to label them. The field adds subdued
+end zones, yard stripes, sideline ticks and brighter turf without changing
+the canonical coordinate system.

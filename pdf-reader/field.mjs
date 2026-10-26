@@ -23,14 +23,19 @@ export class Field {
   project(p){let x=this.options.swap?100-p.x:p.x,y=FIELD.width-p.y;if(this.options.flip){x=100-x;y=FIELD.width-y;}return {x,y};}
   rebuild(movement,options){
     this.movement=movement;this.options=options;this.svg.replaceChildren();this.nodes.clear();
-    const bg=el('g');this.svg.append(bg);bg.append(el('rect',{x:0,y:0,width:100,height:FIELD.width,fill:'#193d38',rx:.2}));
-    for(let x=0;x<100;x+=10)bg.append(el('rect',{x,y:0,width:5,height:FIELD.width,fill:'#ffffff',opacity:.025}));
+    const defs=el('defs'),turf=el('linearGradient',{id:'field-turf',x1:'0%',y1:'0%',x2:'0%',y2:'100%'});
+    turf.append(el('stop',{offset:'0%','stop-color':'#086a2c'}),el('stop',{offset:'50%','stop-color':'#168345'}),el('stop',{offset:'100%','stop-color':'#086a2c'}));defs.append(turf);this.svg.append(defs);
+    const bg=el('g');this.svg.append(bg);bg.append(el('rect',{x:-6,y:0,width:112,height:FIELD.width,fill:'url(#field-turf)'}));
+    for(let x=0;x<100;x+=10)bg.append(el('rect',{x,y:0,width:5,height:FIELD.width,fill:'#fff',opacity:.045}));
+    for(const x of [-6,100])bg.append(el('rect',{x,y:0,width:6,height:FIELD.width,fill:'#003f20',opacity:.35}));
     const line=(x1,y1,x2,y2,opacity=.3,width=.12)=>bg.append(el('line',{x1,y1,x2,y2,stroke:'white','stroke-opacity':opacity,'stroke-width':width}));
     if(options.grid)for(let x=0;x<=100;x+=.625)line(x,0,x,FIELD.width,.045,.06);
     if(options.grid)for(let y=0;y<=FIELD.width;y+=.625)line(0,y,100,y,.045,.06);
-    for(let x=0;x<=100;x+=5){line(x,0,x,FIELD.width,.35);if(x>0&&x<100&&x%10===0){const label=x<=50?x:100-x;bg.append(el('text',{x,y:8,'text-anchor':'middle',class:'yard'},label));bg.append(el('text',{x,y:FIELD.width-6,'text-anchor':'middle',class:'yard'},label));}}
+    for(let x=0;x<=100;x+=5){line(x,0,x,FIELD.width,x%10===0?.64:.32,x%10===0?.15:.09);if(x>0&&x<100&&x%10===0){const label=x<=50?x:100-x;bg.append(el('text',{x,y:7,'text-anchor':'middle',class:'yard'},label));bg.append(el('text',{x,y:FIELD.width-5,'text-anchor':'middle',class:'yard'},label));}}
+    for(let x=0;x<=100;x++){line(x,0,x,1.25,.75,.1);line(x,FIELD.width-1.25,x,FIELD.width,.75,.1);}
     for(const y of [FIELD.frontHash,FIELD.backHash])for(let x=1;x<100;x++)line(x-.25,y,x+.25,y,.65,.15);
-    line(0,0,100,0,.8,.2);line(0,FIELD.width,100,FIELD.width,.8,.2);
+    line(-6,0,106,0,.9,.17);line(-6,FIELD.width,106,FIELD.width,.9,.17);line(-6,0,-6,FIELD.width,.9,.17);line(106,0,106,FIELD.width,.9,.17);
+    for(const x of [-3,103])bg.append(el('text',{x,y:FIELD.width/2,'text-anchor':'middle','dominant-baseline':'central',transform:`rotate(-90 ${x} ${FIELD.width/2})`,class:'endzone-label'},'TOUCHDOWN'));
     const label=(x,y,text,anchor='middle')=>bg.append(el('text',{x,y,'text-anchor':anchor,class:'field-label'},text));
     label(50,-3,this.options.flip?'FRONT SIDELINE':'BACK SIDELINE');label(50,FIELD.width+4,this.options.flip?'BACK SIDELINE':'FRONT SIDELINE');
     label(18,-3,`SIDE ${(options.swap!==options.flip)?2:1}`);label(82,-3,`SIDE ${(options.swap!==options.flip)?1:2}`);
@@ -38,18 +43,34 @@ export class Field {
     this.path=el('g');this.svg.append(this.path);
     const sections=[...new Set((movement?.people||[]).map(p=>p.instrument))].sort();this.colors=new Map(sections.map((s,i)=>[s,`hsl(${(i*137.508+35)%360} 80% 72%)`]));
     for(const p of movement?.people||[]){const g=el('g',{'data-person':p.id,tabindex:0,role:'button','aria-label':`${p.instrument} ${p.symbol}${p.label}`,class:'marcher'});g.append(el('circle',{r:.48,fill:options.colors?this.colors.get(p.instrument):'#ffdc8b',stroke:'#102c29','stroke-width':.2}));g.append(el('text',{x:0,y:0,'text-anchor':'middle','dominant-baseline':'central',class:'dot-label'},p.symbol+p.label));g.addEventListener('keydown',e=>{if(e.key==='Enter')this.onSelect(p.id);});this.svg.append(g);this.nodes.set(p.id,g);}
-    this.calibration=el('g');const cp=this.project({x:46.875,y:1.25});this.calibration.append(el('circle',{cx:cp.x,cy:cp.y,r:1.1,fill:'#ff7894'}),el('text',{x:cp.x+1.6,y:cp.y,class:'dot-label'},'Calibration'));this.svg.append(this.calibration);this.coordinateLabel=el('g',{class:'coordinate-label','pointer-events':'none',role:'note'});this.coordinateLines=[el('text',{'text-anchor':'middle'}),el('text',{'text-anchor':'middle'})];this.coordinateLabel.append(...this.coordinateLines);this.svg.append(this.coordinateLabel);this.lastSelected='';this.annotationState=null;
+    this.calibration=el('g');const cp=this.project({x:46.875,y:1.25});this.calibration.append(el('circle',{cx:cp.x,cy:cp.y,r:1.1,fill:'#ff7894'}),el('text',{x:cp.x+1.6,y:cp.y,class:'dot-label'},'Calibration'));this.svg.append(this.calibration);this.pathMarker=el('circle',{fill:'#fff5be',stroke:'#193d38','pointer-events':'none'});this.svg.append(this.pathMarker);this.coordinateLabel=el('g',{class:'coordinate-label','pointer-events':'none',role:'note'});this.coordinateLines=[el('text',{'text-anchor':'middle'}),el('text',{'text-anchor':'middle'})];this.coordinateLabel.append(...this.coordinateLines);this.svg.append(this.coordinateLabel);this.lastSelected='';this.annotationState=null;
   }
   draw(count,selected,query='',setIndex=null,followId='',pathIds=new Set()){
-    const m=this.movement;this.annotationState=null;this.coordinateLabel.style.display='none';this.path?.replaceChildren();this.calibration.style.display=this.options.calibration?'':'none';if(!m)return;
+    const m=this.movement;this.annotationState=null;this.coordinateLabel.style.display='none';this.pathMarker.style.display='none';this.path?.replaceChildren();this.calibration.style.display=this.options.calibration?'':'none';if(!m)return;
     const l=setIndex===null?locate(m.sets,count):{index:setIndex,next:Math.min(setIndex+1,m.sets.length-1),t:0};
     for(const p of m.people){const g=this.nodes.get(p.id),pos=setIndex===null?positionAt(p,m.sets,count):p.positions[m.sets[setIndex]?.id],matches=(`${p.instrument} ${p.symbol}${p.label} ${p.label}`).toLowerCase().includes(query.toLowerCase());g.style.display=pos?'':'none';if(!pos)continue;
       const xy=this.project(pos);if(p.id===followId){this.pan={x:xy.x-50,y:xy.y-FIELD.width/2};this.view();}
       if(pathIds.has(p.id)){let previous=null;for(const set of m.sets){const point=p.positions[set.id];if(!point){previous=null;continue;}const q=this.project(point);if(previous)this.path.append(el('line',{x1:previous.x,y1:previous.y,x2:q.x,y2:q.y,stroke:this.colors.get(p.instrument),'stroke-width':.18,opacity:.7}));this.path.append(el('circle',{cx:q.x,cy:q.y,r:.35,fill:'none',stroke:this.colors.get(p.instrument),'stroke-width':.15}));previous=q;}}
       g.setAttribute('transform',`translate(${xy.x} ${xy.y})`);g.style.opacity=matches?1:.15;g.lastChild.style.display=this.options.labels?'':'none';g.firstChild.setAttribute('stroke',selected===p.id?'#ffffff':'#102c29');const size=+this.options.dotSize||1;g.firstChild.setAttribute('stroke-width',(selected===p.id?.22:.12)*size);g.firstChild.setAttribute('r',.48*size);
       this.fitDotLabel(g,size);
-      if(p.id===selected){this.drawCoordinateLabel(p,xy,count,setIndex,size);if(this.lastSelected!==selected){this.svg.append(g,this.coordinateLabel);this.lastSelected=selected;}const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];if(a&&b){const aa=this.project(a),bb=this.project(b);if(this.options.paths)this.path.append(el('line',{x1:aa.x,y1:aa.y,x2:bb.x,y2:bb.y,stroke:'#ffdc8b','stroke-width':.3,'stroke-dasharray':'.6 .5'}));if(this.options.ghosts)for(const q of [aa,bb])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*(+this.options.dotSize||1),fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*(+this.options.dotSize||1)}));}}
+      if(p.id===selected){this.drawCoordinateLabel(p,xy,count,setIndex,size);if(this.lastSelected!==selected){this.svg.append(g,this.coordinateLabel);this.lastSelected=selected;}const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];if(a&&b){const aa=this.project(a),bb=this.project(b);if(this.options.paths)this.drawSelectedPath(xy,bb,size);if(this.options.ghosts)for(const q of [aa,bb])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*(+this.options.dotSize||1),fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*(+this.options.dotSize||1)}));}}
     }
+  }
+  drawSelectedPath(from,to,size){
+    const dx=to.x-from.x,dy=to.y-from.y;if(Math.hypot(dx,dy)<.02)return;
+    const box=this.svg.getBoundingClientRect(),view=this.svg.viewBox.baseVal,scale=Math.min(box.width/view.width,box.height/view.height);
+    if(!(scale>0))return;
+    const stroke={stroke:'#ffecae','stroke-width':1/scale};
+    this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:to.y,...stroke}));
+    const guide={stroke:'#eef5d5','stroke-opacity':.75,'stroke-width':.7/scale};
+    if(Math.abs(dx)*scale>=18)this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:from.y,...guide}));
+    if(Math.abs(dy)*scale>=18)this.path.append(el('line',{x1:to.x,y1:from.y,x2:to.x,y2:to.y,...guide}));
+    const step=(this.options.step||22.5)/36;
+    const measure=(x,y,value,anchor='middle')=>{const t=el('text',{x,y,'text-anchor':anchor,class:'path-measure'},value);t.style.fontSize=`${8/scale}px`;t.style.strokeWidth=`${1.5/scale}px`;this.path.append(t);};
+    if(Math.abs(dx)*scale>=25)measure((from.x+to.x)/2,from.y+14/scale,`${dx<0?'Left':'Right'} ${(Math.abs(dx)/step).toFixed(1)} st`);
+    if(Math.abs(dy)*scale>=25)measure(to.x+8/scale,(from.y+to.y)/2,`${dy<0?'Up':'Down'} ${(Math.abs(dy)/step).toFixed(1)} st`,'start');
+    for(const [key,value] of Object.entries({cx:to.x,cy:to.y,r:.25*size,'stroke-width':.08*size}))this.pathMarker.setAttribute(key,value);
+    this.pathMarker.style.display='';
   }
   fitDotLabel(g,size){
     const label=g.lastChild;if(label.dataset.fittedSize===String(size))return;
