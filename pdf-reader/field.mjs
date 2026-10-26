@@ -53,9 +53,9 @@ export class Field {
   }
   fitDotLabel(g,size){
     const label=g.lastChild;if(label.dataset.fittedSize===String(size))return;
-    let font=Math.min(.52,.7/(Math.max(1,Array.from(label.textContent).length)*.65))*size;
+    let font=Math.min(.6,.8/(Math.max(1,Array.from(label.textContent).length)*.65))*size;
     label.setAttribute('x',0);label.setAttribute('y',0);label.style.fontSize=`${font}px`;
-    for(let i=0;i<2;i++){const b=label.getBBox(),radius=Math.hypot(b.width/2,b.height/2),limit=.48*size*.74;if(!(radius>limit))break;font*=limit/radius;label.style.fontSize=`${font}px`;}
+    for(let i=0;i<2;i++){const b=label.getBBox(),radius=Math.hypot(b.width/2,b.height/2),limit=.48*size*.82;if(!(radius>limit))break;font*=limit/radius;label.style.fontSize=`${font}px`;}
     const b=label.getBBox();label.setAttribute('x',-(b.x+b.width/2));label.setAttribute('y',-(b.y+b.height/2));if(b.width>0&&b.height>0)label.dataset.fittedSize=String(size);else delete label.dataset.fittedSize;
   }
   drawCoordinateLabel(person,xy,count,setIndex,size){

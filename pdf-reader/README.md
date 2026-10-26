@@ -148,3 +148,7 @@ through zoom and viewport changes. Identifiers use the original performer
 symbol and label, centered inside each circle; SVG text bounds are measured to
 fit the glyphs, including wider symbols. The separate inspector retains the
 coordinate details. Existing coordinate formatting and timing are unchanged.
+
+Update 20 increases the label size while keeping the measured glyphs within
+each dot. Darker text and a thin light outline improve contrast across the
+instrument colors. The device choice uses phone and laptop emojis.
