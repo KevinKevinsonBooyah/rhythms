@@ -3,7 +3,7 @@ import {setupDevice} from './device.mjs?v=22';
 import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows,performerPhase} from './core.mjs?v=14';
 import {extractPDF} from './parser.mjs?v=3';
-import {Field} from './field.mjs?v=23';
+import {Field} from './field.mjs?v=24';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const $=id=>document.getElementById(id),make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -29,7 +29,7 @@ function rebuild(preferred=active){snapshot();movements=compile(project.rows,pro
   $('movement').replaceChildren();for(const m of movements)$('movement').append(new Option(m.name,m.name));if(!movements.length)$('movement').append(new Option('No movement yet',''));$('movement').value=active;$('playerMovement').replaceChildren(...[...$('movement').options].map(o=>new Option(o.text,o.value)));$('playerMovement').value=active;
   count=Math.min(count,maxCount());renderMovement();}
 function attachCurrentAudio(){audio.pause();audio.removeAttribute('src');const url=audioUrls.get(active);if(url)audio.src=url;audio.load();}
-function renderMovement(){const m=current();$('toggleLabels').textContent=project.field.labels?'Hide labels':'Show labels';$('toggleLabels').setAttribute('aria-pressed',!project.field.labels);$('movementTitle').textContent=m?.name||'Every dot has a place.';$('performerCount').textContent=`${m?.people.length||0} performers`;$('bpm').value=m?.settings.bpm||120;
+function renderMovement(){const m=current();$('toggleLabels').textContent=project.field.labels?'Hide labels':'Show labels';$('toggleLabels').setAttribute('aria-pressed',!project.field.labels);$('keepBright').checked=!!project.field.noSearchFade;$('movementTitle').textContent=m?.name||'Every dot has a place.';$('performerCount').textContent=`${m?.people.length||0} performers`;$('bpm').value=m?.settings.bpm||120;
   field.rebuild(m,project.field);$('legend').replaceChildren();for(const [name,color]of field.colors){const span=make('span'),i=make('i');i.style.background=color;span.append(i,document.createTextNode(name));$('legend').append(span);}
   renderSets();renderPeople();renderDotChoices();draw();inspector();updateFiles();}
 function renderSets(){const m=current();$('setList').replaceChildren();for(const id of ['jumpSet','loopStart','loopEnd','playerSet'])$(id).replaceChildren();
@@ -137,7 +137,7 @@ function renderDotChoices(){const m=current();$('dotPerson').replaceChildren();$
   m.people.forEach(p=>$('dotPerson').append(new Option(`${p.instrument} ${p.symbol}${p.label}`,p.id)));m.sets.forEach(s=>$('dotSet').append(new Option(`${s.id} · ${s.title||'Untitled'}`,s.id)));
   if(selected&&m.people.some(p=>p.id===selected))editPersonId=selected;
   if(!m.people.some(p=>p.id===editPersonId))editPersonId=m.people[0]?.id||'';
-  if(!m.sets.some(s=>s.id===editSetId))editSetId=m.sets[located().index]?.id||m.sets[0]?.id||'';
+  if(!m.sets.some(s=>s.id===editSetId))editSetId=m.sets[m.sets.length>1?Math.max(1,located().next):0]?.id||'';
   $('dotPerson').value=editPersonId;$('dotSet').value=editSetId;refreshDotEditor();
 }
 function refreshDotEditor(){const {m,p,i,s}=editContext();if(!m||!p||!s)return;
@@ -151,6 +151,7 @@ function refreshDotEditor(){const {m,p,i,s}=editContext();if(!m||!p||!s)return;
   $('dotBpm').value=i?(anchor?.bpm??m.settings.tempo.filter(t=>t.count<=c).at(-1)?.bpm??m.settings.bpm):m.settings.bpm;
   $('dotSync').value=i?(anchor?.seconds??sync?.seconds??''):m.settings.offset;
   $('dotBpm').dataset.edited='';$('dotSync').dataset.edited='';
+  $('dotStart').dataset.edited='';$('dotMove').dataset.edited='';
   $('dotTitle').value=s.title||'';$('dotMeasure').value=s.measure||'';$('dotNote').value=m.settings.dotNotes?.[p.id]?.[s.id]||'';
   updateDotHold();$('dotEditStatus').textContent='';
 }
@@ -164,9 +165,10 @@ function saveDotEdits(){const {m,p,i,s}=editContext();if(!m||!p||!s)return;
   const editingPosition=[x,y,side,depth].some(Boolean),point=editingPosition?coordinate(side,depth,step):null;
   if(editingPosition&&(!x||!y||!point?.valid||point.errors.length||Math.abs(point.x-+x)>.02||Math.abs(point.y-+y)>.02)){dotError('Check X/Y and card coordinates. They must describe the same place on the field.');return;}
   const duration=i?+$('dotDuration').value:0,setMove=i?+$('dotSetMove').value:0,start=i?+$('dotStart').value:0,move=i?+$('dotMove').value:0;
-  if(i&&(!(duration>0)||setMove<0||setMove>duration||start<0||move<0||start+move>duration)){dotError('Set length, march time, and this marcher’s wait + march must fit within the transition.');return;}
+  const performerEdited=!!($('dotStart').dataset.edited||$('dotMove').dataset.edited);
+  if(i&&(!(duration>0)||setMove<0||setMove>duration||(performerEdited&&(start<0||move<0||start+move>duration)))){dotError('Marching and any marcher wait must fit within this set’s total counts.');return;}
   const old=p.positions[s.id],previous=i?p.positions[m.sets[i-1].id]:null;
-  if(i&&move===0&&previous&&point?.valid&&Math.hypot(previous.x-point.x,previous.y-point.y)>1e-7){dotError('A marcher changing position needs positive march counts.');return;}
+  if(i&&performerEdited&&move===0&&previous&&point?.valid&&Math.hypot(previous.x-point.x,previous.y-point.y)>1e-7){dotError('A marcher changing position needs positive march counts.');return;}
   const bpm=+$('dotBpm').value,seconds=+$('dotSync').value;
   if($('dotBpm').dataset.edited&&!(bpm>0&&bpm<=600)){dotError('BPM must be between 1 and 600.');return;}
   if($('dotSync').dataset.edited&&($('dotSync').value===''||!Number.isFinite(seconds)||seconds<0)){dotError('Enter a nonnegative audio time, or use Remove set audio anchor.');return;}
@@ -181,12 +183,12 @@ function saveDotEdits(){const {m,p,i,s}=editContext();if(!m||!p||!s)return;
     for(const r of rows){r.originalSide??=r.side;r.originalDepth??=r.depth;r.side=side;r.depth=depth;r.status='corrected';r.parseWarning='';}
   }
   if(i){m.settings.durations??={};m.settings.motionCounts??={};m.settings.durations[s.id]=duration;m.settings.motionCounts[s.id]=setMove;
-    if(Math.abs(start-(p.motionPhases[s.id]?.start??0))>1e-8||Math.abs(move-(p.motionPhases[s.id]?.move??0))>1e-8||p.motionPhases[s.id]?.custom){m.settings.performerPhases??={};m.settings.performerPhases[p.id]??={};m.settings.performerPhases[p.id][s.id]={start,move};}
+    if(performerEdited){m.settings.performerPhases??={};m.settings.performerPhases[p.id]??={};m.settings.performerPhases[p.id][s.id]={start,move};}
   }
   if(s.title!==$('dotTitle').value||s.measure!==$('dotMeasure').value)for(const r of project.rows.filter(r=>r.movement===active&&r.set===s.id)){r.title=$('dotTitle').value;r.measure=$('dotMeasure').value;r.status='corrected';}
   m.settings.dotNotes??={};m.settings.dotNotes[p.id]??={};if($('dotNote').value.trim())m.settings.dotNotes[p.id][s.id]=$('dotNote').value.trim().slice(0,500);else delete m.settings.dotNotes[p.id][s.id];
   if($('dotBpm').dataset.edited||$('dotSync').dataset.edited){m.settings.editDotAnchors??={};const a=m.settings.editDotAnchors[s.id]??={};if($('dotBpm').dataset.edited)a.bpm=bpm;if($('dotSync').dataset.edited)a.seconds=seconds;}
-  rebuild();seek(count);changed();status(`Saved ${p.instrument} ${p.symbol}${p.label}, set ${s.id}.`);dotError('Saved.');
+  rebuild();seek(count);changed();status(`Saved changes to set ${s.id}.`);dotError('Set saved.');
 }
 // UI wiring.
 $('dotSize').oninput=()=>{project.field.dotSize=+$('dotSize').value;draw();changed();};
@@ -200,16 +202,17 @@ $('markReviewed').onclick=()=>{for(const r of filteredRows().slice(rowPage*100,r
 $('generate').onclick=()=>{rebuild();attachCurrentAudio();changed();close('reviewDialog');status(`Generated ${movements.length} movement(s). Check arrival counts in Set sequence → Edit before rehearsing.`);};
 $('movement').onchange=()=>{pause();active=$('movement').value;selected='';manualSet=null;count=0;attachCurrentAudio();renderMovement();};
 function showAsideTab(tab){for(const [name,panel]of [['sets','setsPanel'],['people','peoplePanel'],['dots','dotsPanel']]){$(panel).hidden=name!==tab;$(name==='sets'?'setsTab':name==='people'?'peopleTab':'dotsTab').classList.toggle('active',name===tab);}if(tab==='dots')renderDotChoices();}
-$('setsTab').onclick=()=>showAsideTab('sets');$('peopleTab').onclick=()=>showAsideTab('people');$('dotsTab').onclick=()=>showAsideTab('dots');$('search').oninput=()=>{renderPeople();draw();};
+$('setsTab').onclick=()=>showAsideTab('sets');$('peopleTab').onclick=()=>showAsideTab('people');$('dotsTab').onclick=()=>showAsideTab('dots');$('search').oninput=()=>{renderPeople();draw();};$('keepBright').onchange=()=>{project.field.noSearchFade=$('keepBright').checked;draw();changed();};
 $('dotPerson').onchange=()=>{editPersonId=$('dotPerson').value;selected=editPersonId;refreshDotEditor();draw();inspector();};
 $('dotSet').onchange=()=>{editSetId=$('dotSet').value;refreshDotEditor();};
-for(const id of ['dotStart','dotMove','dotDuration'])$(id).oninput=updateDotHold;
+for(const id of ['dotStart','dotMove'])$(id).oninput=()=>{$(id).dataset.edited='yes';updateDotHold();};
+$('dotDuration').oninput=()=>{const n=+$('dotDuration').value;if(n>0&&+$('dotSetMove').value>n)$('dotSetMove').value=n;updateDotHold();};
 for(const id of ['dotBpm','dotSync'])$(id).oninput=()=>{$(id).dataset.edited='yes';};
 for(const id of ['dotX','dotY'])$(id).onchange=()=>{const x=+$('dotX').value,y=+$('dotY').value;if($('dotX').value!==''&&$('dotY').value!==''&&x>=0&&x<=100&&y>=0&&y<=FIELD.width)setEditorPoint({x,y});};
 for(const id of ['dotSide','dotDepth'])$(id).onchange=()=>{const point=coordinate($('dotSide').value,$('dotDepth').value,project.field.step/36);if(point.valid&&!point.errors.length){$('dotX').value=point.x.toFixed(4);$('dotY').value=point.y.toFixed(4);dotError('');}else dotError('Check the dot-card coordinate wording.');};
 $('dotApplyNudge').onclick=()=>{const x=+$('dotX').value,y=+$('dotY').value,dx=+$('dotHorizontal').value,dy=+$('dotVertical').value,step=project.field.step/36;if(!$('dotX').value||!$('dotY').value||![x,y,dx,dy].every(Number.isFinite)||x+dx*step<0||x+dx*step>100||y+dy*step<0||y+dy*step>FIELD.width){dotError('Enter a valid dot and keep it on the field.');return;}setEditorPoint({x:x+dx*step,y:y+dy*step});dotError('Moved in the editor. Press Save dot and timing.');};
 for(const [id,d] of [['dotPrev',-1],['dotNext',1]])$(id).onclick=()=>{const {m,p,i}=editContext(),point=p?.positions[m.sets[i+d]?.id];if(!point){dotError('There is no known dot in that neighboring set.');return;}setEditorPoint(point);dotError('Copied in the editor. Press Save dot and timing.');};
-$('dotShiftApply').onclick=()=>{const shift=+$('dotShift').value,duration=+$('dotDuration').value;if(!Number.isFinite(shift)||!(duration+shift>0)){dotError('Arrival shift must leave a positive transition length.');return;}$('dotDuration').value=duration+shift;$('dotShift').value=0;updateDotHold();dotError('Transition length updated in the editor. Press Save dot and timing.');};
+$('dotShiftApply').onclick=()=>{const shift=+$('dotShift').value,duration=+$('dotDuration').value;if(!Number.isFinite(shift)||!(duration+shift>0)){dotError('Arrival shift must leave a positive transition length.');return;}$('dotDuration').value=duration+shift;$('dotDuration').dispatchEvent(new Event('input'));$('dotShift').value=0;dotError('Arrival updated here. Press Save set changes.');};
 $('dotSave').onclick=saveDotEdits;
 $('dotReset').onclick=()=>{const {m,p,s}=editContext();if(!m||!p||!s)return;const rows=project.rows.filter(r=>r.movement===active&&r.set===s.id&&identity(r)===p.id);if(!rows.some(r=>r.originalSide!==undefined)){dotError('No original position is recorded for this dot.');return;}for(const r of rows){if(r.originalSide!==undefined){r.side=r.originalSide;r.depth=r.originalDepth;r.status='corrected';r.parseWarning='';delete r.originalSide;delete r.originalDepth;}}rebuild();changed();dotError('Original dot restored.');};
 $('dotTimingReset').onclick=()=>{const {m,p,s}=editContext();if(!m||!p||!s)return;delete m.settings.performerPhases?.[p.id]?.[s.id];rebuild();changed();dotError('Default marcher timing restored.');};
@@ -218,7 +221,7 @@ $('previous').onclick=()=>stepSet(-1);$('next').onclick=()=>stepSet(1);$('play')
 $('resetView').onclick=()=>{followId='';renderPeople();field.reset()};$('zoomIn').onclick=()=>{field.zoom=Math.min(8,field.zoom*1.3);field.view();};$('zoomOut').onclick=()=>{field.zoom=Math.max(1,field.zoom/1.3);field.view();};$('flip').onclick=()=>{project.field.flip=!project.field.flip;renderMovement();syncFieldInputs();changed();};$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('fieldPanel').requestFullscreen();}catch{status('Fullscreen is unavailable in this browser.');}};
 for(const id of ['labels','paths','ghosts'])$(id).onchange=()=>{project.field[id]=$(id).checked;renderMovement();changed();};
 $('settingsButton').onclick=()=>{syncFieldInputs();open('settingsDialog');};$('applySettings').onclick=()=>{const n=+$('stepSize').value;if(!(n>0&&n<=100))return;project.field.step=n;for(const id of ['swap','grid','colors','calibration'])project.field[id]=$(id).checked;project.field.flip=$('orientation').checked;rebuild();changed();close('settingsDialog');};
-$('editSets').onclick=()=>{renderSetEditor();open('setsDialog');};$('saveSets').onclick=()=>{rebuild();changed();seek(0);close('setsDialog');};$('outgoingCounts').onclick=()=>{const m=current();if(!m)return;m.settings.durations={};for(let i=1;i<m.sets.length;i++){const values=[...new Set(project.rows.filter(r=>r.movement===active&&r.set===m.sets[i-1].id).map(r=>r.counts))];m.settings.durations[m.sets[i].id]=values.length===1&&+values[0]>0?+values[0]:null;}rebuild();renderSetEditor();changed();};
+$('editSets').onclick=()=>{if(document.body.dataset.device==='mobile')document.querySelector('[data-mobile-view="edit"]').click();else showAsideTab('dots');};$('saveSets').onclick=()=>{rebuild();changed();seek(0);close('setsDialog');};$('outgoingCounts').onclick=()=>{const m=current();if(!m)return;m.settings.durations={};for(let i=1;i<m.sets.length;i++){const values=[...new Set(project.rows.filter(r=>r.movement===active&&r.set===m.sets[i-1].id).map(r=>r.counts))];m.settings.durations[m.sets[i].id]=values.length===1&&+values[0]>0?+values[0]:null;}rebuild();renderSetEditor();changed();};
 $('addSet').onclick=()=>{const m=current();if(!m)return;const name=prompt('New set identifier (for example 6B)');if(!name||m.sets.some(s=>s.id===name))return;const people=m.people.length?m.people:[{instrument:'',symbol:'',label:''}];for(const p of people)project.rows.push({id:uuid(),movement:active,instrument:p.instrument,symbol:p.symbol,label:p.label,set:name,title:'',measure:'',counts:'',side:'',depth:'',source:'Manual',page:1,method:'manual',status:'missing'});rebuild();renderSetEditor();changed();};
 $('syncButton').onclick=openTiming;$('audioButton').onclick=()=>{if(!current()){status('Import and generate a movement before attaching show audio.',true);return;}$('audioInput').click();};$('attachAudio').onclick=()=>$('audioInput').click();$('audioInput').onchange=e=>{addAudio(e.target.files[0]);e.target.value='';};$('removeAudio').onclick=()=>{pause();const url=audioUrls.get(active);if(url)URL.revokeObjectURL(url);audioUrls.delete(active);audioBlobs.delete(active);audioNames.delete(active);attachCurrentAudio();changed();draw();};$('volume').oninput=()=>{audio.volume=+$('volume').value;};
 $('applyTiming').onclick=()=>{const m=current();if(!m)return;try{const settings={...m.settings,holdMode:$('titleHolds').checked?'title':'off',naturalArrival:$('naturalArrival').checked,bpm:+$('baseBpm').value,offset:+$('offset').value,beats:+$('beats').value,subdivision:+$('subdivision').value,countIn:+$('countIn').value,tempo:parsePairs($('tempoMap').value,'bpm'),markers:parsePairs($('syncMap').value,'seconds'),editDotAnchors:{}};validateTiming(settings);if(!(settings.beats>0&&settings.countIn>=0&&settings.countIn<=32))throw Error('Check beats and count-in.');m.settings=settings;rebuild();$('bpm').value=settings.bpm;seek(count);changed();close('timingDialog');status('Timing saved. Sync markers align your drill to the audio clock.');}catch(e){alert(e.message);}};

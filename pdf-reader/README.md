@@ -179,3 +179,12 @@ do not shrink as the marcher travels. The field annotation shows the printed
 coordinates of the destination, and the inspector retains the printed current
 and next coordinates until the set boundary. There is no live interpolated
 front/back or left/right coordinate display.
+
+Update 24 emphasizes the fixed directional measurements with larger text and
+dark backed labels, softens the starting ring, and marks the corner where both
+orthogonal guides meet. Search fades other marchers to 55% opacity, or keeps
+them fully bright with the new Marchers checkbox. Edit sets makes shared
+transition and marching counts the main controls; music alignment and one
+marcher's wait, position, and notes are optional sections. The Set sequence
+Edit button opens this simpler panel. Saved data and timing behavior are
+unchanged.

@@ -42,15 +42,15 @@ export class Field {
     this.path=el('g');this.svg.append(this.path);
     const sections=[...new Set((movement?.people||[]).map(p=>p.instrument))].sort();this.colors=new Map(sections.map((s,i)=>[s,`hsl(${(i*137.508+35)%360} 80% 72%)`]));
     for(const p of movement?.people||[]){const g=el('g',{'data-person':p.id,tabindex:0,role:'button','aria-label':`${p.instrument} ${p.symbol}${p.label}`,class:'marcher'});g.append(el('circle',{r:.48,fill:options.colors?this.colors.get(p.instrument):'#ffdc8b',stroke:'#102c29','stroke-width':.2}));g.append(el('text',{x:0,y:0,'text-anchor':'middle','dominant-baseline':'central',class:'dot-label'},p.symbol+p.label));g.addEventListener('keydown',e=>{if(e.key==='Enter')this.onSelect(p.id);});this.svg.append(g);this.nodes.set(p.id,g);}
-    this.calibration=el('g');const cp=this.project({x:46.875,y:1.25});this.calibration.append(el('circle',{cx:cp.x,cy:cp.y,r:1.1,fill:'#ff7894'}),el('text',{x:cp.x+1.6,y:cp.y,class:'dot-label'},'Calibration'));this.svg.append(this.calibration);this.startMarker=el('circle',{fill:'none',stroke:'#fff5be','pointer-events':'none'});this.pathMarker=el('circle',{fill:'#fff5be',stroke:'#193d38','pointer-events':'none'});this.svg.append(this.startMarker,this.pathMarker);this.coordinateLabel=el('g',{class:'coordinate-label','pointer-events':'none',role:'note'});this.coordinateLines=[el('text',{'text-anchor':'middle'}),el('text',{'text-anchor':'middle'})];this.coordinateLabel.append(...this.coordinateLines);this.svg.append(this.coordinateLabel);this.lastSelected='';this.annotationState=null;
+    this.calibration=el('g');const cp=this.project({x:46.875,y:1.25});this.calibration.append(el('circle',{cx:cp.x,cy:cp.y,r:1.1,fill:'#ff7894'}),el('text',{x:cp.x+1.6,y:cp.y,class:'dot-label'},'Calibration'));this.svg.append(this.calibration);this.startMarker=el('circle',{fill:'none',stroke:'#fff5be','pointer-events':'none'});this.pathMarker=el('circle',{fill:'#fff5be',stroke:'#193d38','pointer-events':'none'});this.measurements=el('g',{'pointer-events':'none'});this.svg.append(this.startMarker,this.pathMarker,this.measurements);this.coordinateLabel=el('g',{class:'coordinate-label','pointer-events':'none',role:'note'});this.coordinateLines=[el('text',{'text-anchor':'middle'}),el('text',{'text-anchor':'middle'})];this.coordinateLabel.append(...this.coordinateLines);this.svg.append(this.coordinateLabel);this.lastSelected='';this.annotationState=null;
   }
   draw(count,selected,query='',setIndex=null,followId='',pathIds=new Set()){
-    const m=this.movement;this.annotationState=null;this.coordinateLabel.style.display='none';this.startMarker.style.display='none';this.pathMarker.style.display='none';this.path?.replaceChildren();this.calibration.style.display=this.options.calibration?'':'none';if(!m)return;
+    const m=this.movement;this.annotationState=null;this.coordinateLabel.style.display='none';this.startMarker.style.display='none';this.pathMarker.style.display='none';this.path?.replaceChildren();this.measurements?.replaceChildren();this.calibration.style.display=this.options.calibration?'':'none';if(!m)return;
     const l=setIndex===null?locate(m.sets,count):{index:setIndex,next:Math.min(setIndex+1,m.sets.length-1),t:0};
     for(const p of m.people){const g=this.nodes.get(p.id),pos=setIndex===null?positionAt(p,m.sets,count):p.positions[m.sets[setIndex]?.id],matches=(`${p.instrument} ${p.symbol}${p.label} ${p.label}`).toLowerCase().includes(query.toLowerCase());g.style.display=pos?'':'none';if(!pos)continue;
       const xy=this.project(pos);if(p.id===followId){this.pan={x:xy.x-50,y:xy.y-FIELD.width/2};this.view();}
       if(pathIds.has(p.id)){let previous=null;for(const set of m.sets){const point=p.positions[set.id];if(!point){previous=null;continue;}const q=this.project(point);if(previous)this.path.append(el('line',{x1:previous.x,y1:previous.y,x2:q.x,y2:q.y,stroke:this.colors.get(p.instrument),'stroke-width':.18,opacity:.7}));this.path.append(el('circle',{cx:q.x,cy:q.y,r:.35,fill:'none',stroke:this.colors.get(p.instrument),'stroke-width':.15}));previous=q;}}
-      g.setAttribute('transform',`translate(${xy.x} ${xy.y})`);g.style.opacity=matches?1:.15;g.lastChild.style.display=this.options.labels?'':'none';g.firstChild.setAttribute('stroke',selected===p.id?'#ffffff':'#102c29');const size=+this.options.dotSize||1;g.firstChild.setAttribute('stroke-width',(selected===p.id?.22:.12)*size);g.firstChild.setAttribute('r',.48*size);
+      g.setAttribute('transform',`translate(${xy.x} ${xy.y})`);g.style.opacity=matches||this.options.noSearchFade?1:.55;g.lastChild.style.display=this.options.labels?'':'none';g.firstChild.setAttribute('stroke',selected===p.id?'#ffffff':'#102c29');const size=+this.options.dotSize||1;g.firstChild.setAttribute('stroke-width',(selected===p.id?.22:.12)*size);g.firstChild.setAttribute('r',.48*size);
       this.fitDotLabel(g,size);
       if(p.id===selected){const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];if(a&&b){const aa=this.project(a),bb=this.project(b);this.drawCoordinateLabel(p,bb,l.next,size);if(this.options.paths)this.drawSelectedPath(aa,bb,size);if(this.options.ghosts)for(const q of [aa,bb])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*(+this.options.dotSize||1),fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*(+this.options.dotSize||1)}));}else this.drawCoordinateLabel(p,xy,l.index,size);if(this.lastSelected!==selected){this.svg.append(g,this.coordinateLabel);this.lastSelected=selected;}}
     }
@@ -62,13 +62,16 @@ export class Field {
     const stroke={stroke:'#ffecae','stroke-width':1/scale};
     this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:to.y,...stroke}));
     const guide={stroke:'#eef5d5','stroke-opacity':.75,'stroke-width':.7/scale};
-    if(Math.abs(dx)*scale>=18)this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:from.y,...guide}));
-    if(Math.abs(dy)*scale>=18)this.path.append(el('line',{x1:to.x,y1:from.y,x2:to.x,y2:to.y,...guide}));
+    const horizontal=Math.abs(dx)*scale>=18,vertical=Math.abs(dy)*scale>=18;
+    if(horizontal)this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:from.y,...guide}));
+    if(vertical)this.path.append(el('line',{x1:to.x,y1:from.y,x2:to.x,y2:to.y,...guide}));
+    if(horizontal&&vertical)this.path.append(el('circle',{cx:to.x,cy:from.y,r:.16*size,fill:'#fff3b8'}));
     const step=(this.options.step||22.5)/36;
-    const measure=(x,y,value,anchor='middle')=>{const t=el('text',{x,y,'text-anchor':anchor,class:'path-measure'},value);t.style.fontSize=`${8/scale}px`;t.style.strokeWidth=`${1.5/scale}px`;this.path.append(t);};
-    if(Math.abs(dx)*scale>=25)measure((from.x+to.x)/2,from.y+14/scale,`${dx<0?'Left':'Right'} ${(Math.abs(dx)/step).toFixed(1)} st`);
-    if(Math.abs(dy)*scale>=25)measure(to.x+8/scale,(from.y+to.y)/2,`${dy<0?'Up':'Down'} ${(Math.abs(dy)/step).toFixed(1)} st`,'start');
-    for(const [key,value] of Object.entries({cx:from.x,cy:from.y,r:.48*size,'stroke-width':.13*size}))this.startMarker.setAttribute(key,value);
+    const measure=(x,y,value,anchor='middle')=>{const font=12/scale,t=el('text',{x,y,'text-anchor':anchor,class:'path-measure'},value);t.style.fontSize=`${font}px`;t.style.strokeWidth=`${1.8/scale}px`;this.measurements.append(t);const b=t.getBBox(),w=b.width||value.length*font*.6,h=b.height||font,x0=b.width?b.x:anchor==='middle'?x-w/2:x,y0=b.height?b.y:y-h;
+      const pad=2.5/scale,back=el('rect',{x:x0-pad,y:y0-pad,width:w+pad*2,height:h+pad*2,rx:3/scale,fill:'#0c3029','fill-opacity':.92,stroke:'#f6dc95','stroke-width':.6/scale,'pointer-events':'none'});this.measurements.insertBefore(back,t);};
+    if(Math.abs(dx)*scale>=25)measure((from.x+to.x)/2,from.y+27/scale,`${dx<0?'Left':'Right'} ${(Math.abs(dx)/step).toFixed(1)} st`);
+    if(Math.abs(dy)*scale>=25)measure(to.x+24/scale,(from.y+to.y)/2+16/scale,`${dy<0?'Up':'Down'} ${(Math.abs(dy)/step).toFixed(1)} st`,'start');
+    for(const [key,value] of Object.entries({cx:from.x,cy:from.y,r:.5*size,'stroke-width':.085*size,'stroke-opacity':.5}))this.startMarker.setAttribute(key,value);
     for(const [key,value] of Object.entries({cx:to.x,cy:to.y,r:.25*size,'stroke-width':.08*size}))this.pathMarker.setAttribute(key,value);
     this.startMarker.style.display='';this.pathMarker.style.display='';
   }
@@ -84,7 +87,7 @@ export class Field {
     const set=this.movement.sets[setIndex],row=person.positions[set?.id]?.row;
     if(!row)return;
     const box=this.svg.getBoundingClientRect(),view=this.svg.viewBox.baseVal,scale=Math.min(box.width/view.width,box.height/view.height);if(!(scale>0))return;
-    const font=10/scale,gap=6/scale,line=font*1.35;
+    const font=10/scale,gap=32/scale,line=font*1.35;
     const texts=[`Go to ${set.id} · ${row.side}`,row.depth];
     this.coordinateLines.forEach((t,i)=>{if(t.textContent!==texts[i])t.textContent=texts[i];t.setAttribute('y',i===0?-line:0);t.style.fontSize=`${font}px`;t.style.strokeWidth=`${font*.25}px`;});
     this.coordinateLabel.style.display='';const bounds=this.coordinateLabel.getBBox(),margin=3/scale;
