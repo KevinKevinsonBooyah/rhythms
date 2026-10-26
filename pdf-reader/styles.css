@@ -52,3 +52,4 @@ body.player-mode .player-top,body.player-mode .transport{transition:opacity .35s
 body.player-mode.controls-hidden .player-top,body.player-mode.controls-hidden .transport{opacity:0;pointer-events:none}
 body.player-mode.controls-hidden #player{cursor:none}
 body.player-mode .player-top:focus-within,body.player-mode .transport:focus-within{cursor:auto}
+.set-edit{flex-wrap:wrap}.set-edit>small{flex-basis:100%;color:#9b4129}#timingAudit{background:#f3f5ed;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px}#timingAudit ul{padding-left:18px}#timingAudit li{margin-bottom:8px}

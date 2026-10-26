@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {compile,clock,starts,validateTiming} from '../core.mjs';
+import {compile,clock,starts,validateTiming,positionAt} from '../core.mjs';
 const project=JSON.parse(fs.readFileSync(new URL('../templates/atlantis/project.json',import.meta.url)));
 const movements=compile(project.rows,project.settings);
 test('Atlantis movement tracks are distinct and all score tempo maps validate',()=>{
@@ -26,4 +26,14 @@ test('observed count 20.7 starts set 2 to 2A and preserves subsequent 10-count t
  assert.equal(at('1A'),15);
  for(const [id,value]of [['2',20.7],['2A',30.7],['2B',40.7],['3',50.7]])assert.ok(Math.abs(at(id)-value)<1e-8);
  const end=clock(m.settings).toSeconds(ss.at(-1));assert.ok(end>183&&end<189.48);
+});
+test('Atlantis resolves whole-phrase holds without changing any set or tempo cue count',()=>{
+ for(const m of movements){
+  const baseline=compile(project.rows,{...project.settings,[m.name]:{...m.settings,holdMode:'off'}}).find(v=>v.name===m.name);assert.deepEqual(starts(m.sets),starts(baseline.sets));
+  for(let i=1;i<m.sets.length;i++){const s=m.sets[i];if(!s.holdCounts||!s.moveCounts)continue;
+   const start=starts(m.sets)[i-1];for(const p of m.people){const dest=p.positions[s.id];if(!dest||!p.positions[m.sets[i-1].id])continue;
+    const reached=positionAt(p,m.sets,start+s.moveCounts),held=positionAt(p,m.sets,start+s.moveCounts+s.holdCounts/2);assert.ok(Math.hypot(reached.x-dest.x,reached.y-dest.y)<1e-8);assert.deepEqual(held,reached);
+   }
+  }
+ }
 });

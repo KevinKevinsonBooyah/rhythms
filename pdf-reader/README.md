@@ -98,3 +98,16 @@ Set 1A remains at 15, and 2A, 2B, 3 arrive at 30.7, 40.7, 50.7. These fractional
 counts are provisional playback calibration, not verified source counts.
 The subsequent tempo cue moves to 110.7 to preserve its location within the
 drill after shortening the opening.
+
+
+Update 13 introduces independent marching and holding phases. Atlantis opts into
+its user-confirmed title convention: first number marches, numbers after plus
+hold. The phrase spans all subset intervals since the preceding main set.
+Only exact total matches resolve automatically. A proposed all-hold interval
+with changing coordinates is flagged; unknown coordinates are not filled in.
+Manual march counts can override each interval. Total interval counts and
+existing audio anchors are unchanged. This fixes 15 hold intervals across the
+show; 5 conflicting phrases remain (M1: 2, 5, 13; M3: 32, 38). The opening
+calibration remains provisional. Timing audit is visible under Audio & timing.
+The clock already followed audio.currentTime; the main defect was allocating
+all elapsed counts to motion instead of modeling a hold at the destination.

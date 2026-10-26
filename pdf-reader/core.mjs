@@ -68,9 +68,29 @@ export function compile(rows,old={},step=.625) {
       }
       people.push({id:key,instrument:first.instrument,symbol:first.symbol,label:first.label,positions});
     }
+    applyPhases(sets,people,previous);
     movements.push({name,sets,people,settings:{bpm:120,offset:0,tempo:[],markers:[],beats:4,subdivision:1,countIn:0,...previous}});
   }
   return movements;
+}
+// Titles describe a phrase ending at a main set, including intervening subsets.
+export function applyPhases(sets,people,settings){
+  for(let i=1;i<sets.length;i++){const s=sets[i];s.moveCounts=s.duration;s.holdCounts=0;s.motionIssue='';s.phaseSource='full interval';}
+  if(settings.holdMode==='title')for(let i=1;i<sets.length;i++){
+    const target=sets[i];if(!/^\d+(?:\.\d+)?(?:\s*\+\s*\d+(?:\.\d+)?)+$/.test(target.title.trim()))continue;
+    let first=i;while(first>1&&/subset/i.test(sets[first-1].measure))first--;
+    const parts=target.title.split('+').map(Number),total=parts.reduce((a,b)=>a+b,0),block=sets.slice(first,i+1),span=block.reduce((a,s)=>a+(s.duration||0),0);
+    if(Math.abs(total-span)>1e-7){target.motionIssue=`Title ${target.title} totals ${total}, phrase including subsets totals ${span}. Confirm march/hold split.`;continue;}
+    let elapsed=0;const phases=block.map(s=>{const move=Math.max(0,Math.min(s.duration,parts[0]-elapsed));elapsed+=s.duration;return {set:s,move};});
+    const conflicts=phases.some(({set,move})=>{if(move>0)return false;const k=sets.indexOf(set),from=sets[k-1].id;return people.some(p=>{const a=p.positions[from],b=p.positions[set.id];return a&&b&&Math.hypot(a.x-b.x,a.y-b.y)>1e-6;});});
+    if(conflicts){target.motionIssue='Title requires a complete hold while subset coordinates change. Confirm subset schedule.';continue;}
+    for(const {set,move}of phases){set.moveCounts=move;set.phaseSource='title phrase';}
+  }
+  for(let i=1;i<sets.length;i++){
+    const s=sets[i],explicit=settings.motionCounts?.[s.id];
+    if(explicit!==undefined){if(Number.isFinite(+explicit)&&+explicit>=0&&+explicit<=s.duration){s.moveCounts=+explicit;s.phaseSource='manual';s.motionIssue='';}else s.motionIssue='March counts must be between 0 and the interval total.';}
+    s.holdCounts=Math.max(0,(s.duration||0)-(s.moveCounts||0));
+  }
 }
 export function starts(sets) {
   let c=0;return sets.map((s,i)=>{if(i) c+=s.duration>0?s.duration:0;return c;});
@@ -79,13 +99,15 @@ export function locate(sets,count) {
   const times=starts(sets);let i=0;
   while(i+1<times.length && times[i+1]<=count) i++;
   const end=times[i+1];
-  return {index:i,next:Math.min(i+1,sets.length-1),t:end>times[i]?(count-times[i])/(end-times[i]):0,start:times[i]||0};
+  const elapsed=Math.max(0,count-(times[i]||0)),duration=end-times[i],move=sets[i+1]?.moveCounts??duration;
+  return {index:i,next:Math.min(i+1,sets.length-1),t:duration>0?elapsed/duration:0,motionT:duration>0?(move>0?Math.min(1,elapsed/move):1):0,holding:duration>0&&move<duration&&elapsed>=move,start:times[i]||0};
 }
 export function positionAt(person,sets,count) {
   if(!sets.length)return null;
   const l=locate(sets,count),a=person.positions[sets[l.index].id],b=person.positions[sets[l.next].id];
-  if(!a || (l.t>0&&!b))return null;
-  return {x:a.x+((b?.x??a.x)-a.x)*l.t,y:a.y+((b?.y??a.y)-a.y)*l.t};
+  const progress=l.motionT;
+  if(!a || (progress>0&&!b))return null;
+  return {x:a.x+((b?.x??a.x)-a.x)*progress,y:a.y+((b?.y??a.y)-a.y)*progress};
 }
 // Count zero is the opening dot/downbeat. Counts column defaults to arrival counts.
 export function clock(settings) {
