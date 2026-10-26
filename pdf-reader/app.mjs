@@ -1,9 +1,9 @@
-import {marcherReadout,formatCardCoordinate} from './marcher-card.mjs?v=18';
+import {marcherReadout,formatCardCoordinate} from './marcher-card.mjs?v=23';
 import {setupDevice} from './device.mjs?v=22';
 import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows,performerPhase} from './core.mjs?v=14';
 import {extractPDF} from './parser.mjs?v=3';
-import {Field} from './field.mjs?v=22';
+import {Field} from './field.mjs?v=23';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const $=id=>document.getElementById(id),make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -46,7 +46,7 @@ function draw(){const m=current();field.draw(count,selected,$('search').value,ma
 function formatTime(s){return Number.isFinite(s)?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:'0:00';}
 function inspector(){const m=current(),p=m?.people.find(p=>p.id===selected);$('detail').replaceChildren(make('span','MARCHER INSPECTOR','eyebrow'));if(!p){$('detail').append(make('p','Select a dot to inspect its position and next transition.'));return;}
   const l=located(),a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];$('detail').append(make('h2',`${p.instrument} ${p.symbol}${p.label}`));const dl=make('dl');
-  const pair=(k,v)=>dl.append(make('dt',k),make('dd',v));pair('Identity',`Symbol ${p.symbol} · label ${p.label}`);const phase=performerPhase(p,m.sets,count);pair('Set',m.sets[phase.holding?l.next:l.index]?.id||'');pair('Phase',phase.waiting?'Waiting to step off':phase.holding?'Holding at destination':'Marching transition');if(phase.estimated)pair('Timing','Estimated early arrival from step size');if(phase.custom)pair('Timing','Custom marcher phase');if(phase.issue)pair('Timing warning',phase.issue);const info=marcherReadout(p,m,count,project.field.step/36,manualSet);pair('Coordinates',info.status);pair('Left / right',info.side);pair('Front / back',info.depth);if(info.hasNext){pair(`Next ${info.nextSet} L/R`,info.nextSide);pair(`Next ${info.nextSet} F/B`,info.nextDepth);}
+  const pair=(k,v)=>dl.append(make('dt',k),make('dd',v));pair('Identity',`Symbol ${p.symbol} · label ${p.label}`);const phase=performerPhase(p,m.sets,count);pair('Set',m.sets[l.index]?.id||'');pair('Phase',phase.waiting?'Waiting to step off':phase.holding?'Holding at next dot':'Marching transition');if(phase.estimated)pair('Timing','Estimated early arrival from step size');if(phase.custom)pair('Timing','Custom marcher phase');if(phase.issue)pair('Timing warning',phase.issue);const info=marcherReadout(p,m,count,project.field.step/36,manualSet);pair('Current dot',info.status);pair('Left / right',info.side);pair('Front / back',info.depth);if(info.hasNext){pair(`Go to ${info.nextSet} L/R`,info.nextSide);pair(`Go to ${info.nextSet} F/B`,info.nextDepth);}
   if(a&&b){const d=Math.hypot(b.x-a.x,b.y-a.y);pair('Distance',`${d.toFixed(3)} yd · ${(d*36/project.field.step).toFixed(2)} standard steps`);const duration=m.sets[l.next]?.duration;if(duration>0)pair('Step length',`${(d*36/(p.motionPhases[m.sets[l.next]?.id]?.move||duration)).toFixed(2)} inches/count`);}
   const dotNote=m.settings.dotNotes?.[p.id]?.[m.sets[l.index]?.id];if(dotNote)pair('Dot note',dotNote);
   $('detail').append(dl);const edit=make('button','Edit this performer');edit.onclick=()=>{$('rowSearch').value=`${p.instrument} ${p.symbol} ${p.label}`;rowPage=0;renderReview();open('reviewDialog');};$('detail').append(edit);const phaseButton=make('button','Marcher timing');phaseButton.onclick=()=>openPerformerTiming(p.id);$('detail').append(phaseButton);}

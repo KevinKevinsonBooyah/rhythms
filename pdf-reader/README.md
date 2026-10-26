@@ -171,3 +171,11 @@ Set-linked tempo and audio markers follow a set when its count changes. Edited
 projects and attached audio resume from browser storage on the next visit;
 Atlantis remains the default for a fresh browser. Export JSON from Project for
 a portable backup; movement audio must be attached again after JSON import.
+
+Update 23 keeps the selected route anchored to the starting and destination
+dot for the whole transition. The moving marcher leaves a fixed ring at its
+starting position; the thin route, orthogonal step guides, and their numbers
+do not shrink as the marcher travels. The field annotation shows the printed
+coordinates of the destination, and the inspector retains the printed current
+and next coordinates until the set boundary. There is no live interpolated
+front/back or left/right coordinate display.
