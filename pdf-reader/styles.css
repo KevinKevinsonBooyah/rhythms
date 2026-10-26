@@ -54,7 +54,6 @@ body.player-mode.controls-hidden #player{cursor:none}
 body.player-mode .player-top:focus-within,body.player-mode .transport:focus-within{cursor:auto}
 .set-edit{flex-wrap:wrap}.set-edit>small{flex-basis:100%;color:#9b4129}#timingAudit{background:#f3f5ed;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px}#timingAudit ul{padding-left:18px}#timingAudit li{margin-bottom:8px}
 
-#accuracyWarning{background:#ffdddd;color:#982027;border-bottom:1px solid #dfa0a4;text-align:center;font-weight:700;font-size:13px;line-height:1.4;padding:7px 12px;letter-spacing:.1px}body.player-mode #accuracyWarning,:root:fullscreen #accuracyWarning{display:none!important}@media(orientation:landscape){body[data-device=mobile] #accuracyWarning{display:none!important}}
 
 /* Identifiers stay inside each dot; selected coordinates track the dot above it. */
 .marcher>.dot-label{fill:#071d19;stroke:#fff;stroke-opacity:.65;stroke-width:.035px;paint-order:stroke;stroke-linejoin:round;font-family:Manrope,system-ui,sans-serif;font-weight:800;pointer-events:none}.coordinate-label text{fill:#fff;stroke:#102c29;paint-order:stroke;stroke-linejoin:round;font-family:'DM Sans',system-ui,sans-serif;font-weight:600;pointer-events:none}
@@ -66,3 +65,5 @@ body.player-mode .transport-buttons #playerEditDots{display:block!important;min-
 .inspector-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.inspector-actions button{font-size:12px}.inspector-actions button[aria-pressed=true]{background:var(--accent);color:white}
 
 #field .yard{fill:#f4f8e9;fill-opacity:.95;font-weight:700;font-size:2.7px}
+
+#playbackWarningDialog{width:min(460px,92vw)}#playbackWarningDialog h2{font-size:21px;color:#982027}#playbackWarningDialog p{line-height:1.6}
