@@ -23,16 +23,16 @@ export class Field {
   rebuild(movement,options){
     this.movement=movement;this.options=options;this.svg.replaceChildren();this.nodes.clear();
     const defs=el('defs'),turf=el('linearGradient',{id:'field-turf',x1:'0%',y1:'0%',x2:'0%',y2:'100%'});
-    turf.append(el('stop',{offset:'0%','stop-color':'#086a2c'}),el('stop',{offset:'50%','stop-color':'#168345'}),el('stop',{offset:'100%','stop-color':'#086a2c'}));defs.append(turf);this.svg.append(defs);
+    turf.append(el('stop',{offset:'0%','stop-color':'#328b49'}),el('stop',{offset:'50%','stop-color':'#409d55'}),el('stop',{offset:'100%','stop-color':'#328b49'}));defs.append(turf);this.svg.append(defs);
     const bg=el('g');this.svg.append(bg);bg.append(el('rect',{x:-6,y:0,width:112,height:FIELD.width,fill:'url(#field-turf)'}));
-    for(let x=0;x<100;x+=10)bg.append(el('rect',{x,y:0,width:5,height:FIELD.width,fill:'#fff',opacity:.045}));
+    for(let x=0;x<100;x+=10)bg.append(el('rect',{x,y:0,width:5,height:FIELD.width,fill:'#fff',opacity:.025}));
     for(const x of [-6,100])bg.append(el('rect',{x,y:0,width:6,height:FIELD.width,fill:'#003f20',opacity:.35}));
     const line=(x1,y1,x2,y2,opacity=.3,width=.12)=>bg.append(el('line',{x1,y1,x2,y2,stroke:'white','stroke-opacity':opacity,'stroke-width':width}));
     if(options.grid)for(let x=0;x<=100;x+=.625)line(x,0,x,FIELD.width,.045,.06);
     if(options.grid)for(let y=0;y<=FIELD.width;y+=.625)line(0,y,100,y,.045,.06);
-    for(let x=0;x<=100;x+=5){line(x,0,x,FIELD.width,x%10===0?.64:.32,x%10===0?.15:.09);if(x>0&&x<100&&x%10===0){const label=x<=50?x:100-x;bg.append(el('text',{x,y:7,'text-anchor':'middle',class:'yard'},label));bg.append(el('text',{x,y:FIELD.width-5,'text-anchor':'middle',class:'yard'},label));}}
+    for(let x=0;x<=100;x+=5){line(x,0,x,FIELD.width,x%10===0?.9:.68,x%10===0?.2:.14);if(x>0&&x<100&&x%10===0){const label=x<=50?x:100-x;bg.append(el('text',{x,y:7,'text-anchor':'middle',transform:`rotate(180 ${x} 6)`,class:'yard'},label));bg.append(el('text',{x,y:FIELD.width-5,'text-anchor':'middle',class:'yard'},label));}}
     for(let x=0;x<=100;x++){line(x,0,x,1.25,.75,.1);line(x,FIELD.width-1.25,x,FIELD.width,.75,.1);}
-    for(const y of [FIELD.frontHash,FIELD.backHash])for(let x=1;x<100;x++)line(x-.25,y,x+.25,y,.65,.15);
+    for(const y of [FIELD.frontHash,FIELD.backHash])for(let x=1;x<100;x++)line(x,y-.7,x,y+.7,.9,.15);
     line(-6,0,106,0,.9,.17);line(-6,FIELD.width,106,FIELD.width,.9,.17);line(-6,0,-6,FIELD.width,.9,.17);line(106,0,106,FIELD.width,.9,.17);
     for(const [x,name] of [[-3,!!this.options.swap!==!!this.options.flip?'SIDE 2':'SIDE 1'],[103,!!this.options.swap!==!!this.options.flip?'SIDE 1':'SIDE 2']])bg.append(el('text',{x,y:FIELD.width/2,'text-anchor':'middle','dominant-baseline':'central',transform:`rotate(-90 ${x} ${FIELD.width/2})`,class:'endzone-label'},name));
     const label=(x,y,text,anchor='middle')=>bg.append(el('text',{x,y,'text-anchor':anchor,class:'field-label'},text));
@@ -52,7 +52,7 @@ export class Field {
       if(pathIds.has(p.id)){let previous=null;for(const set of m.sets){const point=p.positions[set.id];if(!point){previous=null;continue;}const q=this.project(point);if(previous)this.path.append(el('line',{x1:previous.x,y1:previous.y,x2:q.x,y2:q.y,stroke:this.colors.get(p.instrument),'stroke-width':.18,opacity:.7}));this.path.append(el('circle',{cx:q.x,cy:q.y,r:.35,fill:'none',stroke:this.colors.get(p.instrument),'stroke-width':.15}));previous=q;}}
       g.setAttribute('transform',`translate(${xy.x} ${xy.y})`);g.style.opacity=matches||this.options.noSearchFade?1:.55;g.lastChild.style.display=this.options.labels?'':'none';g.firstChild.setAttribute('stroke',selected===p.id?'#ffffff':'#102c29');const size=+this.options.dotSize||1;g.firstChild.setAttribute('stroke-width',(selected===p.id?.22:.12)*size);g.firstChild.setAttribute('r',.48*size);
       this.fitDotLabel(g,size);
-      if(p.id===selected){const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];if(a&&b){const aa=this.project(a),bb=this.project(b);this.drawCoordinateLabel(p,bb,l.next,size);if(this.options.paths)this.drawSelectedPath(aa,bb,size);if(this.options.ghosts)for(const q of [aa,bb])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*(+this.options.dotSize||1),fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*(+this.options.dotSize||1)}));}else this.drawCoordinateLabel(p,xy,l.index,size);if(this.lastSelected!==selected){this.svg.append(g,this.coordinateLabel);this.lastSelected=selected;}}
+      if(p.id===selected){const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];if(a&&b){const aa=this.project(a),bb=this.project(b);this.drawCoordinateLabel(p,bb,l.next,size);if(this.options.paths)this.drawSelectedPath(aa,bb,size);if(this.options.ghosts)for(const q of [aa,bb])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*(+this.options.dotSize||1),fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*(+this.options.dotSize||1)}));}else this.drawCoordinateLabel(p,xy,l.index,size);if(this.lastSelected!==selected){this.svg.append(g,this.measurements,this.coordinateLabel);this.lastSelected=selected;}}
     }
   }
   drawSelectedPath(from,to,size){

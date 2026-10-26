@@ -64,3 +64,5 @@ body.player-mode .transport-buttons #playerEditDots{display:block!important;min-
 .search-bright{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink);margin:3px 0 10px}.search-bright input{flex:none}.dot-editor>details{margin-top:7px}.dot-editor details details{margin:12px 0 2px;padding-left:9px;border-left:2px solid var(--border)}.dot-editor>label:first-of-type{font-size:13px}
 
 .inspector-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.inspector-actions button{font-size:12px}.inspector-actions button[aria-pressed=true]{background:var(--accent);color:white}
+
+#field .yard{fill:#f4f8e9;fill-opacity:.95;font-weight:700;font-size:2.7px}
