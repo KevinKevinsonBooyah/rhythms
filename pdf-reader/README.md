@@ -159,3 +159,15 @@ Thin horizontal and vertical guides show screen left/right and up/down travel
 in standard steps when there is room to label them. The field adds subdued
 end zones, yard stripes, sideline ticks and brighter turf without changing
 the canonical coordinate system.
+
+Update 22 labels the end zones Side 1 and Side 2, respecting field swaps and
+rotation, and renames Templates to Current shows. Edit dots is available beside
+Marchers and in the mobile navigation. Choose a performer and set to correct
+card coordinates or yard positions, nudge by standard steps, copy a neighboring
+dot, or restore the original PDF position. Per-performer wait and marching
+counts, shared interval length and march/hold split, count arrival shifts, BPM,
+set-linked audio seconds, set title/measure, and performer notes can be edited.
+Set-linked tempo and audio markers follow a set when its count changes. Edited
+projects and attached audio resume from browser storage on the next visit;
+Atlantis remains the default for a fresh browser. Export JSON from Project for
+a portable backup; movement audio must be attached again after JSON import.

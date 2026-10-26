@@ -35,7 +35,7 @@ export class Field {
     for(let x=0;x<=100;x++){line(x,0,x,1.25,.75,.1);line(x,FIELD.width-1.25,x,FIELD.width,.75,.1);}
     for(const y of [FIELD.frontHash,FIELD.backHash])for(let x=1;x<100;x++)line(x-.25,y,x+.25,y,.65,.15);
     line(-6,0,106,0,.9,.17);line(-6,FIELD.width,106,FIELD.width,.9,.17);line(-6,0,-6,FIELD.width,.9,.17);line(106,0,106,FIELD.width,.9,.17);
-    for(const x of [-3,103])bg.append(el('text',{x,y:FIELD.width/2,'text-anchor':'middle','dominant-baseline':'central',transform:`rotate(-90 ${x} ${FIELD.width/2})`,class:'endzone-label'},'TOUCHDOWN'));
+    for(const [x,name] of [[-3,!!this.options.swap!==!!this.options.flip?'SIDE 2':'SIDE 1'],[103,!!this.options.swap!==!!this.options.flip?'SIDE 1':'SIDE 2']])bg.append(el('text',{x,y:FIELD.width/2,'text-anchor':'middle','dominant-baseline':'central',transform:`rotate(-90 ${x} ${FIELD.width/2})`,class:'endzone-label'},name));
     const label=(x,y,text,anchor='middle')=>bg.append(el('text',{x,y,'text-anchor':anchor,class:'field-label'},text));
     label(50,-3,this.options.flip?'FRONT SIDELINE':'BACK SIDELINE');label(50,FIELD.width+4,this.options.flip?'BACK SIDELINE':'FRONT SIDELINE');
     label(18,-3,`SIDE ${(options.swap!==options.flip)?2:1}`);label(82,-3,`SIDE ${(options.swap!==options.flip)?1:2}`);

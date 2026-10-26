@@ -12,7 +12,7 @@ export function setupDevice({pause,fit}) {
   $('player').addEventListener('pointermove',wake,{passive:true});
   $('player').addEventListener('keydown',wake);
   $('player').addEventListener('focusout',wake);
-  function view(name){body.dataset.mobileView=name;document.querySelectorAll('button[data-mobile-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mobileView===name));if(name!=='field')$(name==='sets'?'setsTab':'peopleTab').click();}
+  function view(name){body.dataset.mobileView=name;document.querySelectorAll('button[data-mobile-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mobileView===name));if(name!=='field')$(name==='sets'?'setsTab':name==='edit'?'dotsTab':'peopleTab').click();}
   function enter(){body.classList.add('player-mode');wake();body.classList.remove('drawer-open');fit();}
   function leave(){if(active())pause();body.classList.remove('player-mode','drawer-open');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}
   function orient(){if(device==='mobile'&&landscape.matches&&phone.matches&&!dismissed)enter();else leave();}
@@ -27,7 +27,7 @@ export function setupDevice({pause,fit}) {
   document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&active()){dismissed=true;leave();}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&active()&&!document.querySelector('dialog[open]')){dismissed=true;leave();}});
   $('playerFit').onclick=fit;
-  for(const [id,tab] of [['playerSets','setsTab'],['playerMarchers','peopleTab']])$(id).onclick=()=>{body.classList.toggle('drawer-open',!body.classList.contains('drawer-open')||!$(tab).classList.contains('active'));$(tab).click();};
+  for(const [id,tab] of [['playerSets','setsTab'],['playerMarchers','peopleTab'],['playerEditDots','dotsTab']])$(id).onclick=()=>{body.classList.toggle('drawer-open',!body.classList.contains('drawer-open')||!$(tab).classList.contains('active'));$(tab).click();};
   $('closeDrawer').onclick=()=>body.classList.remove('drawer-open');
   // Keep loop controls as the same DOM elements, so there is only one playback state.
   const loopHomes=['loopStart','loopEnd'].map(id=>({id,parent:$(id).parentElement,next:$(id).nextSibling}));
