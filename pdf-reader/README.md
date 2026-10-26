@@ -84,3 +84,10 @@ counts and displays these notes in Audio & timing, where exact set/audio
 alignment can be edited. The clarinet PDF is not redistributed by the site.
 
 Validation: `node --test pdf-reader/tests/*.test.mjs` from the repository root.
+
+Update 11 supersedes the opening-count assumptions above: provisional removal
+of the printed +20 gives 15 counts into 1A and 15 into set 2. The user suspects
++20 is a card mistake; this remains unconfirmed. Set 2 is now count 30, the
+measure-29 tempo change is count 120, and the final dot is count 476 at about
+188.31 seconds, compared with the 189.48-second recording. Matching the overall
+duration is supporting evidence, not proof of individual set alignment.

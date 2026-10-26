@@ -9,7 +9,7 @@ test('Atlantis movement tracks are distinct and all score tempo maps validate',(
  for(const m of movements){validateTiming(m.settings);assert.ok(fs.statSync(new URL('../templates/atlantis/'+m.settings.audioFile,import.meta.url)).size>1000000);}
 });
 test('score tempo changes apply inside transitions without a discontinuity',()=>{
- for(const [i,bpm,change,next]of [[0,140,140,172],[1,86,96,90],[2,90,32,172]]){
+ for(const [i,bpm,change,next]of [[0,140,120,172],[1,86,96,90],[2,90,32,172]]){
   const s=movements[i].settings,c=clock(s);assert.equal(s.bpm,bpm);
   assert.ok(Math.abs(c.toSeconds(change)-(s.offset+change*60/bpm))<1e-7);
   assert.ok(Math.abs(c.toSeconds(change+4)-c.toSeconds(change)-240/next)<1e-7);
@@ -21,6 +21,6 @@ test('Movement 1 retains the requested intro hold and Movement 2 changes at set 
  const m=movements[1];assert.equal(starts(m.sets)[m.sets.findIndex(s=>s.id==='27')],96);
 });
 
-test('opening subset uses three 5/4 measures and preserves downstream musical counts',()=>{
- const m=movements[0],ss=starts(m.sets);assert.equal(ss[m.sets.findIndex(s=>s.id==='1A')],15);assert.equal(ss[m.sets.findIndex(s=>s.id==='2')],50);assert.equal(ss.at(-1),496);
+test('provisional opening removes 20 counts and finishes within the movement track',()=>{
+ const m=movements[0],ss=starts(m.sets);assert.equal(ss[m.sets.findIndex(s=>s.id==='1A')],15);assert.equal(ss[m.sets.findIndex(s=>s.id==='2')],30);assert.equal(ss.at(-1),476);const end=clock(m.settings).toSeconds(ss.at(-1));assert.ok(end>187&&end<189.48);
 });
