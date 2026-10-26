@@ -125,3 +125,9 @@ This is explicitly an estimate, not reconstructed choreography. Disable it in
 Audio & timing. Per-marcher custom start/march counts override the estimate via
 Select marcher > Marcher timing. Overrides persist in project settings without
 changing the shared count/audio clock.
+
+
+Update 15 loads Atlantis automatically on startup, without autoplaying music
+or replacing an existing IndexedDB save. Manual template selection still asks
+before replacing an open project. A prominent red warning uses the user's
+exact wording and remains visible in the fullscreen player when controls fade.

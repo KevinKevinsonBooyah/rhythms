@@ -53,3 +53,5 @@ body.player-mode.controls-hidden .player-top,body.player-mode.controls-hidden .t
 body.player-mode.controls-hidden #player{cursor:none}
 body.player-mode .player-top:focus-within,body.player-mode .transport:focus-within{cursor:auto}
 .set-edit{flex-wrap:wrap}.set-edit>small{flex-basis:100%;color:#9b4129}#timingAudit{background:#f3f5ed;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px}#timingAudit ul{padding-left:18px}#timingAudit li{margin-bottom:8px}
+
+#accuracyWarning{position:sticky;top:0;z-index:90;background:#bd151b;color:#fff;border-bottom:4px solid #85090d;text-align:center;font-weight:800;font-size:clamp(20px,2.3vw,30px);line-height:1.3;padding:17px 20px;letter-spacing:.3px}body.player-mode #accuracyWarning{display:block!important;position:fixed;top:56px;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));z-index:105;font-size:clamp(11px,1.7vw,18px);padding:6px 10px;border:1px solid #ff6f73;border-radius:6px;pointer-events:none}body.player-mode.controls-hidden #accuracyWarning{top:max(8px,env(safe-area-inset-top))}
