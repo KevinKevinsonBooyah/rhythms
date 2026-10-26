@@ -5,8 +5,15 @@ export function setupDevice({pause,fit}) {
   const landscape=matchMedia('(orientation: landscape)'),phone=matchMedia('(max-height: 600px), (pointer: coarse)');
   let device='',dismissed=false;
   const active=()=>body.classList.contains('player-mode');
+  let hideTimer;
+  function wake(){body.classList.remove('controls-hidden');clearTimeout(hideTimer);if(active())hideTimer=setTimeout(()=>{if(!body.classList.contains('drawer-open')&&!document.querySelector('dialog[open]')&&!$('player').querySelector(':focus-visible'))body.classList.add('controls-hidden');},3000);}
+  // A first tap reveals hidden controls; it does not also select a marcher.
+  $('player').addEventListener('pointerdown',e=>{if(active()&&body.classList.contains('controls-hidden')){e.preventDefault();e.stopImmediatePropagation();}wake();},true);
+  $('player').addEventListener('pointermove',wake,{passive:true});
+  $('player').addEventListener('keydown',wake);
+  $('player').addEventListener('focusout',wake);
   function view(name){body.dataset.mobileView=name;document.querySelectorAll('button[data-mobile-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mobileView===name));if(name!=='field')$(name==='sets'?'setsTab':'peopleTab').click();}
-  function enter(){body.classList.add('player-mode');body.classList.remove('drawer-open');fit();}
+  function enter(){body.classList.add('player-mode');wake();body.classList.remove('drawer-open');fit();}
   function leave(){if(active())pause();body.classList.remove('player-mode','drawer-open');if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}
   function orient(){if(device==='mobile'&&landscape.matches&&phone.matches&&!dismissed)enter();else leave();}
   function choose(value){device=value;body.dataset.device=value;dismissed=false;try{localStorage.setItem('fieldbook-device',value);}catch{}$('deviceDialog').close();view('field');orient();}

@@ -1,4 +1,4 @@
-import {setupDevice} from './device.mjs?v=8';
+import {setupDevice} from './device.mjs?v=9';
 import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows} from './core.mjs';
 import {extractPDF} from './parser.mjs?v=3';
@@ -56,13 +56,19 @@ async function play(){if(playing){pause();return;}const m=current();if(!m?.sets.
   if(count>=maxCount())seek(0);if($('loop').checked){const ss=starts(m.sets);if(count<ss[+$('loopStart').value]||count>=ss[+$('loopEnd').value])seek(ss[+$('loopStart').value]);}
   seconds=audioUrls.has(active)&&count===0?(audio.currentTime<timing().toSeconds(0)?audio.currentTime:0):timing().toSeconds(count);playing=true;lastFrame=performance.now();lastClick=-1;
   countInLeft=+m.settings.countIn||0;countInElapsed=0;if(countInLeft){beep(true);}else await startAudio();draw();}
+async function finishMovement(){
+  pause();const next=movements[movements.findIndex(m=>m.name===active)+1];
+  if(!next){status('Show complete.');return;}
+  active=next.name;count=0;seconds=0;manualSet=null;selected='';followId='';
+  attachCurrentAudio();renderMovement();status(`Continuing to ${active}.`);await play();
+}
 function frame(now){if(playing){const dt=((now-lastFrame)/1000)*+$('speed').value;const m=current();
     if(countInLeft>0){const before=Math.ceil(countInLeft);countInLeft-=dt*m.settings.bpm*m.settings.subdivision/60;if(Math.ceil(countInLeft)!==before&&countInLeft>0)beep();if(countInLeft<=0){countInLeft=0;startAudio();}}
     else {
-      if(audioUrls.has(active)){seconds=audio.currentTime;if(audio.ended){pause();status('Audio ended. Reattach a longer track or remove audio to continue silently.');}}
+      if(audioUrls.has(active)){seconds=audio.currentTime;if(audio.ended&&!$('loop').checked){finishMovement();lastFrame=now;requestAnimationFrame(frame);return;}}
       else seconds+=dt;
       count=timing().toCount(seconds);const end=$('loop').checked?starts(m.sets)[+$('loopEnd').value]:maxCount();
-      if(count>=end){if($('loop').checked){seek(starts(m.sets)[+$('loopStart').value]);if(audioUrls.has(active)&&audio.paused)startAudio();}else{seek(maxCount());pause();}}
+      if(count>=end){if($('loop').checked){seek(starts(m.sets)[+$('loopStart').value]);if(audioUrls.has(active)&&audio.paused)startAudio();}else if(!audioUrls.has(active)){finishMovement();lastFrame=now;requestAnimationFrame(frame);return;}else{count=maxCount();}}
       const pulse=Math.floor(count);if(pulse!==lastClick&&seconds>=timing().toSeconds(0)){beep(pulse%(m.settings.beats*m.settings.subdivision)===0);lastClick=pulse;inspector();}
     }draw();}lastFrame=now;requestAnimationFrame(frame);}
 function stepSet(delta){pause();const m=current();if(!m)return;const l=located();goSet(Math.max(0,Math.min(m.sets.length-1,l.index+delta)));}
@@ -129,7 +135,7 @@ rebuild();syncFieldInputs();requestAnimationFrame(frame);get('project').then(dat
 
 $('updatesButton').onclick=()=>open('updatesDialog');
 $('templatesButton').onclick=()=>open('templatesDialog');
-$('atlantisTemplate').onclick=async()=>{if(project.rows.length&&!confirm('Load Atlantis and replace the current project? Export your project first to keep it.'))return;const button=$('atlantisTemplate');button.disabled=true;$('templateStatus').textContent='Loading Atlantis and three movement tracks…';try{const pr=await fetch('templates/atlantis/project.json?v=8');if(!pr.ok)throw Error('Template could not load.');const data=await pr.json();const tracks=await Promise.all(Object.entries(data.settings).map(async([name,s])=>{if(!/^movement-[123]\.mp3$/.test(s.audioFile))throw Error('Invalid template audio file.');const r=await fetch('templates/atlantis/'+s.audioFile);if(!r.ok)throw Error('Movement audio could not load.');return {name,blob:await r.blob(),label:s.audioFile.replace('movement-','AtlantisMvnt')};}));applyProject(data);followId='';pathIds.clear();for(const {name,blob,label}of tracks){audioBlobs.set(name,blob);audioNames.set(name,label);audioUrls.set(name,URL.createObjectURL(blob));}attachCurrentAudio();changed();close('templatesDialog');status('Atlantis loaded with separate movement tracks and score tempos. Movement 1 delay: 12.7s. See Audio & timing for score/recording alignment notes.');}catch(e){$('templateStatus').textContent=e.message;}finally{button.disabled=false;}};
+$('atlantisTemplate').onclick=async()=>{if(project.rows.length&&!confirm('Load Atlantis and replace the current project? Export your project first to keep it.'))return;const button=$('atlantisTemplate');button.disabled=true;$('templateStatus').textContent='Loading Atlantis and three movement tracks…';try{const pr=await fetch('templates/atlantis/project.json?v=9');if(!pr.ok)throw Error('Template could not load.');const data=await pr.json();const tracks=await Promise.all(Object.entries(data.settings).map(async([name,s])=>{if(!/^movement-[123]\.mp3$/.test(s.audioFile))throw Error('Invalid template audio file.');const r=await fetch('templates/atlantis/'+s.audioFile);if(!r.ok)throw Error('Movement audio could not load.');return {name,blob:await r.blob(),label:s.audioFile.replace('movement-','AtlantisMvnt')};}));applyProject(data);followId='';pathIds.clear();for(const {name,blob,label}of tracks){audioBlobs.set(name,blob);audioNames.set(name,label);audioUrls.set(name,URL.createObjectURL(blob));}attachCurrentAudio();changed();close('templatesDialog');status('Atlantis loaded with separate movement tracks and score tempos. Movement 1 delay: 12.7s. See Audio & timing for score/recording alignment notes.');}catch(e){$('templateStatus').textContent=e.message;}finally{button.disabled=false;}};
 
 $('toggleLabels').onclick=()=>{project.field.labels=!project.field.labels;$('labels').checked=project.field.labels;renderMovement();changed();};
 $('alignAtAudio').onclick=()=>{try{const m=current();if(!m||!audioUrls.has(active))throw Error('Attach movement audio first.');if(m.sets.some(s=>s.timingIssue))throw Error('Correct missing transition counts before aligning sets.');const i=+$('alignSet').value,c=starts(m.sets)[i],seconds=$('timingPreview').currentTime;if(i===0)$('offset').value=seconds.toFixed(3);else{const markers=parsePairs($('syncMap').value,'seconds').filter(a=>a.count!==c);markers.push({count:c,seconds});markers.sort((a,b)=>a.count-b.count);$('syncMap').value=markers.map(a=>`${a.count}, ${a.seconds.toFixed(3)}`).join('\n');}}catch(e){alert(e.message);}};

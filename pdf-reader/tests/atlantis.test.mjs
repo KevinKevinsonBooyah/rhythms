@@ -20,3 +20,7 @@ test('Movement 1 retains the requested intro hold and Movement 2 changes at set 
  const c=clock(movements[0].settings);assert.equal(c.toSeconds(0),12.7);assert.equal(c.toCount(12.699),0);
  const m=movements[1];assert.equal(starts(m.sets)[m.sets.findIndex(s=>s.id==='27')],96);
 });
+
+test('opening subset uses three 5/4 measures and preserves downstream musical counts',()=>{
+ const m=movements[0],ss=starts(m.sets);assert.equal(ss[m.sets.findIndex(s=>s.id==='1A')],15);assert.equal(ss[m.sets.findIndex(s=>s.id==='2')],50);assert.equal(ss.at(-1),496);
+});
