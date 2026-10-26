@@ -87,10 +87,11 @@ export class Field {
     const set=this.movement.sets[setIndex],row=person.positions[set?.id]?.row;
     if(!row)return;
     const box=this.svg.getBoundingClientRect(),view=this.svg.viewBox.baseVal,scale=Math.min(box.width/view.width,box.height/view.height);if(!(scale>0))return;
-    const font=10/scale,gap=32/scale,line=font*1.35;
+    const font=14/scale,gap=42/scale,line=font*1.3;
     const texts=[`Go to ${set.id} · ${row.side}`,row.depth];
     this.coordinateLines.forEach((t,i)=>{if(t.textContent!==texts[i])t.textContent=texts[i];t.setAttribute('y',i===0?-line:0);t.style.fontSize=`${font}px`;t.style.strokeWidth=`${font*.25}px`;});
-    this.coordinateLabel.style.display='';const bounds=this.coordinateLabel.getBBox(),margin=3/scale;
+    this.coordinateLabel.style.display='';this.coordinateLabel.querySelector('.coordinate-backdrop')?.remove();const bounds=this.coordinateLabel.getBBox(),margin=5/scale;
+    const pad=5/scale,back=el('rect',{class:'coordinate-backdrop',x:bounds.x-pad,y:bounds.y-pad,width:bounds.width+pad*2,height:bounds.height+pad*2,rx:4/scale,fill:'#0b3029','fill-opacity':.94,stroke:'#ffe0a0','stroke-width':.8/scale});this.coordinateLabel.insertBefore(back,this.coordinateLines[0]);
     const half=bounds.width/2,x=Math.max(view.x+half+margin,Math.min(view.x+view.width-half-margin,xy.x));
     const y=Math.max(view.y-bounds.y+margin,xy.y-.48*size-gap);
     this.coordinateLabel.setAttribute('transform',`translate(${x} ${y})`);this.coordinateLabel.setAttribute('aria-label',`Go to set ${set.id}: ${row.side}; ${row.depth}`);
