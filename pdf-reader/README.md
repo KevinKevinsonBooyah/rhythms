@@ -91,3 +91,10 @@ of the printed +20 gives 15 counts into 1A and 15 into set 2. The user suspects
 measure-29 tempo change is count 120, and the final dot is count 476 at about
 188.31 seconds, compared with the 189.48-second recording. Matching the overall
 duration is supporting evidence, not proof of individual set alignment.
+
+Update 12 supersedes the provisional opening above with the user's observed
+COUNT-display cue: set 2 arrives at 20.7 and immediately starts moving to 2A.
+Set 1A remains at 15, and 2A, 2B, 3 arrive at 30.7, 40.7, 50.7. These fractional
+counts are provisional playback calibration, not verified source counts.
+The subsequent tempo cue moves to 110.7 to preserve its location within the
+drill after shortening the opening.
