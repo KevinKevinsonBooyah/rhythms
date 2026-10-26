@@ -1,4 +1,4 @@
-import {FIELD,positionAt,locate} from './core.mjs?v=13';
+import {FIELD,positionAt,locate} from './core.mjs?v=14';
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
 export class Field {

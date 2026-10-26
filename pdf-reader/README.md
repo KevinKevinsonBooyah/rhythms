@@ -111,3 +111,17 @@ show; 5 conflicting phrases remain (M1: 2, 5, 13; M3: 32, 38). The opening
 calibration remains provisional. Timing audit is visible under Audio & timing.
 The clock already followed audio.currentTime; the main defect was allocating
 all elapsed counts to motion instead of modeling a hold at the destination.
+
+
+Update 14 fixes all 48 missing Atlantis coordinate rows, which used the valid
+centerline form `On 50 yd ln` without a side prefix. That form now resolves to
+x=50; unprefixed non-center yard lines remain ambiguous. All 108 performers
+have known coordinates at all sets and sampled transitions in all movements.
+
+Atlantis enables optional estimated early arrival on already-resolved hold
+phrases: shorter paths use ceil(distance / configured step size) march counts,
+capped by the phrase's march window, then hold. Zero-distance paths stay still.
+This is explicitly an estimate, not reconstructed choreography. Disable it in
+Audio & timing. Per-marcher custom start/march counts override the estimate via
+Select marcher > Marcher timing. Overrides persist in project settings without
+changing the shared count/audio clock.

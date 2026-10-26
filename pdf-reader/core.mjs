@@ -19,6 +19,7 @@ export function coordinate(sideText,depthText,step=0.625) {
       x=sm[1]==='1'?line+offset:100-line-offset;
     }
   }
+  if(/^On\s+50\s*(?:yd\.?\s*(?:ln|line)|yard\s*line)\.?$/i.test(side))x=50;
   if(x===null) errors.push('Unrecognized side coordinate');
   const dm=depth.match(/^(?:(On)|(.+?)\s*steps?\s*(in front of|behind))\s*(Front|Back)\s*(Hash(?:\s*\(HS\))?|side\s*line|sideline)\.?$/i);
   if(dm) {
@@ -69,6 +70,7 @@ export function compile(rows,old={},step=.625) {
       people.push({id:key,instrument:first.instrument,symbol:first.symbol,label:first.label,positions});
     }
     applyPhases(sets,people,previous);
+    applyPerformerPhases(sets,people,previous,step);
     movements.push({name,sets,people,settings:{bpm:120,offset:0,tempo:[],markers:[],beats:4,subdivision:1,countIn:0,...previous}});
   }
   return movements;
@@ -92,6 +94,21 @@ export function applyPhases(sets,people,settings){
     s.holdCounts=Math.max(0,(s.duration||0)-(s.moveCounts||0));
   }
 }
+export function applyPerformerPhases(sets,people,settings,step){
+  for(const p of people){p.motionPhases={};for(let i=1;i<sets.length;i++){
+    const s=sets[i],a=p.positions[sets[i-1].id],b=p.positions[s.id],distance=a&&b?Math.hypot(a.x-b.x,a.y-b.y):null;
+    let phase={start:0,move:distance===0?0:s.moveCounts??s.duration,estimated:false,custom:false};
+    if(settings.naturalArrival&&s.holdCounts>0&&distance!==null&&step>0){const required=distance<1e-8?0:Math.max(1,Math.ceil(distance/step-1e-9));if(required<phase.move)phase={...phase,move:required,estimated:true};}
+    const custom=settings.performerPhases?.[p.id]?.[s.id];
+    if(custom){if(Number.isFinite(custom.start)&&Number.isFinite(custom.move)&&custom.start>=0&&custom.move>=0&&custom.start+custom.move<=s.duration&&(custom.move>0||distance===0))phase={start:custom.start,move:custom.move,estimated:false,custom:true};else phase.issue='Invalid marcher timing; using the default phase.';}
+    p.motionPhases[s.id]=phase;
+  }}
+}
+export function performerPhase(person,sets,count){
+  const l=locate(sets,count),s=sets[l.next],phase=person.motionPhases?.[s?.id]||{start:0,move:s?.moveCounts??s?.duration??0};
+  const elapsed=Math.max(0,count-l.start),progress=l.next===l.index?0:Math.max(0,Math.min(1,phase.move>0?(elapsed-phase.start)/phase.move:elapsed>=phase.start?1:0));
+  return {...phase,progress,waiting:elapsed<phase.start,holding:l.next!==l.index&&elapsed>=phase.start+phase.move};
+}
 export function starts(sets) {
   let c=0;return sets.map((s,i)=>{if(i) c+=s.duration>0?s.duration:0;return c;});
 }
@@ -105,7 +122,7 @@ export function locate(sets,count) {
 export function positionAt(person,sets,count) {
   if(!sets.length)return null;
   const l=locate(sets,count),a=person.positions[sets[l.index].id],b=person.positions[sets[l.next].id];
-  const progress=l.motionT;
+  const progress=performerPhase(person,sets,count).progress;
   if(!a || (progress>0&&!b))return null;
   return {x:a.x+((b?.x??a.x)-a.x)*progress,y:a.y+((b?.y??a.y)-a.y)*progress};
 }

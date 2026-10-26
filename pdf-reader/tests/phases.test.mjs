@@ -24,3 +24,11 @@ test('coordinate-changing subsets during a claimed full hold are flagged instead
  const extra=[rows[0],{...rows[1],set:'1A',title:'Subset',measure:'Subset',counts:'8',side:'Side 1: On 35 yd ln'},{...rows[1],title:'8+12',counts:'12'}];
  const m=compile(extra,{Demo:{holdMode:'title'}})[0];assert.match(m.sets[2].motionIssue,/coordinates change/);assert.equal(m.sets[2].moveCounts,12);
 });
+test('short paths can arrive earlier by step-size estimate without changing the audio timeline',()=>{
+ const small=rows.map(r=>r.set==='2'?{...r,side:'Side 1: On 32 yd ln'}:r),m=compile(small,{Demo:{holdMode:'title',naturalArrival:true}})[0],p=m.people[0];
+ assert.equal(p.motionPhases['2'].move,4);assert.equal(p.motionPhases['2'].estimated,true);assert.equal(positionAt(p,m.sets,4).x,32);assert.equal(positionAt(p,m.sets,15).x,32);assert.deepEqual(starts(m.sets),[0,20]);
+});
+test('per-marcher step-off and early hold override the estimate and survive reconstruction',()=>{
+ const initial=compile(rows)[0],id=initial.people[0].id,settings={Demo:{holdMode:'title',naturalArrival:true,performerPhases:{[id]:{'2':{start:3,move:5}}}}};
+ const m=compile(rows,JSON.parse(JSON.stringify(settings)))[0],p=m.people[0];assert.equal(positionAt(p,m.sets,2).x,30);assert.equal(positionAt(p,m.sets,5.5).x,35);assert.equal(positionAt(p,m.sets,8).x,40);assert.equal(positionAt(p,m.sets,19).x,40);assert.equal(p.motionPhases['2'].custom,true);
+});

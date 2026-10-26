@@ -37,3 +37,9 @@ test('Atlantis resolves whole-phrase holds without changing any set or tempo cue
   }
  }
 });
+test('all 108 Atlantis marchers retain known positions through every set and transition',()=>{
+ for(const m of movements){assert.equal(m.people.length,108);const times=starts(m.sets);for(const p of m.people)for(let i=0;i<m.sets.length;i++){
+  assert.ok(p.positions[m.sets[i].id],`${m.name} ${p.label} ${m.sets[i].id}`);
+  assert.ok(positionAt(p,m.sets,times[i]));if(i)assert.ok(positionAt(p,m.sets,(times[i-1]+times[i])/2));
+ }}
+});

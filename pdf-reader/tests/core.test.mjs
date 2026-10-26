@@ -25,3 +25,9 @@ test('OCR header split into words and slight baseline differences',()=>{const a=
 test('Text fallback never splits a side coordinate at its numeric offset',()=>{const text='1A After 3 Subset 40 Side 1: 3.0 steps inside 45 yd ln 2.0 steps behind Front side line';const p=parsePage([{text,x:0,y:0,height:10}]);assert.equal(p.rows[0].side,'Side 1: 3.0 steps inside 45 yd ln');assert.equal(p.rows[0].depth,'2.0 steps behind Front side line');assert.equal(p.rows[0].counts,'40');});
 test('Merged duplicates retain multiple source file identities',()=>{const a={...row('1',''),fileId:'a'},b={...row('1',''),fileId:'b'};assert.deepEqual(mergeRows([a],[b]).rows[0].sources,['a','b']);});
 test('Real-card metadata above table does not hide rows or pollute labels',()=>{const a=items().filter(i=>i.y<200);a.push({text:'Performer: Alto Sax Symbol: A Label: 1 Golden Valley 2026 Mvt 1',x:20,y:0,height:10});const p=parsePage(a);assert.equal(p.rows.length,3);assert.equal(p.rows[0].label,'1');assert.equal(p.rows[0].movement,'Golden Valley 2026 Mvt 1');assert.equal(p.rows[0].instrument,'Alto Sax');});
+
+test('centerline without a side prefix is unambiguous; other unprefixed yard lines stay unknown',()=>{
+ assert.equal(coordinate('On 50 yd ln','On Front Hash').x,50);
+ assert.equal(coordinate('On 50 yard line','On Front Hash').x,50);
+ assert.equal(coordinate('On 45 yd ln','On Front Hash').valid,false);
+});
