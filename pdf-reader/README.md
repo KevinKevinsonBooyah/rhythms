@@ -51,3 +51,36 @@ Verified in Chromium: 108-page PDF, 648 extracted rows, 108 unique performers, o
 Add audio now opens a waveform editor. Every current movement gets a start/end range that must be confirmed before applying. Drag the gold handles, use Start here/End here at the preview playhead, or enter seconds. Nonoverlapping ranges create separate PCM WAV blobs for each movement and persist in browser saves. Initial equal divisions are only suggestions. Times and delay controls become relative to the resulting clip; previous sync markers are cleared when replacing clips.
 
 Hide labels/Show labels is an explicit button above the field. New Atlantis template projects use a 12.7-second Movement 1 offset. The first transition still uses the source card's 40 counts; default tempo is not a verified Atlantis tempo. Audio & timing includes a preview and set alignment control that creates count/audio sync anchors, allowing real recording timings to replace the default tempo-derived durations. Pausing during the initial wait now resumes the remaining wait rather than restarting it.
+
+## Mobile layout and Atlantis score timing (update 8)
+
+First visit asks Mobile or Computer; Device layout changes the saved preference.
+Mobile has separate Field, Sets and Marchers views. Landscape phones enter a
+viewport-fitted field player with play/pause, previous/next, set and movement
+selectors, sets/marchers drawers, and a Tools menu (dot size, labels, fit, zoom,
+flip, speed, volume, metronome, loops and timing). X exits; rotating back or
+leaving fullscreen pauses playback. The in-page player works without a native
+fullscreen API. Selection/ghost outlines scale with the dot-size slider; the
+browser focus rectangle around the SVG label is replaced with a dot outline.
+
+Atlantis now loads `movement-1.mp3`, `movement-2.mp3`, and `movement-3.mp3`.
+Reload Templates > Atlantis to get the update; existing saved custom projects
+are not silently overwritten. Tempo markings were visually read from the
+user's Clarinet in Bb 1 part (pages 1 and 3):
+
+| Movement | Base quarter-note BPM | Change | Drill count |
+| --- | --- | --- | --- |
+| 1 | 140 | measure 29: 172 | 140 |
+| 2 | 86 | measure 142: 90 | 96 |
+| 3 | 90 | measure 173: 172 | 32 |
+
+Count mappings use the original arrival counts and measure ranges on the dot
+cards. Movement 1 retains the user-requested 12.7-second delay. No recording
+sync markers are invented: score timings and recordings do not completely
+agree. In particular, M1 ends after its 189.48-second track under these inputs;
+M2's recording origin relative to measure 118 is unconfirmed; M3 set 32 has
+20 card counts over four 4/4 bars (16 score beats). The app preserves card
+counts and displays these notes in Audio & timing, where exact set/audio
+alignment can be edited. The clarinet PDF is not redistributed by the site.
+
+Validation: `node --test pdf-reader/tests/*.test.mjs` from the repository root.
