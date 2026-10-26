@@ -131,3 +131,13 @@ Update 15 loads Atlantis automatically on startup, without autoplaying music
 or replacing an existing IndexedDB save. Manual template selection still asks
 before replacing an open project. A prominent red warning uses the user's
 exact wording and remains visible in the fullscreen player when controls fade.
+
+
+Update 18 adds a selected-marcher coordinate card below the field in normal
+view and as a compact overlay in the fullscreen/landscape player. Source
+Side 1/Side 2 and front/back wording is preserved at known dots. Between dots,
+the readout formats the interpolated position as an explicitly labeled live
+estimate using the configured step size. Next dot expands to show the
+destination's source coordinates. X hides the card; selecting or following a
+marcher opens it again. The inspector also separates left/right and front/back
+values. Coordinates retain canonical card orientation when the field is flipped.
