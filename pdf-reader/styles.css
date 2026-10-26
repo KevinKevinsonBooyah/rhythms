@@ -54,4 +54,4 @@ body.player-mode.controls-hidden #player{cursor:none}
 body.player-mode .player-top:focus-within,body.player-mode .transport:focus-within{cursor:auto}
 .set-edit{flex-wrap:wrap}.set-edit>small{flex-basis:100%;color:#9b4129}#timingAudit{background:#f3f5ed;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px}#timingAudit ul{padding-left:18px}#timingAudit li{margin-bottom:8px}
 
-#accuracyWarning{background:#fff0f0;color:#a3262b;border-bottom:1px solid #efcaca;text-align:center;font-weight:600;font-size:12px;line-height:1.4;padding:6px 12px;letter-spacing:.1px}body.player-mode #accuracyWarning,:root:fullscreen #accuracyWarning{display:none!important}@media(orientation:landscape){body[data-device=mobile] #accuracyWarning{display:none!important}}
+#accuracyWarning{background:#ffdddd;color:#982027;border-bottom:1px solid #dfa0a4;text-align:center;font-weight:700;font-size:13px;line-height:1.4;padding:7px 12px;letter-spacing:.1px}body.player-mode #accuracyWarning,:root:fullscreen #accuracyWarning{display:none!important}@media(orientation:landscape){body[data-device=mobile] #accuracyWarning{display:none!important}}
