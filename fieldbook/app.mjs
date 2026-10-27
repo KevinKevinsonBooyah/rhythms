@@ -9,6 +9,11 @@ import {isLetteredSet,nextVisibleSetIndex,visibleSetIndex} from './display-sets.
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const $=id=>document.getElementById(id),make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
+/* Keep the web page at its intended mobile scale. SVG field pinch/pan uses pointer events. */
+for(const event of ['gesturestart','gesturechange'])document.addEventListener(event,e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchmove',e=>{
+  if(e.touches.length>1&&!(e.target instanceof Element&&e.target.closest('#field')))e.preventDefault();
+},{passive:false});
 let project={version:1,name:'My marching show',rows:[],pages:[],files:[],settings:{},field:{step:22.5,swap:false,flip:false,grid:false,colors:true,labels:true,paths:true,ghosts:false,calibration:false,ignoreLetterSets:false}};
 let projectRevision=0;
 let followId='',pathIds=new Set();
