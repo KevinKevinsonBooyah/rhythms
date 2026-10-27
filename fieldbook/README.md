@@ -1,6 +1,6 @@
 # Fieldbook: Marching Drill Reader
 
-Buildless application at the existing `/rhythms/pdf-reader/` GitHub Pages path. All application changes are confined to this directory. No Rhythms game files or Firebase services are used.
+Buildless application at the `/rhythms/fieldbook/` GitHub Pages path. All application changes are confined to this directory. No Rhythms game files or Firebase services are used.
 
 ## Rehearsal workflow
 
@@ -29,9 +29,9 @@ Identity is instrument + symbol + label, normalized for case/outer whitespace; t
 
 ## Tests
 
-Run `node --test pdf-reader/tests/core.test.mjs` from the repository root. No npm install required. Coverage includes exact HS geometry, all coordinate anchors, fractions/quarter steps, Side 1/2 crossing, natural subsets, holds, unknown endpoints, reverse scrubbing, timing conflicts, independent movements, duplicate provenance, tempo changes, sync markers and the cumulative three-file limit.
+Run `node --test fieldbook/tests/core.test.mjs` from the repository root. No npm install required. Coverage includes exact HS geometry, all coordinate anchors, fractions/quarter steps, Side 1/2 crossing, natural subsets, holds, unknown endpoints, reverse scrubbing, timing conflicts, independent movements, duplicate provenance, tempo changes, sync markers and the cumulative three-file limit.
 
-Synthetic end-to-end fixtures can be generated with `python pdf-reader/tests/make_fixtures.py` after installing ReportLab/Pillow. They are written to `tmp/pdfs/`; create that directory first. The generator uses the DejaVu font from a typical Linux installation. Fixtures are synthetic and are not real band drill.
+Synthetic end-to-end fixtures can be generated with `python fieldbook/tests/make_fixtures.py` after installing ReportLab/Pillow. They are written to `tmp/pdfs/`; create that directory first. The generator uses the DejaVu font from a typical Linux installation. Fixtures are synthetic and are not real band drill.
 
 Verified in Chromium: 108-page PDF, 648 extracted rows, 108 unique performers, one-page duplicate import, six scanned/OCR rows, browser save/load, subset navigation, audio attach, tempo/marker calibration and backward audio seeking. A 390px embedded viewport checks the responsive layout. Physical phone gestures and iOS audio policies still need device testing.
 
@@ -83,7 +83,7 @@ M2's recording origin relative to measure 118 is unconfirmed; M3 set 32 has
 counts and displays these notes in Audio & timing, where exact set/audio
 alignment can be edited. The clarinet PDF is not redistributed by the site.
 
-Validation: `node --test pdf-reader/tests/*.test.mjs` from the repository root.
+Validation: `node --test fieldbook/tests/*.test.mjs` from the repository root.
 
 Update 11 supersedes the opening-count assumptions above: provisional removal
 of the printed +20 gives 15 counts into 1A and 15 into set 2. The user suspects
@@ -188,3 +188,5 @@ transition and marching counts the main controls; music alignment and one
 marcher's wait, position, and notes are optional sections. The Set sequence
 Edit button opens this simpler panel. Saved data and timing behavior are
 unchanged.
+
+The previous `/rhythms/pdf-reader/` address redirects to `/rhythms/fieldbook/`. Browser saves and settings remain available because the origin and storage keys are unchanged.
