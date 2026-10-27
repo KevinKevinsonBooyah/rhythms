@@ -115,8 +115,8 @@ async function play(){if(playing){pause();return;}const m=current();if(!m?.sets.
   if(count>=maxCount())seek(0);if($('loop').checked){const ss=starts(m.sets);if(count<ss[+$('loopStart').value]||count>=ss[+$('loopEnd').value])seek(ss[+$('loopStart').value]);}
   seconds=audioUrls.has(active)&&count===0?(audio.currentTime<timing().toSeconds(0)?audio.currentTime:0):timing().toSeconds(count);playing=true;lastFrame=performance.now();lastClick=-1;
   countInLeft=+m.settings.countIn||0;countInElapsed=0;if(countInLeft){beep(true);}else await startAudio();draw();}
-async // Marcher selection, Follow, Isolate and Paths carry into the next movement.
-function finishMovement(){
+// Marcher selection, Follow, Isolate and Paths carry into the next movement.
+async function finishMovement(){
   pause();const next=movements[movements.findIndex(m=>m.name===active)+1];
   if(!next){status('Show complete.');return;}
   active=next.name;count=0;seconds=0;manualSet=null;retainMarcherView();
