@@ -27,6 +27,8 @@ let audio=new Audio(),audioUrls=new Map(),audioBlobs=new Map(),audioNames=new Ma
 audio.preload='auto';audio.volume=.8;
 const field=new Field($('field'),id=>{if(id===selected)return;selected=id;isolateId='';if(!selected)followId='';else renderDotChoices();renderPeople();draw();inspector();});
 const current=()=>movements.find(m=>m.name===active),maxCount=()=>starts(current()?.sets||[]).at(-1)||0;
+function retainMarcherView(){const ids=new Set(current()?.people.map(p=>p.id)||[]);if(!ids.has(selected))selected='';if(!ids.has(followId))followId='';if(!ids.has(isolateId))isolateId='';pathIds=new Set([...pathIds].filter(id=>ids.has(id)));editPersonId=ids.has(editPersonId)?editPersonId:'';editSetId='';$('movement').value=active;$('playerMovement').value=active;}
+
 const located=()=>manualSet===null?locate(current()?.sets||[],count):{index:manualSet,next:Math.min(manualSet+1,(current()?.sets.length||1)-1),t:0};
 function goSet(i){const m=current();if(!m)return;pause();if(m.sets.some(s=>s.timingIssue)){manualSet=i;draw();inspector();}else seek(starts(m.sets)[i]);}
 const timing=()=>clock(current()?.settings||{bpm:120});
