@@ -53,6 +53,9 @@ function renderSets(){const m=current();$('setList').replaceChildren();for(const
     btn.append(make('b',s.id),label);btn.onclick=()=>goSet(i);$('setList').append(btn);
     for(const id of ['jumpSet','loopStart','loopEnd','playerSet'])$(id).append(new Option(s.id,String(i)));
   });
+  // Loop playback must still reach the true final set, even if its label is hidden.
+  if(hide&&hasNumbered&&isLetteredSet(m.sets[m.sets.length-1]))
+    $('loopEnd').append(new Option('End of show',String(m.sets.length-1)));
   $('loopEnd').selectedIndex=Math.max(0,$('loopEnd').options.length-1);
 }
 function toggleFollow(id){followId=followId===id?'':id;if(followId){selected=id;field.zoom=Math.max(field.zoom,2);}renderPeople();renderDotChoices();draw();inspector();}
@@ -274,9 +277,17 @@ $('previous').onclick=()=>stepSet(-1);$('next').onclick=()=>stepSet(1);$('play')
 $('resetView').onclick=()=>{followId='';renderPeople();field.reset();inspector()};$('zoomIn').onclick=()=>{field.zoom=Math.min(8,field.zoom*1.3);field.view();};$('zoomOut').onclick=()=>{field.zoom=Math.max(1,field.zoom/1.3);field.view();};$('flip').onclick=()=>{project.field.flip=!project.field.flip;renderMovement();syncFieldInputs();changed();};$('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('fieldPanel').requestFullscreen();}catch{status('Fullscreen is unavailable in this browser.');}};
 for(const id of ['labels','paths','ghosts'])$(id).onchange=()=>{project.field[id]=$(id).checked;renderMovement();changed();};
 for(const id of ['ignoreLetterSets','playerIgnoreLetterSets'])$(id).onchange=()=>{
+  const oldStart=+$('loopStart').value,oldEnd=+$('loopEnd').value;
   project.field.ignoreLetterSets=$(id).checked;
   $('ignoreLetterSets').checked=$('playerIgnoreLetterSets').checked=project.field.ignoreLetterSets;
-  renderSets();draw();inspector();changed();
+  renderSets();
+  const values=[...$('loopStart').options].map(o=>+o.value);
+  const startsAt=values.filter(v=>v<=oldStart).at(-1)??values[0];
+  const endValues=[...$('loopEnd').options].map(o=>+o.value);
+  const endsAt=endValues.find(v=>v>=oldEnd)??endValues.at(-1);
+  if(startsAt!==undefined)$('loopStart').value=String(startsAt);
+  if(endsAt!==undefined)$('loopEnd').value=String(endsAt);
+  draw();inspector();changed();
 };
 $('settingsButton').onclick=()=>{syncFieldInputs();open('settingsDialog');};$('applySettings').onclick=()=>{const n=+$('stepSize').value;if(!(n>0&&n<=100))return;project.field.step=n;for(const id of ['swap','grid','colors','calibration'])project.field[id]=$(id).checked;project.field.flip=$('orientation').checked;rebuild();changed();close('settingsDialog');};
 $('editSets').onclick=()=>{if(document.body.dataset.device==='mobile')document.querySelector('[data-mobile-view="edit"]').click();else showAsideTab('dots');};$('saveSets').onclick=()=>{rebuild();changed();seek(0);close('setsDialog');};$('outgoingCounts').onclick=()=>{const m=current();if(!m)return;m.settings.durations={};for(let i=1;i<m.sets.length;i++){const values=[...new Set(project.rows.filter(r=>r.movement===active&&r.set===m.sets[i-1].id).map(r=>r.counts))];m.settings.durations[m.sets[i].id]=values.length===1&&+values[0]>0?+values[0]:null;}rebuild();renderSetEditor();changed();};
