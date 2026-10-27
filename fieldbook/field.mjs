@@ -14,7 +14,7 @@ export class Field {
       else {const scale=116/svg.getBoundingClientRect().width/this.zoom;this.pan.x-=(e.clientX-prev.x)*scale;this.pan.y-=(e.clientY-prev.y)*scale;if(Math.hypot(e.clientX-this.drag.x,e.clientY-this.drag.y)>4)this.drag.moved=true;}
       this.view();
     });
-    const end=e=>{if(this.drag&&!this.drag.moved){const id=this.drag.target.closest('[data-person]')?.dataset.person;if(id)this.onSelect(id);}pointers.delete(e.pointerId);lastDistance=0;const remaining=[...pointers.values()][0];this.drag=remaining?{...remaining,moved:true,target:this.svg}:null;};
+    const end=e=>{if(this.drag&&!this.drag.moved&&pointers.size===1){const id=this.drag.target.closest('[data-person]')?.dataset.person||'';this.onSelect(id);}pointers.delete(e.pointerId);lastDistance=0;const remaining=[...pointers.values()][0];this.drag=remaining?{...remaining,moved:true,target:this.svg}:null;};
     svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',()=>{pointers.clear();this.drag=null;lastDistance=0;});
   }
   view(){this.svg.setAttribute('viewBox',`${-8+this.pan.x+(116-116/this.zoom)/2} ${-7+this.pan.y+(67.3333-67.3333/this.zoom)/2} ${116/this.zoom} ${67.3333/this.zoom}`);if(this.annotationState)this.drawCoordinateLabel(...this.annotationState);}
