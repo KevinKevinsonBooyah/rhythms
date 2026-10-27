@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46=globalThis.RHYTHMS_RELEASE||'61',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46=globalThis.RHYTHMS_RELEASE||'62',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ["High levels now mix straight rhythms and tuplets instead of repeatedly picking triplets.", "Comments have compact rating bars and nested replies in previews and shared rhythm players.", "Owners can find players and send coin gifts from Profile → Owner tools, with grant history and cancellation of uncollected gifts.", "Collect gifts at sign-in or from Profile → Check coin gifts. Replies and gifts require the Update 61 Firebase rules."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ["Comments now use smaller avatars, tighter spacing, and compact controls.", "Replies have lighter styling, smaller text, and shallower thread indentation, especially on mobile."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }
