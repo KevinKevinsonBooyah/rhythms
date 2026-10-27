@@ -60,9 +60,11 @@ function renderSets(){const m=current();$('setList').replaceChildren();for(const
 }
 function toggleFollow(id){followId=followId===id?'':id;if(followId){selected=id;field.zoom=Math.max(field.zoom,2);}renderPeople();renderDotChoices();draw();inspector();}
 function togglePaths(id){pathIds.has(id)?pathIds.delete(id):pathIds.add(id);renderPeople();draw();inspector();}
+$('quickFollow').onclick=()=>{if(selected)toggleFollow(selected);};
+$('quickPaths').onclick=()=>{if(selected)togglePaths(selected);};
 function renderPeople(){const m=current(),q=$('search').value.toLowerCase();$('peopleList').replaceChildren();for(const p of m?.people||[])if(`${p.instrument} ${p.symbol}${p.label} ${p.label}`.toLowerCase().includes(q)){const row=make('div',undefined,'person-row'),b=make('button',`${p.instrument} ${p.symbol}${p.label}`),follow=make('button',followId===p.id?'Following':'Follow'),paths=make('button','Paths');b.onclick=()=>{selected=p.id;renderDotChoices();draw();inspector();};follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>toggleFollow(p.id);paths.onclick=()=>togglePaths(p.id);row.append(b,follow,paths);$('peopleList').append(row);}}
 
-function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds);const l=located();
+function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds);const chosen=!!m?.people.some(p=>p.id===selected);$('marcherQuickActions').hidden=!chosen;$('quickFollow').textContent=followId===selected?'Stop following':'Follow';$('quickFollow').setAttribute('aria-pressed',String(chosen&&followId===selected));$('quickPaths').textContent=pathIds.has(selected)?'Hide paths':'Show paths';$('quickPaths').setAttribute('aria-pressed',String(chosen&&pathIds.has(selected)));const l=located();
   const at=l.holding?l.next:l.index,hide=!!project.field.ignoreLetterSets;
   const show=m?visibleSetIndex(m.sets,at,hide):-1;
   const upcoming=m?nextVisibleSetIndex(m.sets,at,hide):-1;
