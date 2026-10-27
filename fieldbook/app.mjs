@@ -4,7 +4,7 @@ import {setupDevice} from './device.mjs?v=22';
 import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows,performerPhase} from './core.mjs?v=14';
 import {extractPDF} from './parser.mjs?v=3';
-import {Field} from './field.mjs?v=32';
+import {Field} from './field.mjs?v=33';
 import {isLetteredSet,nextVisibleSetIndex,visibleSetIndex} from './display-sets.mjs?v=1';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
@@ -21,10 +21,11 @@ let playbackWarningSeen=false;
 try{playbackWarningSeen=localStorage.getItem('fieldbook-playback-warning-seen')==='1';}catch{}
 let editPersonId='',editSetId='';
 let setEditorWarningShown=false;
+let isolateId=''; // Session-only view state, never saved to the drill project.
 let movements=[],active='',selected='',manualSet=null,count=0,playing=false,seconds=0,lastFrame=0,lastClick=-1,countInLeft=0,countInElapsed=0,busy=false,cancelled=false,rowPage=0,dirty=false,saveTimer;
 let audio=new Audio(),audioUrls=new Map(),audioBlobs=new Map(),audioNames=new Map(),audioContext;
 audio.preload='auto';audio.volume=.8;
-const field=new Field($('field'),id=>{if(id===selected)return;selected=id;if(!selected)followId='';else renderDotChoices();renderPeople();draw();inspector();});
+const field=new Field($('field'),id=>{if(id===selected)return;selected=id;isolateId='';if(!selected)followId='';else renderDotChoices();renderPeople();draw();inspector();});
 const current=()=>movements.find(m=>m.name===active),maxCount=()=>starts(current()?.sets||[]).at(-1)||0;
 const located=()=>manualSet===null?locate(current()?.sets||[],count):{index:manualSet,next:Math.min(manualSet+1,(current()?.sets.length||1)-1),t:0};
 function goSet(i){const m=current();if(!m)return;pause();if(m.sets.some(s=>s.timingIssue)){manualSet=i;draw();inspector();}else seek(starts(m.sets)[i]);}
@@ -58,13 +59,19 @@ function renderSets(){const m=current();$('setList').replaceChildren();for(const
     $('loopEnd').append(new Option('End of show',String(m.sets.length-1)));
   $('loopEnd').selectedIndex=Math.max(0,$('loopEnd').options.length-1);
 }
-function toggleFollow(id){followId=followId===id?'':id;if(followId){selected=id;field.zoom=Math.max(field.zoom,2);}renderPeople();renderDotChoices();draw();inspector();}
+function toggleFollow(id){followId=followId===id?'':id;if(followId){if(selected!==id)isolateId='';selected=id;field.zoom=Math.max(field.zoom,2);}renderPeople();renderDotChoices();draw();inspector();}
 function togglePaths(id){pathIds.has(id)?pathIds.delete(id):pathIds.add(id);renderPeople();draw();inspector();}
+function toggleIsolate(id){if(!id||!current()?.people.some(p=>p.id===id))return;
+  if(selected!==id){selected=id;renderDotChoices();}
+  isolateId=isolateId===id?'':id;
+  renderPeople();draw();inspector();
+}
 $('quickFollow').onclick=()=>{if(selected)toggleFollow(selected);};
 $('quickPaths').onclick=()=>{if(selected)togglePaths(selected);};
-function renderPeople(){const m=current(),q=$('search').value.toLowerCase();$('peopleList').replaceChildren();for(const p of m?.people||[])if(`${p.instrument} ${p.symbol}${p.label} ${p.label}`.toLowerCase().includes(q)){const row=make('div',undefined,'person-row'),b=make('button',`${p.instrument} ${p.symbol}${p.label}`),follow=make('button',followId===p.id?'Following':'Follow'),paths=make('button','Paths');b.onclick=()=>{selected=p.id;renderDotChoices();draw();inspector();};follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>toggleFollow(p.id);paths.onclick=()=>togglePaths(p.id);row.append(b,follow,paths);$('peopleList').append(row);}}
+$('quickIsolate').onclick=()=>{if(selected)toggleIsolate(selected);};
+function renderPeople(){const m=current(),q=$('search').value.toLowerCase();$('peopleList').replaceChildren();for(const p of m?.people||[])if(`${p.instrument} ${p.symbol}${p.label} ${p.label}`.toLowerCase().includes(q)){const row=make('div',undefined,'person-row'),b=make('button',`${p.instrument} ${p.symbol}${p.label}`),follow=make('button',followId===p.id?'Following':'Follow'),paths=make('button','Paths');b.onclick=()=>{if(selected!==p.id)isolateId='';selected=p.id;renderDotChoices();draw();inspector();};follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>toggleFollow(p.id);paths.onclick=()=>togglePaths(p.id);row.append(b,follow,paths);$('peopleList').append(row);}}
 
-function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds);const chosen=!!m?.people.some(p=>p.id===selected);$('marcherQuickActions').hidden=!chosen;$('quickFollow').textContent=followId===selected?'Stop following':'Follow';$('quickFollow').setAttribute('aria-pressed',String(chosen&&followId===selected));$('quickPaths').textContent=pathIds.has(selected)?'Hide paths':'Show paths';$('quickPaths').setAttribute('aria-pressed',String(chosen&&pathIds.has(selected)));const l=located();
+function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds,isolateId===selected?isolateId:'');const chosen=!!m?.people.some(p=>p.id===selected);$('marcherQuickActions').hidden=!chosen;$('quickFollow').textContent=followId===selected?'Stop following':'Follow';$('quickFollow').setAttribute('aria-pressed',String(chosen&&followId===selected));$('quickPaths').textContent=pathIds.has(selected)?'Hide paths':'Show paths';$('quickPaths').setAttribute('aria-pressed',String(chosen&&pathIds.has(selected)));$('quickIsolate').textContent=isolateId===selected?'Show everyone':'Isolate';$('quickIsolate').setAttribute('aria-pressed',String(chosen&&isolateId===selected));const l=located();
   const at=l.holding?l.next:l.index,hide=!!project.field.ignoreLetterSets;
   const show=m?visibleSetIndex(m.sets,at,hide):-1;
   const upcoming=m?nextVisibleSetIndex(m.sets,at,hide):-1;
@@ -83,7 +90,7 @@ function draw(){const m=current();field.draw(count,selected,$('search').value,ma
 }
 function formatTime(s){return Number.isFinite(s)?`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`:'0:00';}
 function inspector(){const m=current(),p=m?.people.find(p=>p.id===selected);$('detail').replaceChildren(make('span','MARCHER INSPECTOR','eyebrow'));if(!p){$('detail').append(make('p','Select a dot to inspect its position and next transition.'));return;}
-  const l=located(),hide=!!project.field.ignoreLetterSets,shown=visibleSetIndex(m.sets,l.index,hide),target=hide?nextVisibleSetIndex(m.sets,l.index,true):l.next,a=p.positions[m.sets[l.index]?.id],b=target>=0?p.positions[m.sets[target]?.id]:null;$('detail').append(make('h2',`${p.instrument} ${p.symbol}${p.label}`));const actions=make('div',undefined,'inspector-actions'),follow=make('button',followId===p.id?'Stop following':'Follow'),paths=make('button',pathIds.has(p.id)?'Hide paths':'Show paths');follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>toggleFollow(p.id);paths.onclick=()=>togglePaths(p.id);actions.append(follow,paths);$('detail').append(actions);const dl=make('dl');
+  const l=located(),hide=!!project.field.ignoreLetterSets,shown=visibleSetIndex(m.sets,l.index,hide),target=hide?nextVisibleSetIndex(m.sets,l.index,true):l.next,a=p.positions[m.sets[l.index]?.id],b=target>=0?p.positions[m.sets[target]?.id]:null;$('detail').append(make('h2',`${p.instrument} ${p.symbol}${p.label}`));const actions=make('div',undefined,'inspector-actions'),follow=make('button',followId===p.id?'Stop following':'Follow'),paths=make('button',pathIds.has(p.id)?'Hide paths':'Show paths');follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>toggleFollow(p.id);paths.onclick=()=>togglePaths(p.id);const isolate=make('button',isolateId===p.id?'Show everyone':'Isolate');isolate.setAttribute('aria-pressed',String(isolateId===p.id));isolate.onclick=()=>toggleIsolate(p.id);actions.append(follow,paths,isolate);$('detail').append(actions);const dl=make('dl');
   const pair=(k,v)=>dl.append(make('dt',k),make('dd',v));pair('Identity',`Symbol ${p.symbol} · label ${p.label}`);const phase=performerPhase(p,m.sets,count);pair('Set',m.sets[shown]?.id||'');pair('Phase',phase.waiting?'Waiting to step off':phase.holding?'Holding at next dot':'Marching transition');if(phase.estimated)pair('Timing','Estimated early arrival from step size');if(phase.custom)pair('Timing','Custom marcher phase');if(phase.issue)pair('Timing warning',phase.issue);
   const info=marcherReadout(p,m,count,project.field.step/36,manualSet);
   pair('Current dot',hide&&shown!==l.index?'Intermediate position (subset hidden)':info.status);
@@ -111,7 +118,7 @@ async function play(){if(playing){pause();return;}const m=current();if(!m?.sets.
 async function finishMovement(){
   pause();const next=movements[movements.findIndex(m=>m.name===active)+1];
   if(!next){status('Show complete.');return;}
-  active=next.name;count=0;seconds=0;manualSet=null;selected='';followId='';
+  active=next.name;count=0;seconds=0;manualSet=null;selected='';followId='';isolateId='';
   attachCurrentAudio();renderMovement();status(`Continuing to ${active}.`);await play();
 }
 function frame(now){if(playing){const dt=((now-lastFrame)/1000)*+$('speed').value;const m=current();
@@ -172,7 +179,7 @@ function applyProject(data){if(!data||data.version!==1||!Array.isArray(data.rows
   for(const r of data.rows){if(!fields.every(k=>typeof r[k]==='string'))throw Error('Invalid row data.');r.id||=uuid();}if(!(data.field.step>0&&data.field.step<=100))throw Error('Invalid step size.');
   if(data.name==='Atlantis'&&data.templateRevision>=8&&data.templateRevision<14){for(const s of Object.values(data.settings)){s.holdMode='title';s.naturalArrival??=true;}data.templateRevision=14;}
   applyAtlantisDefaults(data);
-  for(const s of Object.values(data.settings))validateTiming(s);projectRevision++;pause();for(const url of audioUrls.values())URL.revokeObjectURL(url);audioUrls.clear();audioBlobs.clear();audioNames.clear();movements=[];project=data;project.pages??=[];$('projectName').value=project.name;count=0;manualSet=null;selected='';editPersonId='';editSetId='';rebuild();attachCurrentAudio();syncFieldInputs();}
+  for(const s of Object.values(data.settings))validateTiming(s);projectRevision++;pause();for(const url of audioUrls.values())URL.revokeObjectURL(url);audioUrls.clear();audioBlobs.clear();audioNames.clear();movements=[];project=data;project.pages??=[];$('projectName').value=project.name;count=0;manualSet=null;selected='';isolateId='';editPersonId='';editSetId='';rebuild();attachCurrentAudio();syncFieldInputs();}
 function syncFieldInputs(){$('dotSize').value=project.field.dotSize||1;for(const id of ['labels','paths','ghosts','grid','colors','calibration','swap'])$(id).checked=project.field[id];$('ignoreLetterSets').checked=!!project.field.ignoreLetterSets;$('playerIgnoreLetterSets').checked=!!project.field.ignoreLetterSets;$('orientation').checked=project.field.flip;$('stepSize').value=project.field.step;}
 async function load(){const data=await get('project');if(!data){status('No browser save found.');return;}const storedAudio=await get('audio')||[];applyProject(data);for(const {name,blob,label}of storedAudio){audioBlobs.set(name,blob);audioNames.set(name,label);audioUrls.set(name,URL.createObjectURL(blob));}attachCurrentAudio();status('Loaded your saved project.');draw();}
 function exportCSV(){const cols=['movement','instrument','symbol','label','set','title','measure','counts','side','depth','x_yards','y_yards','status','source','page'];const lines=[cols,...project.rows.map(r=>{const p=coordinate(r.side,r.depth,project.field.step/36);return cols.map(k=>k==='x_yards'?p.x??'':k==='y_yards'?p.y??'':r[k]??'');})];download('fieldbook-coordinates.csv',lines.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n'),'text/csv');}
@@ -258,10 +265,10 @@ $('rowSearch').oninput=$('issuesOnly').onchange=()=>{rowPage=0;renderReview();};
 $('addRow').onclick=()=>{const r=Object.fromEntries(fields.map(k=>[k,'']));Object.assign(r,{id:uuid(),movement:active||'Movement 1',status:'corrected',source:'Manual',page:1,method:'manual'});project.rows.push(r);$('rowSearch').value='';$('issuesOnly').checked=false;rowPage=Math.floor((project.rows.length-1)/100);renderReview();changed();};
 $('markReviewed').onclick=()=>{for(const r of filteredRows().slice(rowPage*100,rowPage*100+100)){if(coordinate(r.side,r.depth,project.field.step/36).valid&&r.instrument&&r.symbol&&r.label){r.status='verified';r.method='verified';r.parseWarning='';}}changed();renderReview();};
 $('generate').onclick=()=>{rebuild();attachCurrentAudio();changed();close('reviewDialog');status(`Generated ${movements.length} movement(s). Check arrival counts in Set sequence → Edit before rehearsing.`);};
-$('movement').onchange=()=>{pause();active=$('movement').value;selected='';manualSet=null;count=0;attachCurrentAudio();renderMovement();};
+$('movement').onchange=()=>{pause();active=$('movement').value;selected='';isolateId='';manualSet=null;count=0;attachCurrentAudio();renderMovement();};
 function showAsideTab(tab){const enteringEditor=tab==='dots'&&$('dotsPanel').hidden;for(const [name,panel]of [['sets','setsPanel'],['people','peoplePanel'],['dots','dotsPanel']]){$(panel).hidden=name!==tab;$(name==='sets'?'setsTab':name==='people'?'peopleTab':'dotsTab').classList.toggle('active',name===tab);}if(tab==='dots'){renderDotChoices();if(enteringEditor&&!setEditorWarningShown&&current()?.sets.length){setEditorWarningShown=true;const {m,s}=editContext();$('setEditorWarningSelected').textContent=`Currently selected: ${m.name}, set ${s?.id||'none'}.`;$('setEditorWarningDialog').showModal();}}}
 $('setsTab').onclick=()=>showAsideTab('sets');$('peopleTab').onclick=()=>showAsideTab('people');$('dotsTab').onclick=()=>showAsideTab('dots');$('confirmSetSelection').onclick=()=>{close('setEditorWarningDialog');$('dotSet').focus();};$('search').oninput=()=>{renderPeople();draw();};$('keepBright').onchange=()=>{project.field.noSearchFade=$('keepBright').checked;draw();changed();};
-$('dotPerson').onchange=()=>{editPersonId=$('dotPerson').value;selected=editPersonId;refreshDotEditor();draw();inspector();};
+$('dotPerson').onchange=()=>{editPersonId=$('dotPerson').value;if(selected!==editPersonId)isolateId='';selected=editPersonId;refreshDotEditor();draw();inspector();};
 $('dotSet').onchange=()=>{editSetId=$('dotSet').value;refreshDotEditor();};
 for(const id of ['dotStart','dotMove'])$(id).oninput=()=>{$(id).dataset.edited='yes';updateDotHold();};
 $('dotDuration').oninput=()=>{const n=+$('dotDuration').value;if(n>0&&+$('dotSetMove').value>n)$('dotSetMove').value=n;updateDotHold();};
