@@ -148,3 +148,96 @@ body.player-mode .marcher-quick-actions button[aria-pressed="true"]{
   body.player-mode .transport-buttons :is(#previous,#play,#next,#playerSet,#playerSets,#playerMarchers,#playerEditDots){min-height:34px;padding:4px 8px}
   body.player-mode .marcher-quick-actions button{min-height:34px}
 }
+
+
+/* Compact fullscreen rehearsal controls: trim the panel and every control together. */
+body.player-mode .transport{
+  left:50%;
+  right:auto;
+  transform:translateX(-50%);
+  width:min(calc(100% - 28px),940px);
+  bottom:max(5px,env(safe-area-inset-bottom));
+  padding:4px 8px 5px;
+  border-radius:11px;
+  border-width:1px;
+}
+body.player-mode .transport #timeline{
+  display:block;
+  width:100%;
+  height:14px;
+  min-height:14px;
+  margin:0 0 3px;
+}
+body.player-mode .transport #timeline::-webkit-slider-runnable-track{
+  height:5px;
+}
+body.player-mode .transport #timeline::-webkit-slider-thumb{
+  width:16px;height:16px;
+  border-width:2px;
+  margin-top:-6px;
+}
+body.player-mode .transport #timeline::-moz-range-track{
+  height:5px;
+}
+body.player-mode .transport #timeline::-moz-range-progress{
+  height:5px;
+}
+body.player-mode .transport #timeline::-moz-range-thumb{
+  width:12px;height:12px;
+  border-width:2px;
+}
+body.player-mode .transport .transport-buttons{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:4px;
+  row-gap:4px;
+}
+body.player-mode .transport .transport-buttons :is(#previous,#play,#next,#playerSet,#playerSets,#playerMarchers,#playerEditDots){
+  min-height:32px;
+  height:32px;
+  padding:3px 8px;
+  border-radius:8px;
+  font-size:11px;
+  line-height:1.2;
+}
+body.player-mode .transport .transport-buttons #play{
+  min-width:74px;
+}
+body.player-mode .transport .transport-buttons #playerSet{
+  width:65px;
+  max-width:80px;
+  padding-inline:5px;
+}
+body.player-mode .transport .transport-buttons .marcher-quick-actions:not([hidden]){
+  min-height:32px;
+  gap:4px;
+  padding-left:6px;
+}
+body.player-mode .transport .marcher-quick-actions button{
+  min-height:32px;
+  height:32px;
+  padding:3px 8px;
+  border-radius:8px;
+  font-size:11px;
+  line-height:1.2;
+}
+@media(max-width:950px){
+  body.player-mode .transport{
+    width:calc(100% - 20px);
+    padding:4px 6px;
+  }
+  body.player-mode .transport .transport-buttons :is(#previous,#play,#next,#playerSet,#playerSets,#playerMarchers,#playerEditDots){
+    padding:3px 6px;
+    font-size:10.5px;
+  }
+  body.player-mode .transport .transport-buttons .marcher-quick-actions:not([hidden]){
+    gap:4px;
+    padding-left:0;
+  }
+  body.player-mode .transport .marcher-quick-actions button{
+    padding:3px 6px;
+    font-size:10.5px;
+  }
+}
