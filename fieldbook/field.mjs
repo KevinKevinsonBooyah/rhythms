@@ -1,4 +1,5 @@
 import {FIELD,positionAt,locate} from './core.mjs?v=14';
+import {nextVisibleSetIndex,visibleSetIndex} from './display-sets.mjs?v=1';
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text!==undefined)n.textContent=text;return n;}
 export class Field {
@@ -52,15 +53,34 @@ export class Field {
       if(pathIds.has(p.id)){let previous=null;for(const set of m.sets){const point=p.positions[set.id];if(!point){previous=null;continue;}const q=this.project(point);if(previous)this.path.append(el('line',{x1:previous.x,y1:previous.y,x2:q.x,y2:q.y,stroke:this.colors.get(p.instrument),'stroke-width':.18,opacity:.7}));this.path.append(el('circle',{cx:q.x,cy:q.y,r:.35,fill:'none',stroke:this.colors.get(p.instrument),'stroke-width':.15}));previous=q;}}
       g.setAttribute('transform',`translate(${xy.x} ${xy.y})`);g.style.opacity=matches||this.options.noSearchFade?1:.55;g.lastChild.style.display=this.options.labels?'':'none';g.firstChild.setAttribute('stroke',selected===p.id?'#ffffff':'#102c29');const size=+this.options.dotSize||1;g.firstChild.setAttribute('stroke-width',(selected===p.id?.22:.12)*size);g.firstChild.setAttribute('r',.48*size);
       this.fitDotLabel(g,size);
-      if(p.id===selected){const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[l.next]?.id];if(a&&b){const aa=this.project(a),bb=this.project(b);this.drawCoordinateLabel(p,bb,l.next,size);if(this.options.paths)this.drawSelectedPath(aa,bb,size);if(this.options.ghosts)for(const q of [aa,bb])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*(+this.options.dotSize||1),fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*(+this.options.dotSize||1)}));}else this.drawCoordinateLabel(p,xy,l.index,size);if(this.lastSelected!==selected){this.svg.append(g,this.measurements,this.coordinateLabel);this.lastSelected=selected;}}
+      if(p.id===selected){
+        const skip=!!this.options.ignoreLetterSets;
+        const destination=skip?nextVisibleSetIndex(m.sets,l.index,true):l.next;
+        const start=skip?(setIndex===null?positionAt(p,m.sets,count):p.positions[m.sets[l.index]?.id]):p.positions[m.sets[l.index]?.id];
+        const end=destination>=0?p.positions[m.sets[destination]?.id]:null;
+        if(start&&end){
+          const route=[this.project(start)];
+          if(skip){for(let j=l.index+1;j<=destination;j++){const dot=p.positions[m.sets[j]?.id];if(dot)route.push(this.project(dot));}}
+          else route.push(this.project(end));
+          const from=route[0],to=route[route.length-1];
+          this.drawCoordinateLabel(p,to,destination,size);
+          if(this.options.paths)this.drawSelectedPath(from,to,size,route);
+          if(this.options.ghosts)for(const q of [from,to])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*size,fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*size}));
+        }else{
+          const shown=visibleSetIndex(m.sets,l.index,skip);
+          if(shown>=0&&p.positions[m.sets[shown]?.id])this.drawCoordinateLabel(p,this.project(p.positions[m.sets[shown].id]),shown,size);
+        }
+        if(this.lastSelected!==selected){this.svg.append(g,this.measurements,this.coordinateLabel);this.lastSelected=selected;}
+      }
     }
   }
-  drawSelectedPath(from,to,size){
+  drawSelectedPath(from,to,size,route=null){
     const dx=to.x-from.x,dy=to.y-from.y;if(Math.hypot(dx,dy)<.02)return;
     const box=this.svg.getBoundingClientRect(),view=this.svg.viewBox.baseVal,scale=Math.min(box.width/view.width,box.height/view.height);
     if(!(scale>0))return;
     const stroke={stroke:'#ffecae','stroke-width':1/scale};
-    this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:to.y,...stroke}));
+    if(route?.length>2)this.path.append(el('polyline',{points:route.map(p=>`${p.x},${p.y}`).join(' '),fill:'none','stroke-linecap':'round','stroke-linejoin':'round',...stroke}));
+    else this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:to.y,...stroke}));
     const guide={stroke:'#eef5d5','stroke-opacity':.75,'stroke-width':.7/scale};
     const horizontal=Math.abs(dx)*scale>=18,vertical=Math.abs(dy)*scale>=18;
     if(horizontal)this.path.append(el('line',{x1:from.x,y1:from.y,x2:to.x,y2:from.y,...guide}));
