@@ -69,3 +69,8 @@ body.player-mode .transport-buttons #playerEditDots{display:block!important;min-
 #playbackWarningDialog{width:min(460px,92vw)}#playbackWarningDialog h2{font-size:21px;color:#982027}#playbackWarningDialog p{line-height:1.6}
 
 .set-edit-warning{background:#fff3d4;border:1px solid #d5ac54;border-left:4px solid #b77817;color:#674714;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5}
+
+#setEditorWarningDialog{width:min(470px,92vw)}
+#setEditorWarningDialog h2{font-size:21px;color:#8c530d}
+#setEditorWarningDialog p{line-height:1.6}
+#setEditorWarningDialog .set-editor-warning-selected{font-weight:700;border-radius:9px;padding:9px 12px;background:#fff3d4;color:#674714}
