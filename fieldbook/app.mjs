@@ -14,6 +14,7 @@ let followId='',pathIds=new Set();
 let playbackWarningSeen=false;
 try{playbackWarningSeen=localStorage.getItem('fieldbook-playback-warning-seen')==='1';}catch{}
 let editPersonId='',editSetId='';
+let setEditorWarningShown=false;
 let movements=[],active='',selected='',manualSet=null,count=0,playing=false,seconds=0,lastFrame=0,lastClick=-1,countInLeft=0,countInElapsed=0,busy=false,cancelled=false,rowPage=0,dirty=false,saveTimer;
 let audio=new Audio(),audioUrls=new Map(),audioBlobs=new Map(),audioNames=new Map(),audioContext;
 audio.preload='auto';audio.volume=.8;
@@ -211,8 +212,8 @@ $('addRow').onclick=()=>{const r=Object.fromEntries(fields.map(k=>[k,'']));Objec
 $('markReviewed').onclick=()=>{for(const r of filteredRows().slice(rowPage*100,rowPage*100+100)){if(coordinate(r.side,r.depth,project.field.step/36).valid&&r.instrument&&r.symbol&&r.label){r.status='verified';r.method='verified';r.parseWarning='';}}changed();renderReview();};
 $('generate').onclick=()=>{rebuild();attachCurrentAudio();changed();close('reviewDialog');status(`Generated ${movements.length} movement(s). Check arrival counts in Set sequence → Edit before rehearsing.`);};
 $('movement').onchange=()=>{pause();active=$('movement').value;selected='';manualSet=null;count=0;attachCurrentAudio();renderMovement();};
-function showAsideTab(tab){for(const [name,panel]of [['sets','setsPanel'],['people','peoplePanel'],['dots','dotsPanel']]){$(panel).hidden=name!==tab;$(name==='sets'?'setsTab':name==='people'?'peopleTab':'dotsTab').classList.toggle('active',name===tab);}if(tab==='dots')renderDotChoices();}
-$('setsTab').onclick=()=>showAsideTab('sets');$('peopleTab').onclick=()=>showAsideTab('people');$('dotsTab').onclick=()=>showAsideTab('dots');$('search').oninput=()=>{renderPeople();draw();};$('keepBright').onchange=()=>{project.field.noSearchFade=$('keepBright').checked;draw();changed();};
+function showAsideTab(tab){const enteringEditor=tab==='dots'&&$('dotsPanel').hidden;for(const [name,panel]of [['sets','setsPanel'],['people','peoplePanel'],['dots','dotsPanel']]){$(panel).hidden=name!==tab;$(name==='sets'?'setsTab':name==='people'?'peopleTab':'dotsTab').classList.toggle('active',name===tab);}if(tab==='dots'){renderDotChoices();if(enteringEditor&&!setEditorWarningShown&&current()?.sets.length){setEditorWarningShown=true;const {m,s}=editContext();$('setEditorWarningSelected').textContent=`Currently selected: ${m.name}, set ${s?.id||'none'}.`;$('setEditorWarningDialog').showModal();}}}
+$('setsTab').onclick=()=>showAsideTab('sets');$('peopleTab').onclick=()=>showAsideTab('people');$('dotsTab').onclick=()=>showAsideTab('dots');$('confirmSetSelection').onclick=()=>{close('setEditorWarningDialog');$('dotSet').focus();};$('search').oninput=()=>{renderPeople();draw();};$('keepBright').onchange=()=>{project.field.noSearchFade=$('keepBright').checked;draw();changed();};
 $('dotPerson').onchange=()=>{editPersonId=$('dotPerson').value;selected=editPersonId;refreshDotEditor();draw();inspector();};
 $('dotSet').onchange=()=>{editSetId=$('dotSet').value;refreshDotEditor();};
 for(const id of ['dotStart','dotMove'])$(id).oninput=()=>{$(id).dataset.edited='yes';updateDotHold();};
