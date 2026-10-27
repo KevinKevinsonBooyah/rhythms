@@ -67,3 +67,5 @@ body.player-mode .transport-buttons #playerEditDots{display:block!important;min-
 #field .yard{fill:#f4f8e9;fill-opacity:.95;font-weight:700;font-size:2.7px}
 
 #playbackWarningDialog{width:min(460px,92vw)}#playbackWarningDialog h2{font-size:21px;color:#982027}#playbackWarningDialog p{line-height:1.6}
+
+.set-edit-warning{background:#fff3d4;border:1px solid #d5ac54;border-left:4px solid #b77817;color:#674714;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5}

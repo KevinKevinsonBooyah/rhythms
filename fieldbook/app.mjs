@@ -1,3 +1,4 @@
+import {applyAtlantisDefaults} from './atlantis-defaults.mjs?v=30';
 import {marcherReadout,formatCardCoordinate} from './marcher-card.mjs?v=23';
 import {setupDevice} from './device.mjs?v=22';
 import {editAudio} from './audio-editor.mjs?v=7';
@@ -122,6 +123,7 @@ async function addAudio(file){if(!file)return;if(!current()){status('Generate a 
 function applyProject(data){if(!data||data.version!==1||!Array.isArray(data.rows)||data.rows.length>200000||!data.field||!data.settings||!Array.isArray(data.files)||data.files.length>3)throw Error('This is not a supported Fieldbook project.');
   for(const r of data.rows){if(!fields.every(k=>typeof r[k]==='string'))throw Error('Invalid row data.');r.id||=uuid();}if(!(data.field.step>0&&data.field.step<=100))throw Error('Invalid step size.');
   if(data.name==='Atlantis'&&data.templateRevision>=8&&data.templateRevision<14){for(const s of Object.values(data.settings)){s.holdMode='title';s.naturalArrival??=true;}data.templateRevision=14;}
+  applyAtlantisDefaults(data);
   for(const s of Object.values(data.settings))validateTiming(s);projectRevision++;pause();for(const url of audioUrls.values())URL.revokeObjectURL(url);audioUrls.clear();audioBlobs.clear();audioNames.clear();movements=[];project=data;project.pages??=[];$('projectName').value=project.name;count=0;manualSet=null;selected='';editPersonId='';editSetId='';rebuild();attachCurrentAudio();syncFieldInputs();}
 function syncFieldInputs(){$('dotSize').value=project.field.dotSize||1;for(const id of ['labels','paths','ghosts','grid','colors','calibration','swap'])$(id).checked=project.field[id];$('orientation').checked=project.field.flip;$('stepSize').value=project.field.step;}
 async function load(){const data=await get('project');if(!data){status('No browser save found.');return;}const storedAudio=await get('audio')||[];applyProject(data);for(const {name,blob,label}of storedAudio){audioBlobs.set(name,blob);audioNames.set(name,label);audioUrls.set(name,URL.createObjectURL(blob));}attachCurrentAudio();status('Loaded your saved project.');draw();}
@@ -147,6 +149,8 @@ function renderDotChoices(){const m=current();$('dotPerson').replaceChildren();$
   $('dotPerson').value=editPersonId;$('dotSet').value=editSetId;refreshDotEditor();
 }
 function refreshDotEditor(){const {m,p,i,s}=editContext();if(!m||!p||!s)return;
+  $('dotSetWarning').textContent=`Check your set first! You are editing set ${s.id} in ${m.name}. Choose a different set above before changing its settings. Playback does not change this selection.`;
+  $('dotSave').textContent=`Save set ${s.id} changes`;
   const pos=p.positions[s.id],phase=p.motionPhases?.[s.id],anchor=m.settings.editDotAnchors?.[s.id],c=starts(m.sets)[i],sync=m.settings.markers.find(a=>a.count===c);
   $('dotSource').textContent=`${p.instrument} ${p.symbol}${p.label} · set ${s.id} · ${pos?.row?.status||'missing'} position`;
   $('dotX').value=pos?.x?.toFixed(4)??'';$('dotY').value=pos?.y?.toFixed(4)??'';$('dotSide').value=pos?.row?.side||'';$('dotDepth').value=pos?.row?.depth||'';

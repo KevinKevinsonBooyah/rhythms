@@ -1,8 +1,10 @@
 import test from 'node:test';
+import {applyAtlantisDefaults} from '../atlantis-defaults.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {compile,clock,starts,validateTiming,positionAt} from '../core.mjs';
 const project=JSON.parse(fs.readFileSync(new URL('../templates/atlantis/project.json',import.meta.url)));
+applyAtlantisDefaults(project);
 const movements=compile(project.rows,project.settings);
 test('Atlantis movement tracks are distinct and all score tempo maps validate',()=>{
  assert.equal(movements.length,3);assert.equal(new Set(movements.map(m=>m.settings.audioFile)).size,3);
@@ -42,4 +44,13 @@ test('all 108 Atlantis marchers retain known positions through every set and tra
   assert.ok(p.positions[m.sets[i].id],`${m.name} ${p.label} ${m.sets[i].id}`);
   assert.ok(positionAt(p,m.sets,times[i]));if(i)assert.ok(positionAt(p,m.sets,(times[i-1]+times[i])/2));
  }}
+});
+
+test('confirmed set 5 defaults use 32 total and 10 marching counts without replacing edits',()=>{
+ const set=movements[0].sets.find(s=>s.id==='5');
+ assert.equal(set.duration,32);assert.equal(set.moveCounts,10);assert.equal(set.holdCounts,22);
+ const custom={name:'Atlantis',templateRevision:14,settings:{'Golden Valley 2026 Mvt 1':{durations:{'5':36},motionCounts:{'5':12}}}};
+ applyAtlantisDefaults(custom);
+ assert.equal(custom.settings['Golden Valley 2026 Mvt 1'].durations['5'],36);
+ assert.equal(custom.settings['Golden Valley 2026 Mvt 1'].motionCounts['5'],12);
 });
