@@ -115,10 +115,11 @@ async function play(){if(playing){pause();return;}const m=current();if(!m?.sets.
   if(count>=maxCount())seek(0);if($('loop').checked){const ss=starts(m.sets);if(count<ss[+$('loopStart').value]||count>=ss[+$('loopEnd').value])seek(ss[+$('loopStart').value]);}
   seconds=audioUrls.has(active)&&count===0?(audio.currentTime<timing().toSeconds(0)?audio.currentTime:0):timing().toSeconds(count);playing=true;lastFrame=performance.now();lastClick=-1;
   countInLeft=+m.settings.countIn||0;countInElapsed=0;if(countInLeft){beep(true);}else await startAudio();draw();}
-async function finishMovement(){
+async // Marcher selection, Follow, Isolate and Paths carry into the next movement.
+function finishMovement(){
   pause();const next=movements[movements.findIndex(m=>m.name===active)+1];
   if(!next){status('Show complete.');return;}
-  active=next.name;count=0;seconds=0;manualSet=null;selected='';followId='';isolateId='';
+  active=next.name;count=0;seconds=0;manualSet=null;retainMarcherView();
   attachCurrentAudio();renderMovement();status(`Continuing to ${active}.`);await play();
 }
 function frame(now){if(playing){const dt=((now-lastFrame)/1000)*+$('speed').value;const m=current();
@@ -265,7 +266,7 @@ $('rowSearch').oninput=$('issuesOnly').onchange=()=>{rowPage=0;renderReview();};
 $('addRow').onclick=()=>{const r=Object.fromEntries(fields.map(k=>[k,'']));Object.assign(r,{id:uuid(),movement:active||'Movement 1',status:'corrected',source:'Manual',page:1,method:'manual'});project.rows.push(r);$('rowSearch').value='';$('issuesOnly').checked=false;rowPage=Math.floor((project.rows.length-1)/100);renderReview();changed();};
 $('markReviewed').onclick=()=>{for(const r of filteredRows().slice(rowPage*100,rowPage*100+100)){if(coordinate(r.side,r.depth,project.field.step/36).valid&&r.instrument&&r.symbol&&r.label){r.status='verified';r.method='verified';r.parseWarning='';}}changed();renderReview();};
 $('generate').onclick=()=>{rebuild();attachCurrentAudio();changed();close('reviewDialog');status(`Generated ${movements.length} movement(s). Check arrival counts in Set sequence → Edit before rehearsing.`);};
-$('movement').onchange=()=>{pause();active=$('movement').value;selected='';isolateId='';manualSet=null;count=0;attachCurrentAudio();renderMovement();};
+$('movement').onchange=()=>{pause();active=$('movement').value;manualSet=null;count=0;retainMarcherView();attachCurrentAudio();renderMovement();};
 function showAsideTab(tab){const enteringEditor=tab==='dots'&&$('dotsPanel').hidden;for(const [name,panel]of [['sets','setsPanel'],['people','peoplePanel'],['dots','dotsPanel']]){$(panel).hidden=name!==tab;$(name==='sets'?'setsTab':name==='people'?'peopleTab':'dotsTab').classList.toggle('active',name===tab);}if(tab==='dots'){renderDotChoices();if(enteringEditor&&!setEditorWarningShown&&current()?.sets.length){setEditorWarningShown=true;const {m,s}=editContext();$('setEditorWarningSelected').textContent=`Currently selected: ${m.name}, set ${s?.id||'none'}.`;$('setEditorWarningDialog').showModal();}}}
 $('setsTab').onclick=()=>showAsideTab('sets');$('peopleTab').onclick=()=>showAsideTab('people');$('dotsTab').onclick=()=>showAsideTab('dots');$('confirmSetSelection').onclick=()=>{close('setEditorWarningDialog');$('dotSet').focus();};$('search').oninput=()=>{renderPeople();draw();};$('keepBright').onchange=()=>{project.field.noSearchFade=$('keepBright').checked;draw();changed();};
 $('dotPerson').onchange=()=>{editPersonId=$('dotPerson').value;if(selected!==editPersonId)isolateId='';selected=editPersonId;refreshDotEditor();draw();inspector();};
