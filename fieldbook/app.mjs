@@ -4,7 +4,7 @@ import {setupDevice} from './device.mjs?v=22';
 import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows,performerPhase} from './core.mjs?v=14';
 import {extractPDF} from './parser.mjs?v=3';
-import {Field} from './field.mjs?v=28';
+import {Field} from './field.mjs?v=29';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
 const $=id=>document.getElementById(id),make=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -18,7 +18,7 @@ let setEditorWarningShown=false;
 let movements=[],active='',selected='',manualSet=null,count=0,playing=false,seconds=0,lastFrame=0,lastClick=-1,countInLeft=0,countInElapsed=0,busy=false,cancelled=false,rowPage=0,dirty=false,saveTimer;
 let audio=new Audio(),audioUrls=new Map(),audioBlobs=new Map(),audioNames=new Map(),audioContext;
 audio.preload='auto';audio.volume=.8;
-const field=new Field($('field'),id=>{selected=id;renderDotChoices();draw();inspector();});
+const field=new Field($('field'),id=>{if(id===selected)return;selected=id;if(!selected)followId='';else renderDotChoices();renderPeople();draw();inspector();});
 const current=()=>movements.find(m=>m.name===active),maxCount=()=>starts(current()?.sets||[]).at(-1)||0;
 const located=()=>manualSet===null?locate(current()?.sets||[],count):{index:manualSet,next:Math.min(manualSet+1,(current()?.sets.length||1)-1),t:0};
 function goSet(i){const m=current();if(!m)return;pause();if(m.sets.some(s=>s.timingIssue)){manualSet=i;draw();inspector();}else seek(starts(m.sets)[i]);}
