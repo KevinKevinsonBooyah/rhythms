@@ -66,8 +66,8 @@ export class Field {
           this.drawCoordinateLabel(p,to,destination,size);
           if(this.options.paths)this.drawSelectedPath(from,to,size,route);
           if(this.options.ghosts)for(const q of [from,to])this.path.append(el('circle',{cx:q.x,cy:q.y,r:.48*size,fill:'none',stroke:'white',opacity:.5,'stroke-width':.12*size}));
-        }else{
-          const shown=visibleSetIndex(m.sets,l.index,skip);
+        }else if(!skip){
+          const shown=visibleSetIndex(m.sets,l.index,false);
           if(shown>=0&&p.positions[m.sets[shown]?.id])this.drawCoordinateLabel(p,this.project(p.positions[m.sets[shown].id]),shown,size);
         }
         if(this.lastSelected!==selected){this.svg.append(g,this.measurements,this.coordinateLabel);this.lastSelected=selected;}
