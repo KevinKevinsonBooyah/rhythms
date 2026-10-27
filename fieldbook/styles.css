@@ -114,10 +114,37 @@ input[type="range"]:disabled{opacity:.5;cursor:not-allowed}
 body.player-mode input[type="range"]::-webkit-slider-runnable-track{background:#48675b;border-color:#739584}
 body.player-mode input[type="range"]::-moz-range-track{background:#48675b;border-color:#739584}
 
-/* Compact selected-marcher tools stay available above the field in fullscreen. */
-.field-wrap{position:relative}
-.marcher-quick-actions{display:none;position:absolute;z-index:8;top:12px;right:12px;gap:7px;align-items:center;pointer-events:none}
-body.player-mode .marcher-quick-actions,#fieldPanel:fullscreen .marcher-quick-actions{display:flex}
-.marcher-quick-actions button{pointer-events:auto;touch-action:manipulation;min-height:36px;padding:7px 12px;border:1px solid #b9d4c5;border-radius:9px;background:rgba(22,62,51,.91);color:#f4f8ee;font-weight:700;font-size:12px;box-shadow:0 2px 10px #071e1860;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-.marcher-quick-actions button[aria-pressed="true"]{background:rgba(235,211,142,.96);border-color:#ffe9ad;color:#233f34}
-@media(max-width:600px){.marcher-quick-actions{top:8px;right:8px;gap:5px}.marcher-quick-actions button{padding:7px 10px;min-height:36px;font-size:11px}}
+/* Selected marcher actions live inside the playback transport, sharing its fade. */
+.marcher-quick-actions{display:none;align-items:center;gap:5px}
+body.player-mode .transport-buttons{flex-wrap:wrap;row-gap:6px}
+body.player-mode .transport-buttons .marcher-quick-actions:not([hidden]){
+  display:flex!important;
+  border-left:1px solid #57786a;
+  padding-left:9px;
+  min-height:40px;
+  flex-wrap:nowrap;
+}
+body.player-mode .transport-buttons .marcher-quick-actions[hidden]{display:none!important}
+body.player-mode .marcher-quick-actions button{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;min-height:40px;
+  font-size:12px;font-weight:700;
+  padding:6px 10px;
+  border-radius:9px;border:1px solid #46695d;
+  background:#254e44;color:#f4f8ee;
+  touch-action:manipulation;
+}
+body.player-mode .marcher-quick-actions button[aria-pressed="true"]{
+  background:#ecd69c;color:#183d36;border-color:#ecd69c;
+}
+@media(max-width:950px){
+  body.player-mode .transport-buttons{gap:5px;row-gap:5px}
+  body.player-mode .transport-buttons .marcher-quick-actions:not([hidden]){
+    border-left:0;padding-left:0;
+  }
+  body.player-mode .marcher-quick-actions button{min-height:37px;padding:5px 8px;font-size:11px}
+}
+@media(max-height:370px){
+  body.player-mode .transport-buttons :is(#previous,#play,#next,#playerSet,#playerSets,#playerMarchers,#playerEditDots){min-height:34px;padding:4px 8px}
+  body.player-mode .marcher-quick-actions button{min-height:34px}
+}
