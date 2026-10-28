@@ -260,3 +260,11 @@ body.player-mode .shifted-3d .scene-hud{top:max(58px,env(safe-area-inset-top) + 
 body.player-mode.controls-hidden .scene-hud{opacity:0;pointer-events:none}body.player-mode.controls-hidden .scene-hud button{pointer-events:none}
 @media(max-width:750px){body.player-mode .transport-buttons #quickShift3d{font-size:10px;padding:3px 6px}.scene-hud button{font-size:10px;padding:5px 8px}}
 @media(prefers-reduced-motion:reduce){#field,#field3d{transition:none}}
+
+/* Camera controls stay within the field and fade with the landscape player UI. */
+.scene-tools{display:flex;align-items:center;gap:5px;flex-wrap:wrap;pointer-events:auto}
+.scene-tools button{min-height:30px;padding:5px 9px}
+.scene-tools #firstPerson3d{background:#e6cb81;color:#15372e;border-color:#f5e5a9;font-weight:800}
+.scene-tools #firstPerson3d[hidden]{display:none}
+body.player-mode .scene-tools{max-width:min(96vw,660px)}
+@media(max-width:650px){.scene-tools button{min-height:27px;padding:4px 6px}.scene-tools #side3d{max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
