@@ -268,3 +268,4 @@ body.player-mode.controls-hidden .scene-hud{opacity:0;pointer-events:none}body.p
 .scene-tools #firstPerson3d[hidden]{display:none}
 body.player-mode .scene-tools{max-width:min(96vw,660px)}
 @media(max-width:650px){.scene-tools button{min-height:27px;padding:4px 6px}.scene-tools #side3d{max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+#field3d{touch-action:none}

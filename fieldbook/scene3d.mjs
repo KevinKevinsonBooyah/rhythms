@@ -53,6 +53,13 @@ export class Scene3D {
     const ctx=this.ctx;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
     const sky=ctx.createLinearGradient(0,0,0,h*.8);sky.addColorStop(0,'#78b8dc');sky.addColorStop(.55,'#c5e5eb');sky.addColorStop(1,'#f6e6b9');ctx.fillStyle=sky;ctx.fillRect(0,0,w,h);
     const horizon=ctx.createLinearGradient(0,h*.2,0,h*.6);horizon.addColorStop(0,'#ffffff00');horizon.addColorStop(1,'#ffffff40');ctx.fillStyle=horizon;ctx.fillRect(0,h*.24,w,h*.35);
+    for(let layer=0;layer<3;layer++){
+      const base=h*(.48+layer*.055),size=16+layer*18;
+      ctx.fillStyle=['#76a69355','#4f846d77','#35674f88'][layer];ctx.beginPath();ctx.moveTo(0,h);
+      for(let x=-size;x<w+size;x+=size*.57){const peak=base-size*(.55+((Math.floor(x/size)*17+layer*11)%7)/13);
+        ctx.lineTo(x,base);ctx.lineTo(x+size*.28,peak);ctx.lineTo(x+size*.56,base);}
+      ctx.lineTo(w,h);ctx.closePath();ctx.fill();
+    }
     const side1Left=!(!!this.options?.swap!==!!this.options?.flip);
     const left=this.side===1?side1Left:!side1Left;
     if(this.followId&&this.movement?.people){
@@ -78,7 +85,7 @@ export class Scene3D {
     const forward=norm(sub(target,from)),right=norm(cross(forward,vector(0,0,1))),up=cross(right,forward);
     const focal=Math.min(w*.78,h*1.35);
     const depth=p=>dot(sub(p,from),forward),near=.35;
-    const project=p=>{const v=sub(p,from),d=dot(v,forward);if(d<near)return null;const size=focal/d;return {x:w/2+dot(v,right)*size,y:h*.53-dot(v,up)*size,size,depth:d};};
+    const project=p=>{const v=sub(p,from),d=dot(v,forward);if(d<near-.001)return null;const size=focal/Math.max(d,near);return {x:w/2+dot(v,right)*size,y:h*.53-dot(v,up)*size,size,depth:d};};
     const lerp=(a,b,t)=>vector(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,a.z+(b.z-a.z)*t);
     const clipped=(points)=>{let out=[];for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],da=depth(a),db=depth(b),inside=da>=near;if(inside)out.push(a);if((da>=near)!==(db>=near))out.push(lerp(a,b,(near-da)/(db-da)));}return out;};
     const polygon=(points,fill,stroke=null,width=1)=>{const ps=clipped(points).map(project);if(ps.length<3||ps.some(p=>!p))return;ctx.beginPath();ctx.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}};
@@ -112,12 +119,11 @@ export class Scene3D {
       for(const edge of [y-5,y+5])line(vector(x,edge,6),vector(x,edge,15),gold,3.5);
     }
     const trees=[];
-    for(let i=0;i<210;i++){
-      const seed=(i*71.318)%1,spread=(i*47.711)%1;
+    for(let i=0;i<230;i++){
+      const spread=(i*47.711)%1,row=Math.floor(i/4),offset=(row*13.117)%1;
       let x,y;
-      if(i%2){x=-30-spread*220;y=-150+((i*19.317)%1)*400;}
-      else{x=130+spread*220;y=-150+((i*23.173)%1)*400;}
-      if(i%5===0){x=-260+((i*37.17)%1)*620;y=i%10===0?-28-seed*200:FIELD.width+25+seed*200;}
+      if(i%4<2){x=-35+row*3.1+(offset-.5)*2;y=i%4===0?-22-spread*38:FIELD.width+17+spread*48;}
+      else{x=i%4===2?-24-spread*55:124+spread*55;y=-60+row*2.3+(offset-.5)*5;}
       const p=project(vector(x,y)),height=7+((i*13.117)%1)*12;
       if(p&&p.x>-80&&p.x<w+80&&p.y>-h*.5&&p.y<h+120)trees.push({p,height,i});
     }
@@ -168,8 +174,10 @@ export class Scene3D {
     }
     if(screenA){ctx.beginPath();ctx.ellipse(screenA.x,screenA.y,clamp(screenA.size*.35,4,14),clamp(screenA.size*.13,2,5),0,0,Math.PI*2);ctx.strokeStyle='#ffebb9a6';ctx.lineWidth=1.5;ctx.stroke();}
     if(screenB){ctx.beginPath();ctx.arc(screenB.x,screenB.y,clamp(screenB.size*.18,3,7),0,Math.PI*2);ctx.fillStyle='#ffdc89';ctx.fill();
-      const row=end.row;this.chip(ctx,{x:screenB.x,y:screenB.y-22},`Go to ${sets[targetIndex].id}`);
-      if(row&&this.options.labels)this.chip(ctx,{x:screenB.x,y:screenB.y-40},`${row.side||'Unknown'} · ${row.depth||'Unknown'}`,true);
+      const row=end.row,above=project(vector(b.x,b.y,3))||{x:screenB.x,y:screenB.y-35};
+      this.chip(ctx,{x:above.x,y:above.y-20},`Go to ${sets[targetIndex].id}`);
+      if(row&&this.options.labels){this.chip(ctx,{x:above.x,y:above.y-42},`L/R: ${row.side||'Unknown'}`,true);
+        this.chip(ctx,{x:above.x,y:above.y-60},`F/B: ${row.depth||'Unknown'}`,true);}
     }
   }
   chip(ctx,p,text,small=false){if(!p||!Number.isFinite(p.x+p.y))return;ctx.save();ctx.font=`700 ${small?10:12}px system-ui`;const width=ctx.measureText(text).width+12;
