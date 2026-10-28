@@ -88,7 +88,7 @@ export class Scene3D{
   setSide(side){this.side=side;this.reset();}
   update(movement,count,selected,options={},manualSet=null,followId='',pathIds=new Set(),isolateId='',query=''){
     const changed=movement!==this.movement;this.movement=movement;this.count=count;this.selected=selected;this.options=options;this.manualSet=manualSet;this.pathIds=pathIds;this.isolateId=isolateId;this.query=query.toLowerCase();
-    if(changed)this.buildPeople();
+    if(changed){this.buildPeople();this.guideKey='';}
     if(!followId&&this._firstPerson)this.firstPerson=false;
     const wasFollowing=this.followId;this.followId=followId;
     for(const p of movement?.people||[]){const g=this.people.get(p.id),pos=manualSet===null?positionAt(p,movement.sets,count):p.positions[movement.sets[manualSet]?.id];if(!g)continue;g.visible=!!pos;if(!pos)continue;
@@ -111,10 +111,13 @@ export class Scene3D{
   buildPeople(){for(const g of this.people.values())this.scene.remove(g);this.people.clear();this.pickables=[];
     for(const p of this.movement?.people||[]){const g=marcher(p);g.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.material.transparent=true;o.material.depthWrite=false;}});this.scene.add(g);this.people.set(p.id,g);this.pickables.push(g);}
   }
-  drawGuides(){while(this.routes.children.length){const c=this.routes.children[0];this.routes.remove(c);if(c.userData.texture)c.userData.texture.dispose();if(c.geometry)c.geometry.dispose();}
-    const m=this.movement;if(!m)return;const route=(pts,color)=>{if(pts.length<2)return;const geo=new T.BufferGeometry().setFromPoints(pts);this.routes.add(new T.Line(geo,new T.LineBasicMaterial({color,depthTest:false})));};
+  drawGuides(){const m=this.movement,l=m?(this.manualSet===null?locate(m.sets,this.count):{index:this.manualSet,next:Math.min(this.manualSet+1,m.sets.length-1)}):null;
+    const key=JSON.stringify([m?.name,l?.index,this.selected,[...this.pathIds].sort(),this.options.paths,this.options.labels,this.options.ignoreLetterSets,this.options.step]);
+    if(key===this.guideKey)return;this.guideKey=key;
+    while(this.routes.children.length){const c=this.routes.children[0];this.routes.remove(c);if(c.userData.texture)c.userData.texture.dispose();if(c.geometry)c.geometry.dispose();if(c.isLine||c.isSprite)c.material.dispose();}
+    if(!m)return;const route=(pts,color)=>{if(pts.length<2)return;const geo=new T.BufferGeometry().setFromPoints(pts);this.routes.add(new T.Line(geo,new T.LineBasicMaterial({color,depthTest:false})));};
     for(const p of m.people){if(!this.pathIds?.has(p.id))continue;const points=m.sets.map(s=>p.positions[s.id]).filter(Boolean).map(pos=>this.point(pos).add(v(0,.1,0)));route(points,'#ffd27a');}
-    const p=m.people.find(q=>q.id===this.selected);if(!p)return;const l=this.manualSet===null?locate(m.sets,this.count):{index:this.manualSet,next:Math.min(this.manualSet+1,m.sets.length-1)},n=this.options.ignoreLetterSets?nextVisibleSetIndex(m.sets,l.index,true):l.next;
+    const p=m.people.find(q=>q.id===this.selected);if(!p)return;const n=this.options.ignoreLetterSets?nextVisibleSetIndex(m.sets,l.index,true):l.next;
     const a=p.positions[m.sets[l.index]?.id],b=p.positions[m.sets[n]?.id];if(!a||!b)return;
     const start=this.point(a).add(v(0,.13,0)),end=this.point(b).add(v(0,.13,0)),corner=v(end.x,.13,start.z);
     if(this.options.paths){route([start,end],'#ffe49c');route([start,corner,end],'#e9f7db');const step=(this.options.step||22.5)/36;
