@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46=globalThis.RHYTHMS_RELEASE||'68',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46=globalThis.RHYTHMS_RELEASE||'69',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ["Simpler coins: use the landscape coin splatter anywhere. Saved with your settings.", "Rhythm Maker: box-select or tap-select notes, then Tie or Untie.", "Higher levels favor denser mixed patterns. Timing is tighter: up to 110 ms early or late, scaled down for fast notes.", "Redesigned gift chest, clearer golden owner names, and small interface improvements.", "25 new shop items: five rings, five gradients, five count-in styles, five finish banners, and five studio backgrounds.", "Kevin has new jokes, an animated sign, and a bell you can tap."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ["Animated gift chest with floating coins and a soft shimmer.", "Owner gifts no longer have the one-million coin cap. Exact numeric storage limits still apply.", "Simplified profile layout with optional save tools tucked away.", "Past Versions replaces the obsolete online edition link with downloadable release archives.", "Disabled text selection and image dragging throughout the game.", "Box select now lives on the score corner; touch dragging selects without scrolling.", "Removed Kevin\u2019s bell button."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }

@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import {createGateway} from './firebase-gateway.js';
+globalThis.location={origin:'https://test.local'};
+const db=new Map(),auth={currentUser:{uid:'owner-one',displayName:'Owner'}},snap=p=>({id:p.split('/').at(-1),exists:()=>db.has(p),data:()=>structuredClone(db.get(p))});let seq=0;
+const sdk={doc:(_,...p)=>p.join('/'),collection:(_,...p)=>p.join('/'),getDoc:async p=>snap(p),setDoc:async(p,v)=>db.set(p,structuredClone(v)),deleteDoc:async p=>db.delete(p),query:(p,...q)=>({p,q}),where:(...a)=>['where',...a],orderBy:(...a)=>['order',...a],limit:n=>['limit',n],getDocs:async q=>{const p=typeof q==='string'?q:q.p;let list=[...db.keys()].filter(k=>k.startsWith(p+'/')&&!k.slice(p.length+1).includes('/')).map(snap);for(const c of q.q||[]){if(c[0]==='where')list=list.filter(s=>s.data()[c[1]]===c[3]);if(c[0]==='order')list.sort((a,b)=>(a.data()[c[1]]-b.data()[c[1]])*(c[2]==='desc'?-1:1));if(c[0]==='limit')list=list.slice(0,c[1])}return{forEach:fn=>list.forEach(fn)}},runTransaction:async(_,fn)=>{const pending=[];const r=await fn({get:async p=>snap(p),set:(p,v)=>pending.push([p,structuredClone(v)])});for(const [p,v]of pending)db.set(p,v);return r}};
+db.set('meta/owner',{uid:'owner-one',uid2:'owner-two'});for(const uid of ['owner-one','owner-two','player-one','player-two'])db.set('profiles/'+uid,{alias:uid.startsWith('player')?'Player':'Owner',bio:'',avatar:''});
+const api=createGateway({auth,db,sdk,randomId:()=> 'request-'+(++seq).toString().padStart(8,'0')});
+async function call(path,method='GET',body,expected=200){const r=await api(path,{method,body:body?JSON.stringify(body):undefined});const data=await r.json();assert.equal(r.status,expected,JSON.stringify(data));return data}
+assert.equal((await call('/api/owner/players?name=Player')).players.length,2);
+const gift={recipientId:'player-one',amount:1500000,reason:'Test reward',requestId:'gift-00000001'};
+await call('/api/owner/grants','POST',gift);await call('/api/owner/grants','POST',gift);assert.equal((await call('/api/owner/grants')).grants.length,1);
+await call('/api/owner/grants','POST',{...gift,requestId:'gift-00000002',amount:-1},400);
+await call('/api/owner/grants','POST',{...gift,requestId:'gift-00000002'});await call('/api/owner/grants/gift-00000002/cancel','POST',{});
+auth.currentUser.uid='player-two';await call('/api/owner/grants','POST',gift,403);await call('/api/owner/grants','GET',undefined,403);assert.equal((await call('/api/gifts/claim','POST',{})).claimed,false);
+auth.currentUser.uid='player-one';const base={format:'beatbounce-save',version:1,data:{'pulse-modded-v1':'{"gold":250,"owned":[]}','pulse-rhythm-v1':'{"level":10}'}};
+await call('/api/gifts/claim','POST',{save:base,etag:'wrong'},409);assert.equal(db.get('coinGrants61/gift-00000001').status,'pending');const claimed=await call('/api/gifts/claim','POST',{save:base,etag:null});assert.equal(claimed.amount,1500000);assert.equal(JSON.parse(claimed.save.data['pulse-modded-v1']).gold,1500250);assert.equal((await call('/api/gifts/claim','POST',{save:claimed.save,etag:claimed.etag})).claimed,false);assert.equal(db.get('coinGrants61/gift-00000002').status,'cancelled');
+auth.currentUser.uid='owner-two';await call('/api/owner/grants/gift-00000001/cancel','POST',{},400);
+const song={barCount:1,bars:[[{base:1,dot:0,rest:false}]],marks:{0:{meter:'4/4',bpm:60}}};db.set('publicRhythms/owner-one_0',{ownerId:'owner-one',slot:0,rhythmKey:'song-one',name:'Song',bio:'',composition:JSON.stringify(song),barCount:1});const path='/api/community/rhythms/owner-one_0';
+const root=await call(path+'/comment','POST',{body:'Root'});let parent=root.id;for(let depth=1;depth<=8;depth++){const reply=await call(path+'/comment','POST',{body:'Reply '+depth,parentId:parent});assert.equal(db.get('publicRhythms/owner-one_0/comments/'+reply.id).depth,depth);parent=reply.id}await call(path+'/comment','POST',{body:'Too deep',parentId:parent},400);await call(path+'/comment','POST',{body:'Missing',parentId:'no-comment'},400);
+await call(path+'/comment/'+root.id+'/vote','PUT',{value:1});assert.equal((await call(path)).comments.find(c=>c.id===root.id).likes,1);
+await call(path+'/comment/'+root.id,'DELETE');const data=await call(path);assert.equal(data.comments.length,9);assert.equal(data.comments.find(c=>c.id===root.id).deleted,true);
+auth.currentUser.uid='player-one';await call(path+'/comment/'+parent,'DELETE',undefined,403);auth.currentUser=null;await call(path+'/comment','POST',{body:'Guest'},401);await call('/api/owner/grants','GET',undefined,401);
+// Exercise family selection with a catalog dominated by tuplets and duplicate weighting.
+const context=vm.createContext({Math});vm.runInContext(readFileSync('rhythm-variety61.js','utf8'),context);const patterns=[...Array.from({length:8},(_,i)=>({id:'straight'+i})),...Array.from({length:50},(_,i)=>({id:'tuplet'+i,tuplet:3}))];for(let level=7;level<=13;level++){let tuples=0,streak=0,last='',state={tuplets:0},seen=new Set();for(let n=0;n<10000;n++){const p=context.choosePattern61([...patterns,...patterns.slice(8)],last,state,level);seen.add(p.id);assert.notEqual(p.id,last);last=p.id;if(p.tuplet){tuples++;streak++}else streak=0;assert.ok(streak<=2)}assert.ok(tuples>1500&&tuples<3400);assert.equal(seen.size,58);console.log('Level',level,Math.round(tuples/100)+'% tuplets')}
+assert.equal(context.choosePattern61([{id:'only',tuplet:3}],'only',{tuplets:3},13).id,'only');
+console.log('PASS: owner authorization, duplicate-name lookup, idempotent gifts, cancellation, safe claim, conflict handling, no double claim, nested replies/depth bounds, tombstones, comment votes, guest denials, rhythm variety and custom-selection preservation.');
