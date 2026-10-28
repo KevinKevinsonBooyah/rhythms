@@ -6,6 +6,10 @@ export function createSocial57({auth,db,sdk}){
  const {doc,getDoc,setDoc,deleteDoc,collection,getDocs,query,where,limit,orderBy}=sdk,ref=(...p)=>doc(db,...p),rows=s=>{const a=[];s.forEach(d=>a.push({id:d.id,...d.data()}));return a};
  return async(url,o={})=>{const uid=auth.currentUser?.uid,method=o.method||'GET',p=url.pathname.split('/').filter(Boolean).slice(2);
  try{
+ if(p[0]==='presence'){
+ if(method==='PUT'){if(!uid)return json({error:'Sign in required'},401);const b=JSON.parse(o.body);await setDoc(ref('presence64',uid),{online:b.online!==false,updatedAt:sdk.serverTimestamp()});return json({saved:true})}
+ if(method==='GET'&&validId(p[1])){const snap=await getDoc(ref('presence64',p[1])),data=snap.data();return json({online:!!data?.online&&Date.now()-(data.updatedAt?.toMillis?.()||0)<130000})}
+ }
  if(p[0]==='profile'&&validId(p[1])&&method==='GET'){const [style,list]=await Promise.all([getDoc(ref('profileStyles',p[1])),getDocs(query(collection(db,'publicRhythms'),where('ownerId','==',p[1]),limit(5)))]);return json({style:style.data()||{},rhythms:rows(list).map(r=>({id:r.id,slot:r.slot,rhythmKey:r.rhythmKey,name:filter.publicName(r.name),bio:filter.publicBio(r.bio),banner:r.banner,barCount:r.barCount,ownerId:r.ownerId}))})}
  if(p[0]==='style'&&method==='PUT'){if(!uid)return json({error:'Sign in to display profile cosmetics.'},401);const b=JSON.parse(o.body);if(!['','ringSun','ringMoon','ringRose','ringPrism','ringVine'].includes(b.ring)||!['','gradientDawn','gradientTide','gradientBerry','gradientForest','gradientAurora'].includes(b.gradient))throw Error('Invalid profile style');await setDoc(ref('profileStyles',uid),{ring:b.ring,gradient:b.gradient});return json({saved:true})}
  if(p[0]!=='rhythms')return json({error:'Not found'},404);const id=p[1];if(!validId(id))throw Error('Invalid rhythm');const parent=ref('publicRhythms',id);
