@@ -34,7 +34,7 @@ export class Scene3D {
     const left=this.side===1?side1Left:!side1Left;
     const from=left?vector(-31,-54,44):vector(131,-54,44),target=vector(50,FIELD.width/2,0);
     const forward=norm(sub(target,from)),right=norm(cross(forward,vector(0,0,1))),up=cross(right,forward);
-    const focal=Math.min(w*1.1,h*1.9);
+    const focal=Math.min(w*.78,h*1.35);
     const project=p=>{const v=sub(p,from),depth=dot(v,forward);if(depth<1)return null;const size=focal/depth;return {x:w/2+dot(v,right)*size,y:h*.53-dot(v,up)*size,size,depth};};
     const polygon=(points,fill,stroke=null,width=1)=>{const ps=points.map(project);if(ps.some(p=>!p))return;ctx.beginPath();ctx.moveTo(ps[0].x,ps[0].y);for(const p of ps.slice(1))ctx.lineTo(p.x,p.y);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke();}};
     const line=(a,b,color,width=1)=>{const p=project(a),q=project(b);if(!p||!q)return;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();};
