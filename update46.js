@@ -1,5 +1,5 @@
 /* Update 46: profile text filtering, controls below stats, and new-update notes. */
-const RELEASE46=globalThis.RHYTHMS_RELEASE||'62',filter46=globalThis.rhythmsTextFilter;
+const RELEASE46=globalThis.RHYTHMS_RELEASE||'63',filter46=globalThis.rhythmsTextFilter;
 function cleanLocalProfile46(){
  const raw=localStorage.getItem('beatbounce-alias');if(raw&&filter46.blocked(raw)){localStorage.setItem('beatbounce-alias','Player');$('playerAlias').value='Player'}
  const bio=localStorage.getItem(BIO_KEY);if(bio&&filter46.blocked(bio))localStorage.setItem(BIO_KEY,'');
@@ -48,6 +48,6 @@ function installUpdate46(){
  for(const id of ['playerAlias','playerBio'])$(id).addEventListener('input',()=>{$(id).setCustomValidity('');$(id).removeAttribute('aria-invalid')});
  const stats=document.querySelector('main>.stats'),toolbar=document.querySelector('.toolbar');stats.after(toolbar);placeSliders44();
  const dialog=$('updatesDialog');dialog.querySelector('h2').textContent='Rhythms · Update '+RELEASE46;dialog.querySelector('ul').replaceChildren();
- for(const message of ["Comments now use smaller avatars, tighter spacing, and compact controls.", "Replies have lighter styling, smaller text, and shallower thread indentation, especially on mobile."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
+ for(const message of ["Levels 8+ favor denser rhythms, and levels 9+ have stronger automatic tempos while keeping speed limits.", "Comment threads now show who each reply is for, with clearer separation between conversations.", "Buttons, sliders, inputs, and panels have a subtle visual polish and clearer focus states.", "Leaderboard profile outlines and dividers now match the equipped gradient."]){const item=document.createElement('li');item.textContent=message;dialog.querySelector('ul').append(item)}
  document.querySelector('.version-chip').textContent='v'+RELEASE46;
 }

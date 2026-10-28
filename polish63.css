@@ -1,0 +1,28 @@
+/* A restrained refresh: clearer controls and conversations. */
+button,.action-link{transition:background-color .15s,border-color .15s,box-shadow .15s,transform .12s;border-radius:10px}
+button:not(:disabled):hover{filter:brightness(1.06)}button:not(:disabled):active{transform:translateY(1px)}button:disabled{cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #c9b2ec;outline-offset:3px}
+input[type=text],input[type=number],input[type=search],input[type=url],textarea,select{border:1px solid #77738b70;border-radius:9px;background-color:#20232e;color:var(--ink);box-shadow:inset 0 1px 3px #0002}
+input[type=range]{accent-color:#c5afe8;cursor:pointer;border-radius:20px}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:10px;background:#87809b45;box-shadow:inset 0 1px 2px #0003}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;margin-top:-5px;background:#d8c6f4;border:2px solid #f3eaff;box-shadow:0 2px 5px #0005}
+input[type=range]{-webkit-appearance:none;background:transparent}input[type=range]::-moz-range-track{height:6px;border-radius:10px;background:#87809b45}input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#d8c6f4;border:2px solid #f3eaff}
+input[type=range]:disabled{opacity:.45;cursor:default}
+dialog{border-color:#8b829955;box-shadow:0 20px 65px #0008}.score-card,.toolbar,.mode-strip{box-shadow:0 3px 16px #0001}
+.comments59{gap:12px}.comments59>.comment59{background:#ffffff04;border-color:#ffffff16;border-left:2px solid #b3c6bc66}
+.reply-branch61{border-left:1px solid #bbadd866;margin-top:7px;padding-left:10px}.reply-branch61>.comment59+.comment59{border-top:1px solid #ffffff0e;padding-top:7px!important}
+.reply-to63{display:block;color:#b3a9c2;font-size:9px;margin:1px 0 3px 25px;line-height:1.2}
+.comment59 .comment-actions61 button{border:1px solid #ffffff0b;background:#ffffff04}.comment59 .comment-actions61 button[aria-pressed=true]{background:#345848;border-color:#8ebfa5;color:#edfff4}.comment59 .comment-actions61 button[aria-pressed=true]:last-child{background:#603f44;border-color:#bd9199}
+.comment-ratio61{color:#a8b8ae}.comment59 .comment-author59 strong{color:#e9f0ec}
+[data-profile-gradient=gradientDawn]{--profile-edge63:linear-gradient(115deg,#ffc6a6,#bca9ff)}
+[data-profile-gradient=gradientTide]{--profile-edge63:linear-gradient(115deg,#89baff,#7ee4c6)}
+[data-profile-gradient=gradientBerry]{--profile-edge63:linear-gradient(115deg,#f0a5d2,#b6a1ff)}
+[data-profile-gradient=gradientForest]{--profile-edge63:linear-gradient(115deg,#b5df9a,#e5c88e)}
+[data-profile-gradient=gradientAurora]{--profile-edge63:linear-gradient(115deg,#8ae8d0,#b2a3ff,#f0acc9)}
+#leaderProfileDialog[data-profile-gradient]:not([data-profile-gradient=""]){border:0;isolation:isolate}
+#leaderProfileDialog[data-profile-gradient]:not([data-profile-gradient=""])::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:2px;background:var(--profile-edge63);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;pointer-events:none;z-index:10}
+#leaderProfileDialog[data-profile-gradient]:not([data-profile-gradient=""])>.modal-head{border-bottom:0;position:relative}
+#leaderProfileDialog[data-profile-gradient]:not([data-profile-gradient=""])>.modal-head::after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--profile-edge63);opacity:.7}
+#leaderProfileDialog[data-profile-gradient]:not([data-profile-gradient=""]) .profile-shelf57{border-top:0;background-image:var(--profile-edge63);background-size:100% 1px;background-repeat:no-repeat;background-position:top;padding-top:16px}
+#leaderProfileDialog[data-profile-gradient]:not([data-profile-gradient=""]) .public-card57{border-color:transparent;background-image:linear-gradient(#26343a,#26343a),var(--profile-edge63);background-origin:padding-box,border-box;background-clip:padding-box,border-box}
+@media(prefers-reduced-motion:reduce){button,.action-link{transition:none}button:active{transform:none}}

@@ -25,7 +25,7 @@ setInterval(()=>{
 // Everything is converted to quarter-note tempo before comparing meters.
 function relaxTempos50(){
  if(cfg.playMode==='maker'||cfg.playMode==='polyrhythms'||generatedLevel<7||!barRanges.length)return false;
- const level=Math.round(clamp(generatedLevel,7,12)),quarterCap=({7:112,8:104,9:96,10:88,11:80,12:72})[level],maxRate=({7:6,8:6,9:6.25,10:6.5,11:6.75,12:7})[level];
+ const level=Math.round(clamp(generatedLevel,7,12)),quarterCap=({7:112,8:104,9:104,10:104,11:100,12:100})[level],maxRate=({7:6,8:6,9:6.75,10:7,11:7.5,12:8})[level];
  const globalMin=notes.filter(n=>!n.rest&&!n.tied).reduce((d,n)=>Math.min(d,n.dur/Q),Infinity);
  // A common cap avoids a sudden rush immediately after a dense measure.
  const densityCap=Number.isFinite(globalMin)?globalMin*60*maxRate:quarterCap,cap=Math.min(quarterCap,densityCap);let previous=Infinity,changed=false;

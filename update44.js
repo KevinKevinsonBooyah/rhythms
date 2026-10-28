@@ -17,7 +17,7 @@ addFx=function(p){if(p.type==='coin'&&cfg.coinVisuals===false){creditHiddenCoins
 // printed beat unit. The manual tempo sliders retain their full range.
 function tempoPool44(meter,level=generatedLevel){
  const levelNumber=Math.round(clamp(level,0,13));if(levelNumber<9)return tempoSets[tempoKind(meter)];
- const [lo,hi]=({9:[64,100],10:[60,92],11:[56,84],12:[52,76],13:[72,112]})[levelNumber],unit=meterInfo(meter).unit;
+ const [lo,hi]=({9:[72,108],10:[72,108],11:[72,104],12:[72,104],13:[80,120]})[levelNumber],unit=meterInfo(meter).unit;
  return [...new Set(Array.from({length:Math.floor((hi-lo)/4)+1},(_,i)=>Math.round(clamp((lo+i*4)/unit,30,240))))];
 }
 const pickTempoBefore44=pickTempo;
