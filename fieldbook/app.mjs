@@ -5,7 +5,7 @@ import {editAudio} from './audio-editor.mjs?v=7';
 import {FIELD,coordinate,compile,reviewRow,identity,starts,locate,clock,validateTiming,canAddFiles,mergeRows,performerPhase} from './core.mjs?v=14';
 import {extractPDF} from './parser.mjs?v=3';
 import {Field} from './field.mjs?v=33';
-import {Scene3D} from './scene3d.mjs?v=4';
+import {Scene3D} from './scene3d-webgl.mjs?v=1';
 import {isLetteredSet,nextVisibleSetIndex,visibleSetIndex} from './display-sets.mjs?v=1';
 import {put,get,download} from './storage.mjs';
 const uuid=()=>globalThis.crypto?.randomUUID?.()||'row-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
@@ -27,10 +27,11 @@ let movements=[],active='',selected='',manualSet=null,count=0,playing=false,seco
 let audio=new Audio(),audioUrls=new Map(),audioBlobs=new Map(),audioNames=new Map(),audioContext;
 audio.preload='auto';audio.volume=.8;
 const field=new Field($('field'),id=>{if(id===selected)return;selected=id;isolateId='';if(!selected)followId='';else renderDotChoices();renderPeople();draw();inspector();});
-const scene3d=new Scene3D($('field3d'),id=>{selected=id;renderDotChoices();renderPeople();draw();inspector();});
+let scene3d;
+function create3DScene(){if(scene3d)return true;try{scene3d=new Scene3D($('field3d'),id=>{selected=id;renderDotChoices();renderPeople();draw();inspector();});return true;}catch(e){status('3D needs WebGL on this device. The 2D field is still available. '+e.message,true);return false;}}
 let threeDimensional=false;
 function updatePlaneControls(){for(const id of ['shift3d','quickShift3d']){$(id).textContent=threeDimensional?'↙ Return to 2D':'✦ Shift to 3D';$(id).disabled=playing;$(id).title=playing?'Pause the show to switch views.':'Switch field view while paused.';$(id).setAttribute('aria-pressed',String(threeDimensional));}}
-function changePlane(){if(playing){status('Pause the show before switching between 2D and 3D.',true);return;}if(!current()){status('Load a show before shifting to 3D.',true);return;}
+function changePlane(){if(playing){status('Pause the show before switching between 2D and 3D.',true);return;}if(!current()){status('Load a show before shifting to 3D.',true);return;}if(!threeDimensional&&!create3DScene())return;
   threeDimensional=!threeDimensional;$('fieldPanel').classList.toggle('shifted-3d',threeDimensional);updatePlaneControls();draw();status(threeDimensional?'Shifted to 3D · viewing Side '+scene3d.side+'.':'Returned to the 2D field.');}
 function switch3dSide(){scene3d.setSide(scene3d.side===1?2:1);$('side3d').textContent=`Viewing Side ${scene3d.side} · switch side`;const message=`Switched to Side ${scene3d.side}`;$('sideNotice').textContent=message;$('sideNotice').classList.remove('show');void $('sideNotice').offsetWidth;$('sideNotice').classList.add('show');status(message+'.');}
 $('shift3d').onclick=changePlane;$('quickShift3d').onclick=changePlane;$('side3d').onclick=switch3dSide;
@@ -83,7 +84,7 @@ $('quickPaths').onclick=()=>{if(selected)togglePaths(selected);};
 $('quickIsolate').onclick=()=>{if(selected)toggleIsolate(selected);};
 function renderPeople(){const m=current(),q=$('search').value.toLowerCase();$('peopleList').replaceChildren();for(const p of m?.people||[])if(`${p.instrument} ${p.symbol}${p.label} ${p.label}`.toLowerCase().includes(q)){const row=make('div',undefined,'person-row'),b=make('button',`${p.instrument} ${p.symbol}${p.label}`),follow=make('button',followId===p.id?'Following':'Follow'),paths=make('button','Paths');b.onclick=()=>{if(selected!==p.id)isolateId='';selected=p.id;renderDotChoices();draw();inspector();};follow.setAttribute('aria-pressed',followId===p.id);paths.setAttribute('aria-pressed',pathIds.has(p.id));follow.onclick=()=>toggleFollow(p.id);paths.onclick=()=>togglePaths(p.id);row.append(b,follow,paths);$('peopleList').append(row);}}
 
-function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds,isolateId===selected?isolateId:'');if(threeDimensional)scene3d.update(m,count,selected,project.field,manualSet,followId,pathIds,isolateId,$('search').value);$('firstPerson3d').hidden=!threeDimensional||!followId;$('firstPerson3d').textContent=scene3d.firstPerson?'Third Person':'First Person';updatePlaneControls();const chosen=!!m?.people.some(p=>p.id===selected);$('marcherQuickActions').hidden=!chosen;$('quickFollow').textContent=followId===selected?'Stop following':'Follow';$('quickFollow').setAttribute('aria-pressed',String(chosen&&followId===selected));$('quickPaths').textContent=pathIds.has(selected)?'Hide paths':'Show paths';$('quickPaths').setAttribute('aria-pressed',String(chosen&&pathIds.has(selected)));$('quickIsolate').textContent=isolateId===selected?'Show everyone':'Isolate';$('quickIsolate').setAttribute('aria-pressed',String(chosen&&isolateId===selected));const l=located();
+function draw(){const m=current();field.draw(count,selected,$('search').value,manualSet,followId,pathIds,isolateId===selected?isolateId:'');if(threeDimensional)scene3d.update(m,count,selected,project.field,manualSet,followId,pathIds,isolateId,$('search').value);$('firstPerson3d').hidden=!threeDimensional||!followId;$('firstPerson3d').textContent=scene3d?.firstPerson?'Third Person':'First Person';updatePlaneControls();const chosen=!!m?.people.some(p=>p.id===selected);$('marcherQuickActions').hidden=!chosen;$('quickFollow').textContent=followId===selected?'Stop following':'Follow';$('quickFollow').setAttribute('aria-pressed',String(chosen&&followId===selected));$('quickPaths').textContent=pathIds.has(selected)?'Hide paths':'Show paths';$('quickPaths').setAttribute('aria-pressed',String(chosen&&pathIds.has(selected)));$('quickIsolate').textContent=isolateId===selected?'Show everyone':'Isolate';$('quickIsolate').setAttribute('aria-pressed',String(chosen&&isolateId===selected));const l=located();
   const at=l.holding?l.next:l.index,hide=!!project.field.ignoreLetterSets;
   const show=m?visibleSetIndex(m.sets,at,hide):-1;
   const upcoming=m?nextVisibleSetIndex(m.sets,at,hide):-1;

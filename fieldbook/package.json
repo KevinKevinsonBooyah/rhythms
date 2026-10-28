@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:3d": "esbuild scene3d-engine-src.mjs --bundle --format=esm --minify --outfile=scene3d-webgl.mjs --external:./core.mjs?v=14 --external:./display-sets.mjs?v=1"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "three": "0.186.1"
+  }
+}
