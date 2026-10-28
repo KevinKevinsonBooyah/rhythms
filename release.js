@@ -1,1 +1,1 @@
-globalThis.RHYTHMS_RELEASE='66';
+globalThis.RHYTHMS_RELEASE='67';
