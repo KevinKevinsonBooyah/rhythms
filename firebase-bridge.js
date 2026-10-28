@@ -3,7 +3,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-
 import {getAuth,initializeAuth,inMemoryPersistence,browserPopupRedirectResolver,signInWithCredential,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js';
 import {getFirestore,doc,getDoc,setDoc,collection,getDocs,runTransaction,deleteDoc,query,where,limit,orderBy,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js';
 import {firebaseConfig} from './firebase-config.js';
-import {createGateway} from './firebase-gateway.js?v=64';
+import {createGateway} from './firebase-gateway.js?v=68';
 
 const unavailable=async()=>new Response(JSON.stringify({error:'Add your Firebase configuration in firebase-config.js, then reload.'}),{status:503,headers:{'Content-Type':'application/json'}});
 if(firebaseConfig.apiKey.startsWith('PASTE_')||firebaseConfig.projectId.startsWith('PASTE_')){

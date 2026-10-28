@@ -37,7 +37,7 @@ const handoffBefore54=syncEndlessHandoffControls;syncEndlessHandoffControls=func
 const countBefore53=setupCountIn;setupCountIn=function(...args){const r=countBefore53(...args);syncWideButton53();return r};
 const launchBefore53=launchCoins;
 launchCoins=function(point,amount,txn){
- if(!wideActive53)return launchBefore53(point,amount,txn);
+ if(!wideActive53&&!cfg.simpleCoins68)return launchBefore53(point,amount,txn);
  if(!txn||txn.cancelled)return;amount=Math.min(Math.max(0,Math.floor(amount)),txn.amount-txn.arrived);if(!amount)return;
  creditHiddenCoins44(txn,amount);if(cfg.coinVisuals===false||document.hidden||!fxContext)return;
  let p=point;if(!p.anchor){const note=[...notes].reverse().find(n=>!n.rest)||notes.at(-1);if(note)p=notePoint(note)}
@@ -46,7 +46,7 @@ launchCoins=function(point,amount,txn){
  for(let i=0;i<count;i++){const angle=-Math.PI+(i+.5)/count*Math.PI,speed=75+Math.random()*65;addFx({type:'coinBurst53',anchor:p.anchor?{...p.anchor}:undefined,x:p.x,y:p.y,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,spin:(Math.random()-.5)*4,life:.72+Math.random()*.16,silver:!!txn.silver,txn})}
 };
 const flyBefore54=flyCoins;
-flyCoins=function(n,amount,txn){if(!wideActive53)return flyBefore54(n,amount,txn);launchCoins(notePoint(n),amount,txn)};
+flyCoins=function(n,amount,txn){if(!wideActive53&&!cfg.simpleCoins68)return flyBefore54(n,amount,txn);launchCoins(notePoint(n),amount,txn)};
 function landscapeTap53(event){
  if(!wideActive53||event.target.closest('#wideExit53'))return;
  if(roundPaused&&!resumeCounting){event.preventDefault();event.stopImmediatePropagation();setRoundPaused(false);return}
